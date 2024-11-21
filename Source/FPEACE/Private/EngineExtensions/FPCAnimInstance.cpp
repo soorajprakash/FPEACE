@@ -114,8 +114,6 @@ void UFPCAnimInstance::CalculateLeanAngle(float DeltaSeconds)
 
 	LeanAngle = FMath::Clamp(LeanAngle, -30.0f, 30.0f);
 	previousYaw = currentYaw;
-
-	UE_LOG(LogTemp, Warning, TEXT("LeanAngle: %f"), LeanAngle);
 }
 
 

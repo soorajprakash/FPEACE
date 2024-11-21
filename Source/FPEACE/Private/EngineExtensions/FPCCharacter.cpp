@@ -136,8 +136,9 @@ void AFPCCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 	{
 		EInputComp->BindAction(LookAction.LoadSynchronous(), ETriggerEvent::Triggered, this, &AFPCCharacter::LookAround);
 		EInputComp->BindAction(MoveAction.LoadSynchronous(), ETriggerEvent::Triggered, this, &AFPCCharacter::MoveAround);
-		EInputComp->BindAction(SprintAction.LoadSynchronous(), ETriggerEvent::Started, this, &AFPCCharacter::ToggleWalkRunSprint);
-		EInputComp->BindAction(SprintAction.LoadSynchronous(), ETriggerEvent::Completed, this, &AFPCCharacter::ToggleWalkRunSprint);
+		EInputComp->BindAction(RunAction.LoadSynchronous(), ETriggerEvent::Started, this, &AFPCCharacter::ToggleWalkRun);
+		// EInputComp->BindAction(RunAction.LoadSynchronous(), ETriggerEvent::Completed, this, &AFPCCharacter::ToggleWalkRun);
+		EInputComp->BindAction(SprintAction.LoadSynchronous(), ETriggerEvent::Completed, this, &AFPCCharacter::ToggleSprint);
 	}
 }
 
@@ -155,14 +156,26 @@ void AFPCCharacter::MoveAround(const FInputActionValue& InputActionValue)
 	AddMovementInput(FVector(input.Y, input.X, 0));
 }
 
-void AFPCCharacter::ToggleWalkRunSprint()
+void AFPCCharacter::ToggleWalkRun()
 {
-	if (BaseMeshAnimInstance->GetCurrentLocomotionState() == ELocomotionState::Walking)
+	if (BaseMeshAnimInstance->GetCurrentLocomotionState() != ELocomotionState::Running)
 		BaseMeshAnimInstance->SetCurrentLocomotionState(ELocomotionState::Running);
 	else
 		BaseMeshAnimInstance->SetCurrentLocomotionState(ELocomotionState::Walking);
 
 	SetLocomotionStateSettings(BaseMeshAnimInstance->GetCurrentLocomotionState());
+}
+
+void AFPCCharacter::ToggleSprint(const FInputActionValue& InputActionValue)
+{
+	if (BaseMeshAnimInstance->GetCurrentLocomotionState() != ELocomotionState::Sprinting)
+		BaseMeshAnimInstance->SetCurrentLocomotionState(ELocomotionState::Sprinting);
+	else
+		BaseMeshAnimInstance->SetCurrentLocomotionState(ELocomotionState::Running);
+
+	SetLocomotionStateSettings(BaseMeshAnimInstance->GetCurrentLocomotionState());
+
+	UE_LOG(LogTemp, Warning, TEXT("AFPCCharacter::ToggleSprint"));
 }
 
 void AFPCCharacter::SetLocomotionStateSettings(ELocomotionState newLocomotionState) const
@@ -193,9 +206,17 @@ void AFPCCharacter::SetLocomotionStateSettings(ELocomotionState newLocomotionSta
 			break;
 		}
 
-	case ELocomotionState::TacSprinting:
-		//TODO Add Sprint settings
-		break;
+	case ELocomotionState::Sprinting:
+		{
+			FLocomotionStateSetting SprintSettings = FPCCharacterData->LocomotionStateSettings[ELocomotionState::Sprinting];
+
+			FPCMovementComp->MaxWalkSpeed = SprintSettings.MaxWalkSpeed;
+			FPCMovementComp->MaxAcceleration = SprintSettings.MaxAcceleration;
+			FPCMovementComp->BrakingDecelerationWalking = SprintSettings.BrakingDeceleration;
+			FPCMovementComp->BrakingFrictionFactor = SprintSettings.BrakingFrictionFactor;
+			FPCMovementComp->BrakingFriction = SprintSettings.BrakingFriction;
+			break;
+		}
 	default: break;
 	}
 }

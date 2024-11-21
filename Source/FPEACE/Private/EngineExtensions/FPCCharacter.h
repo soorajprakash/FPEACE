@@ -91,6 +91,12 @@ protected:
 	TSoftObjectPtr<UInputAction> MoveAction;
 
 	/*
+	 * Reference to the Run Input Action object
+	 */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="FPC/Inputs")
+	TSoftObjectPtr<UInputAction> RunAction;
+
+	/*
 	 * Reference to the Sprint Input Action object
 	 */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="FPC/Inputs")
@@ -107,7 +113,6 @@ protected:
 	virtual void BeginPlay() override;
 
 	virtual void PossessedBy(AController* NewController) override;
-
 	/**
 	 * Setup Player Input
 	 */
@@ -137,9 +142,14 @@ private:
 	void MoveAround(const FInputActionValue& InputActionValue);
 	
 	/*
-	 * Run/Sprint input action binding
+	 * Walk/Run toggle input action binding
 	 */
-	void ToggleWalkRunSprint();
+	void ToggleWalkRun();
+
+	/*
+	 * Run/Sprint toggle input action binding
+	 */
+	void ToggleSprint(const FInputActionValue& InputActionValue);
 
 	/*
 	 * Set the movement component settings for a given locomotion state
