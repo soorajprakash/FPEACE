@@ -9,17 +9,37 @@
 UENUM()
 enum class ECameraMode: uint8
 {
-    TPS,
-    FPS
+	TPS,
+	FPS
 };
 
 /*
  * Different states of movement the character can be in
  */
 UENUM(BlueprintType)
-enum ELocomotionState : uint8
+enum class ELocomotionState : uint8
 {
-    Walking,
-    Running,
-    TacSprinting
+	Walking,
+	Running,
+	TacSprinting
+};
+
+UENUM(BlueprintType)
+enum class ELocomotionDirection : uint8
+{
+	Forward,
+	Backward,
+	Right,
+	Left
+};
+
+UENUM(BlueprintType)
+enum class ECharacterSkeletonType : uint8
+{
+	UEFN,
+	UE5,
+	UE4,
+	LPAMG,
+	LPAMG_UE5,
+	MetaHuman
 };

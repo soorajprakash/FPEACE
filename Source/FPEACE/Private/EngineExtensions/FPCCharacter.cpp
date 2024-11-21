@@ -54,6 +54,7 @@ AFPCCharacter::AFPCCharacter(const FObjectInitializer& ObjectInitializer): Super
 	// Get references to the Extensions 
 	BaseMeshComp = Cast<UFPCSkeletalMeshComponent>(GetMesh());
 	BaseMeshComp->SetVisibility(false);
+	BaseMeshComp->SetHiddenInGame(true);
 	BaseMeshComp->VisibilityBasedAnimTickOption = EVisibilityBasedAnimTickOption::AlwaysTickPoseAndRefreshBones;
 	FPCCapsuleComp = Cast<UFPCCapsuleComponent>(GetCapsuleComponent());
 
@@ -97,16 +98,20 @@ void AFPCCharacter::BeginPlay()
 
 	// Get references to the Extensions 
 	FPCMovementComp = Cast<UFPCCharacterMovementComponent>(GetMovementComponent());
-	BaseMeshAnimInstance = CastChecked<UFPCAnimInstance>(BaseMeshComp->GetAnimInstance());
+
+	// Get the Character Data asset reference
+	FPCCharacterData = UFPCGameInstance::GetInstance(this)->CharacterData;
 
 	//Set initial Character values
-	SetLocomotionStateSettings(Walking);
+	SetLocomotionStateSettings(ELocomotionState::Walking);
 }
 
 void AFPCCharacter::PossessedBy(AController* NewController)
 {
 	Super::PossessedBy(NewController);
 
+	BaseMeshAnimInstance = CastChecked<UFPCAnimInstance>(BaseMeshComp->GetAnimInstance());
+	BaseMeshAnimInstance->isBaseAnimInstance = true;
 	FPCPlayerControllerInstance = CastChecked<AFPCPlayerController>(NewController);
 
 	// Component Settings
@@ -115,8 +120,10 @@ void AFPCCharacter::PossessedBy(AController* NewController)
 		// Bind to Camera Mode switch callback
 		FPCPlayerControllerInstance->OnCameraModeChanged.AddDynamic(this, &AFPCCharacter::SetCameraMode);
 
-		BaseMeshComp->LinkAnimClassLayers(UFPCAnimInstance::GetAnimClassFor(this, ECameraMode::TPS,TEXT("Unarmed"), FString(TEXT("Just for testing"))).LoadSynchronous());
-		FPSArmsMeshComp->LinkAnimClassLayers(UFPCAnimInstance::GetAnimClassFor(this, ECameraMode::FPS,TEXT("Unarmed"), FString(TEXT("Just for testing"))).LoadSynchronous());
+		BaseMeshComp->LinkAnimClassLayers(BaseMeshAnimInstance->GetAnimClassFor(ECameraMode::TPS,TEXT("Unarmed"), FString(TEXT("Just for testing"))).LoadSynchronous());
+		TPSBodyMeshComp->LinkAnimClassLayers(BaseMeshAnimInstance->GetAnimClassFor(ECameraMode::TPS,TEXT("Unarmed"), FString(TEXT("Just for testing"))).LoadSynchronous());
+		FPSBodyMeshComp->LinkAnimClassLayers(BaseMeshAnimInstance->GetAnimClassFor(ECameraMode::TPS,TEXT("Unarmed"), FString(TEXT("Just for testing"))).LoadSynchronous());
+		FPSArmsMeshComp->LinkAnimClassLayers(BaseMeshAnimInstance->GetAnimClassFor(ECameraMode::FPS,TEXT("Unarmed"), FString(TEXT("Just for testing"))).LoadSynchronous());
 	}
 }
 
@@ -150,25 +157,21 @@ void AFPCCharacter::MoveAround(const FInputActionValue& InputActionValue)
 
 void AFPCCharacter::ToggleWalkRunSprint()
 {
-	if (currentLocomotionState == Walking) currentLocomotionState = Running;
-	else currentLocomotionState = Walking;
+	if (BaseMeshAnimInstance->GetCurrentLocomotionState() == ELocomotionState::Walking)
+		BaseMeshAnimInstance->SetCurrentLocomotionState(ELocomotionState::Running);
+	else
+		BaseMeshAnimInstance->SetCurrentLocomotionState(ELocomotionState::Walking);
 
-	SetLocomotionStateSettings(currentLocomotionState);
-
-	// Update Anim Blueprint
-	if (BaseMeshAnimInstance) BaseMeshAnimInstance->currentLocomotionState = currentLocomotionState;
+	SetLocomotionStateSettings(BaseMeshAnimInstance->GetCurrentLocomotionState());
 }
 
-void AFPCCharacter::SetLocomotionStateSettings(TEnumAsByte<ELocomotionState> newLocomotionState) const
+void AFPCCharacter::SetLocomotionStateSettings(ELocomotionState newLocomotionState) const
 {
-	// Get the Character Data asset reference
-	UFPCCharacterData* FPCCharacterData = UFPCGameInstance::GetInstance(this)->CharacterData.Get();
-
 	switch (newLocomotionState)
 	{
-	case Walking:
+	case ELocomotionState::Walking:
 		{
-			FLocomotionStateSetting WalkingSettings = FPCCharacterData->LocomotionStateSettings[Walking];
+			FLocomotionStateSetting WalkingSettings = FPCCharacterData->LocomotionStateSettings[ELocomotionState::Walking];
 
 			FPCMovementComp->MaxWalkSpeed = WalkingSettings.MaxWalkSpeed;
 			FPCMovementComp->MaxAcceleration = WalkingSettings.MaxAcceleration;
@@ -178,9 +181,9 @@ void AFPCCharacter::SetLocomotionStateSettings(TEnumAsByte<ELocomotionState> new
 			break;
 		}
 
-	case Running:
+	case ELocomotionState::Running:
 		{
-			FLocomotionStateSetting RunningSettings = FPCCharacterData->LocomotionStateSettings[Running];
+			FLocomotionStateSetting RunningSettings = FPCCharacterData->LocomotionStateSettings[ELocomotionState::Running];
 
 			FPCMovementComp->MaxWalkSpeed = RunningSettings.MaxWalkSpeed;
 			FPCMovementComp->MaxAcceleration = RunningSettings.MaxAcceleration;
@@ -190,7 +193,7 @@ void AFPCCharacter::SetLocomotionStateSettings(TEnumAsByte<ELocomotionState> new
 			break;
 		}
 
-	case TacSprinting:
+	case ELocomotionState::TacSprinting:
 		//TODO Add Sprint settings
 		break;
 	default: break;

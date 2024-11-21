@@ -7,8 +7,11 @@
 #include "Animation/AnimInstance.h"
 #include "FPCAnimInstance.generated.h"
 
+class UFPCCharacterData;
+enum class ELocomotionDirection : uint8;
+enum class ELocomotionState : uint8;
+class AFPCCharacter;
 enum class ECameraMode : uint8;
-enum ELocomotionState : uint8;
 class UFPCCharacterMovementComponent;
 /**
  * 
@@ -19,6 +22,15 @@ class FPEACE_API UFPCAnimInstance : public UAnimInstance
 	GENERATED_BODY()
 
 public:
+
+	/*
+	 * This is used to only perform operations on the base anim instance for optimization
+	 */
+	bool isBaseAnimInstance;
+	
+	UPROPERTY(BlueprintReadOnly)
+	TObjectPtr<AFPCCharacter> OwningCharacter;
+
 	UPROPERTY(BlueprintReadOnly)
 	TObjectPtr<UFPCCharacterMovementComponent> OwningCharacterMovementComponent;
 
@@ -26,31 +38,68 @@ public:
 	FVector CharacterVelocity;
 
 	UPROPERTY(BlueprintReadOnly)
-	float CharacterSpeed;
+	float CharacterAbsoluteSpeed;
 
 	UPROPERTY(BlueprintReadOnly)
-	FVector2D CharacterVelocity2D;
+	FVector CharacterVelocity2D;
 
 	UPROPERTY(BlueprintReadOnly)
-	float CharacterSpeed2D;
+	float CharacterAbsoluteSpeed2D;
 
 	UPROPERTY(BlueprintReadOnly)
 	bool IsCharacterMoving;
 
-	/*
-	 * Reference to the main anim instance to which this instance is added to as a layer
-	 * This will be a reference to self on the main anim instance
-	 */
 	UPROPERTY(BlueprintReadOnly)
-	TObjectPtr<UFPCAnimInstance> MainAnimInstance;
+	float currentLocomotionStateFloat;
 
 	UPROPERTY(BlueprintReadOnly)
-	TEnumAsByte<ELocomotionState> currentLocomotionState;
+	float DirectionAngle;
 
-	static TSoftClassPtr<UFPCAnimInstance> GetAnimClassFor(const UObject* WorldContextObject, ECameraMode targetCameraMode, FName animStateName, const FString& reasonForGettingThisAnim);
+	UPROPERTY(BlueprintReadOnly)
+	float LeanAngle;
+
+	void SetCurrentLocomotionState(ELocomotionState newLocomotionState);
+
+	ELocomotionState GetCurrentLocomotionState() const {return currentLocomotionState;}
+
+	TSoftClassPtr<UFPCAnimInstance> GetAnimClassFor(ECameraMode TargetCameraMode, FName AnimStateName, const FString& ReasonForGettingThisAnim);
 
 protected:
+	/*
+	 * The current locomotion direction of the owning character
+	 */
+	UPROPERTY(BlueprintReadOnly)
+	ELocomotionDirection CurrentLocomotionDirection;
+
+	UPROPERTY(BlueprintReadOnly)
+	ELocomotionState currentLocomotionState;
+
+	TObjectPtr<UFPCCharacterData> GetCharacterData();
+
 	virtual void NativeBeginPlay() override;
 
 	virtual void NativeUpdateAnimation(float DeltaSeconds) override;
+
+private:
+	/*
+	 * Reference to the character data asset referenced in the game instance
+	 */
+	TObjectPtr<UFPCCharacterData> OwningCharacterData;
+
+	/*
+	 * Used to calculate angular velocity
+	 */
+	float previousYaw;
+
+	// Character direction limit values referenced from the Owning character data asset for ease of use
+	FVector2D ForwardLimits;
+	FVector2D BackwardLimits;
+	float DeadZone;
+
+	/*
+	 * Calculate the direction enum from the given angle using direction limits in Character Data
+	 */
+	ELocomotionDirection GetLocomotionDirection(float LocomotionDirectionAngle) const;
+
+	void CalculateLeanAngle(float DeltaSeconds);
 };

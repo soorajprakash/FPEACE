@@ -76,6 +76,10 @@
 		{
 			"Name": "AvfMedia",
 			"Enabled": false
+		},
+		{
+			"Name": "AnimationWarping",
+			"Enabled": true
 		}
 	]
 }

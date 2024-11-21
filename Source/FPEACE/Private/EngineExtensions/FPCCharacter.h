@@ -8,8 +8,9 @@
 #include "GameFramework/Character.h"
 #include "FPCCharacter.generated.h"
 
+class UFPCCharacterData;
+enum class ELocomotionState : uint8;
 class UFPCAnimInstance;
-enum ELocomotionState : uint8;
 enum class ECameraMode : uint8;
 class AFPCPlayerController;
 class AFPCGameMode;
@@ -40,6 +41,12 @@ public:
 	 * Get the Movement component of this character
 	 */
 	TObjectPtr<UFPCCharacterMovementComponent> GetCharacterMovementComponent() const {return FPCMovementComp;}
+
+	/*
+	 * Reference to the anim instance running on the base skeletal mesh component
+	 */
+	UPROPERTY(BlueprintReadOnly)
+	TObjectPtr<UFPCAnimInstance> BaseMeshAnimInstance;
 
 protected:
 
@@ -108,9 +115,10 @@ protected:
 
 private:
 
-	TObjectPtr<UFPCAnimInstance> BaseMeshAnimInstance;
-	
-	ELocomotionState currentLocomotionState;
+	/*
+	 * Reference to the character data asset referenced in the game instance
+	 */
+	TObjectPtr<UFPCCharacterData> FPCCharacterData;
 	
 	/**
 	 *Reference to Enhanced Input Component
@@ -136,5 +144,5 @@ private:
 	/*
 	 * Set the movement component settings for a given locomotion state
 	 */
-	void SetLocomotionStateSettings(TEnumAsByte<ELocomotionState> newLocomotionState) const;
+	void SetLocomotionStateSettings(ELocomotionState newLocomotionState) const;
 };
