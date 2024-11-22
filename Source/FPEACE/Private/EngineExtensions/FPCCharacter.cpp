@@ -97,6 +97,7 @@ void AFPCCharacter::SetCurrentLocomotionState(ELocomotionState newLocomotionStat
 {
 	currentLocomotionState = newLocomotionState;
 	currentLocomotionStateFloat = UKismetMathLibrary::Conv_ByteToDouble(static_cast<uint8>(currentLocomotionState));
+	SetLocomotionStateSettings(currentLocomotionState);
 }
 
 ELocomotionDirection AFPCCharacter::CalculateLocomotionDirection(const float LocomotionDirectionAngle) const
@@ -160,7 +161,6 @@ void AFPCCharacter::Tick(float DeltaSeconds)
 	// Calculate Velocity
 	CharacterVelocity = FPCMovementComp->Velocity;
 	CharacterAbsoluteSpeed = UKismetMathLibrary::VSizeXY(CharacterVelocity);
-
 	CharacterVelocity2D = FVector(CharacterVelocity.X, CharacterVelocity.Y, 0);
 	CharacterAbsoluteSpeed2D = UKismetMathLibrary::VSizeXY(CharacterVelocity2D);
 
@@ -169,7 +169,7 @@ void AFPCCharacter::Tick(float DeltaSeconds)
 	CurrentLocomotionDirection = CalculateLocomotionDirection(DirectionAngle);
 
 	// Update transition rule values
-	IsCharacterMoving = CharacterVelocity2D.Length() > 0.01f;
+	CheckIfCharacterMoving();
 }
 
 void AFPCCharacter::PossessedBy(AController* NewController)
@@ -227,8 +227,6 @@ void AFPCCharacter::ToggleWalkRun()
 		SetCurrentLocomotionState(ELocomotionState::Running);
 	else
 		SetCurrentLocomotionState(ELocomotionState::Walking);
-
-	SetLocomotionStateSettings(currentLocomotionState);
 }
 
 void AFPCCharacter::ToggleSprint()
@@ -237,8 +235,6 @@ void AFPCCharacter::ToggleSprint()
 		SetCurrentLocomotionState(ELocomotionState::Sprinting);
 	else
 		SetCurrentLocomotionState(ELocomotionState::Running);
-
-	SetLocomotionStateSettings(currentLocomotionState);
 }
 
 void AFPCCharacter::SetLocomotionStateSettings(ELocomotionState newLocomotionState) const
@@ -281,5 +277,18 @@ void AFPCCharacter::SetLocomotionStateSettings(ELocomotionState newLocomotionSta
 			break;
 		}
 	default: break;
+	}
+}
+
+void AFPCCharacter::CheckIfCharacterMoving()
+{
+	if (IsCharacterMoving && CharacterVelocity2D.Length() < 0.01f)
+	{
+		IsCharacterMoving = false;
+		SetCurrentLocomotionState(ELocomotionState::Walking);
+	}
+	else if (!IsCharacterMoving && CharacterVelocity2D.Length() > 0.01f)
+	{
+		IsCharacterMoving = true;
 	}
 }

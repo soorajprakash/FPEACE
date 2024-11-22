@@ -213,4 +213,6 @@ private:
 	 * Set the movement component settings for a given locomotion state
 	 */
 	void SetLocomotionStateSettings(ELocomotionState newLocomotionState) const;
+
+	void CheckIfCharacterMoving();
 };
