@@ -14,7 +14,9 @@
 #include "FPCAnimInstance.h"
 #include "FPCGameInstance.h"
 #include "FPCPlayerController.h"
+#include "KismetAnimationLibrary.h"
 #include "DataStructures/FPCCharacterData.h"
+#include "Kismet/KismetMathLibrary.h"
 
 void AFPCCharacter::SetCameraMode(ECameraMode NewCameraMode)
 {
@@ -49,7 +51,7 @@ AFPCCharacter::AFPCCharacter(const FObjectInitializer& ObjectInitializer): Super
 	                  SetDefaultSubobjectClass<UFPCCapsuleComponent>(CapsuleComponentName))
 {
 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = false;
+	PrimaryActorTick.bCanEverTick = true;
 
 	// Get references to the Extensions 
 	BaseMeshComp = Cast<UFPCSkeletalMeshComponent>(GetMesh());
@@ -91,6 +93,43 @@ AFPCCharacter::AFPCCharacter(const FObjectInitializer& ObjectInitializer): Super
 	}
 }
 
+void AFPCCharacter::SetCurrentLocomotionState(ELocomotionState newLocomotionState)
+{
+	currentLocomotionState = newLocomotionState;
+	currentLocomotionStateFloat = UKismetMathLibrary::Conv_ByteToDouble(static_cast<uint8>(currentLocomotionState));
+}
+
+ELocomotionDirection AFPCCharacter::CalculateLocomotionDirection(const float LocomotionDirectionAngle) const
+{
+	// First check for deadzones
+
+	//If current direction is forward and direction angle is within deadzone buffer, keep the direction
+	if (CurrentLocomotionDirection == ELocomotionDirection::Forward && UKismetMathLibrary::InRange_FloatFloat(LocomotionDirectionAngle, ForwardLimits.X - DeadZone, ForwardLimits.Y + DeadZone))
+		return ELocomotionDirection::Forward;
+	//If current direction is backward and direction angle is within deadzone buffer, keep the direction
+	if (CurrentLocomotionDirection == ELocomotionDirection::Backward && (LocomotionDirectionAngle < BackwardLimits.X + DeadZone || LocomotionDirectionAngle > BackwardLimits.Y - DeadZone))
+		return ELocomotionDirection::Backward;
+	//If current direction is right and direction angle is within deadzone buffer, keep the direction
+	if (CurrentLocomotionDirection == ELocomotionDirection::Right && UKismetMathLibrary::InRange_FloatFloat(LocomotionDirectionAngle, ForwardLimits.Y - DeadZone, BackwardLimits.Y + DeadZone))
+		return ELocomotionDirection::Right;
+	//If current direction is left and direction angle is within deadzone buffer, keep the direction
+	if (CurrentLocomotionDirection == ELocomotionDirection::Left && UKismetMathLibrary::InRange_FloatFloat(LocomotionDirectionAngle, BackwardLimits.X - DeadZone, ForwardLimits.X + DeadZone))
+		return ELocomotionDirection::Left;
+
+	// If the above conditions weren't met, calculate the direction manually
+
+	//Check for Forward range
+	if (UKismetMathLibrary::InRange_FloatFloat(LocomotionDirectionAngle, ForwardLimits.X, ForwardLimits.Y))
+		return ELocomotionDirection::Forward;
+
+	// Check for Backward range
+	if (LocomotionDirectionAngle < BackwardLimits.X || LocomotionDirectionAngle > BackwardLimits.Y)
+		return ELocomotionDirection::Backward;
+
+	//Check for right and left. We only need to test if it's positive angle since we've already ruled out forward and backward
+	return LocomotionDirectionAngle > 0 ? ELocomotionDirection::Right : ELocomotionDirection::Left;
+}
+
 // Called when the game starts or when spawned
 void AFPCCharacter::BeginPlay()
 {
@@ -102,8 +141,35 @@ void AFPCCharacter::BeginPlay()
 	// Get the Character Data asset reference
 	FPCCharacterData = UFPCGameInstance::GetInstance(this)->CharacterData;
 
-	//Set initial Character values
+	// Set initial Character values
 	SetLocomotionStateSettings(ELocomotionState::Walking);
+
+	// Store required Character data
+	if (FPCCharacterData)
+	{
+		ForwardLimits = FPCCharacterData->CharacterDirectionLimits.ForwardLimits;
+		BackwardLimits = FPCCharacterData->CharacterDirectionLimits.BackwardLimits;
+		DeadZone = FPCCharacterData->CharacterDirectionLimits.DirectionalDeadzone;
+	}
+}
+
+void AFPCCharacter::Tick(float DeltaSeconds)
+{
+	Super::Tick(DeltaSeconds);
+
+	// Calculate Velocity
+	CharacterVelocity = FPCMovementComp->Velocity;
+	CharacterAbsoluteSpeed = UKismetMathLibrary::VSizeXY(CharacterVelocity);
+
+	CharacterVelocity2D = FVector(CharacterVelocity.X, CharacterVelocity.Y, 0);
+	CharacterAbsoluteSpeed2D = UKismetMathLibrary::VSizeXY(CharacterVelocity2D);
+
+	//Calculate the direction angle
+	DirectionAngle = UKismetAnimationLibrary::CalculateDirection(CharacterVelocity2D, GetActorRotation());
+	CurrentLocomotionDirection = CalculateLocomotionDirection(DirectionAngle);
+
+	// Update transition rule values
+	IsCharacterMoving = CharacterVelocity2D.Length() > 0.01f;
 }
 
 void AFPCCharacter::PossessedBy(AController* NewController)
@@ -137,7 +203,6 @@ void AFPCCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 		EInputComp->BindAction(LookAction.LoadSynchronous(), ETriggerEvent::Triggered, this, &AFPCCharacter::LookAround);
 		EInputComp->BindAction(MoveAction.LoadSynchronous(), ETriggerEvent::Triggered, this, &AFPCCharacter::MoveAround);
 		EInputComp->BindAction(RunAction.LoadSynchronous(), ETriggerEvent::Started, this, &AFPCCharacter::ToggleWalkRun);
-		// EInputComp->BindAction(RunAction.LoadSynchronous(), ETriggerEvent::Completed, this, &AFPCCharacter::ToggleWalkRun);
 		EInputComp->BindAction(SprintAction.LoadSynchronous(), ETriggerEvent::Completed, this, &AFPCCharacter::ToggleSprint);
 	}
 }
@@ -158,24 +223,22 @@ void AFPCCharacter::MoveAround(const FInputActionValue& InputActionValue)
 
 void AFPCCharacter::ToggleWalkRun()
 {
-	if (BaseMeshAnimInstance->GetCurrentLocomotionState() != ELocomotionState::Running)
-		BaseMeshAnimInstance->SetCurrentLocomotionState(ELocomotionState::Running);
+	if (currentLocomotionState != ELocomotionState::Running)
+		SetCurrentLocomotionState(ELocomotionState::Running);
 	else
-		BaseMeshAnimInstance->SetCurrentLocomotionState(ELocomotionState::Walking);
+		SetCurrentLocomotionState(ELocomotionState::Walking);
 
-	SetLocomotionStateSettings(BaseMeshAnimInstance->GetCurrentLocomotionState());
+	SetLocomotionStateSettings(currentLocomotionState);
 }
 
-void AFPCCharacter::ToggleSprint(const FInputActionValue& InputActionValue)
+void AFPCCharacter::ToggleSprint()
 {
-	if (BaseMeshAnimInstance->GetCurrentLocomotionState() != ELocomotionState::Sprinting)
-		BaseMeshAnimInstance->SetCurrentLocomotionState(ELocomotionState::Sprinting);
+	if (currentLocomotionState != ELocomotionState::Sprinting)
+		SetCurrentLocomotionState(ELocomotionState::Sprinting);
 	else
-		BaseMeshAnimInstance->SetCurrentLocomotionState(ELocomotionState::Running);
+		SetCurrentLocomotionState(ELocomotionState::Running);
 
-	SetLocomotionStateSettings(BaseMeshAnimInstance->GetCurrentLocomotionState());
-
-	UE_LOG(LogTemp, Warning, TEXT("AFPCCharacter::ToggleSprint"));
+	SetLocomotionStateSettings(currentLocomotionState);
 }
 
 void AFPCCharacter::SetLocomotionStateSettings(ELocomotionState newLocomotionState) const

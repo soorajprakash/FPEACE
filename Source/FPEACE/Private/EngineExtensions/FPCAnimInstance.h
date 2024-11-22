@@ -35,45 +35,12 @@ public:
 	TObjectPtr<UFPCCharacterMovementComponent> OwningCharacterMovementComponent;
 
 	UPROPERTY(BlueprintReadOnly)
-	FVector CharacterVelocity;
-
-	UPROPERTY(BlueprintReadOnly)
-	float CharacterAbsoluteSpeed;
-
-	UPROPERTY(BlueprintReadOnly)
-	FVector CharacterVelocity2D;
-
-	UPROPERTY(BlueprintReadOnly)
-	float CharacterAbsoluteSpeed2D;
-
-	UPROPERTY(BlueprintReadOnly)
-	bool IsCharacterMoving;
-
-	UPROPERTY(BlueprintReadOnly)
-	float currentLocomotionStateFloat;
-
-	UPROPERTY(BlueprintReadOnly)
-	float DirectionAngle;
-
-	UPROPERTY(BlueprintReadOnly)
 	float LeanAngle;
-
-	void SetCurrentLocomotionState(ELocomotionState newLocomotionState);
-
-	ELocomotionState GetCurrentLocomotionState() const {return currentLocomotionState;}
 
 	TSoftClassPtr<UFPCAnimInstance> GetAnimClassFor(ECameraMode TargetCameraMode, FName AnimStateName, const FString& ReasonForGettingThisAnim);
 
 protected:
-	/*
-	 * The current locomotion direction of the owning character
-	 */
-	UPROPERTY(BlueprintReadOnly)
-	ELocomotionDirection CurrentLocomotionDirection;
-
-	UPROPERTY(BlueprintReadOnly)
-	ELocomotionState currentLocomotionState;
-
+	
 	TObjectPtr<UFPCCharacterData> GetCharacterData();
 
 	virtual void NativeBeginPlay() override;
@@ -90,16 +57,6 @@ private:
 	 * Used to calculate angular velocity
 	 */
 	float previousYaw;
-
-	// Character direction limit values referenced from the Owning character data asset for ease of use
-	FVector2D ForwardLimits;
-	FVector2D BackwardLimits;
-	float DeadZone;
-
-	/*
-	 * Calculate the direction enum from the given angle using direction limits in Character Data
-	 */
-	ELocomotionDirection GetLocomotionDirection(float LocomotionDirectionAngle) const;
 
 	void CalculateLeanAngle(float DeltaSeconds);
 };

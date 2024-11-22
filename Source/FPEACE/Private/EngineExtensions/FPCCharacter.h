@@ -4,6 +4,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "CommonEnums.h"
 #include "InputActionValue.h"
 #include "GameFramework/Character.h"
 #include "FPCCharacter.generated.h"
@@ -40,7 +41,7 @@ public:
 	/*
 	 * Get the Movement component of this character
 	 */
-	TObjectPtr<UFPCCharacterMovementComponent> GetCharacterMovementComponent() const {return FPCMovementComp;}
+	TObjectPtr<UFPCCharacterMovementComponent> GetCharacterMovementComponent() const { return FPCMovementComp; }
 
 	/*
 	 * Reference to the anim instance running on the base skeletal mesh component
@@ -48,10 +49,46 @@ public:
 	UPROPERTY(BlueprintReadOnly)
 	TObjectPtr<UFPCAnimInstance> BaseMeshAnimInstance;
 
+	/*
+	 * Public getter for current movement direction
+	 */
+	ELocomotionDirection GetCurrentLocomotionDirection() const { return CurrentLocomotionDirection; }
+
 protected:
+	//	--------------------- DATA ---------------------
+
+	UPROPERTY(BlueprintReadOnly)
+	FVector CharacterVelocity;
+
+	UPROPERTY(BlueprintReadOnly)
+	float CharacterAbsoluteSpeed;
+
+	UPROPERTY(BlueprintReadOnly)
+	FVector CharacterVelocity2D;
+
+	UPROPERTY(BlueprintReadOnly)
+	float CharacterAbsoluteSpeed2D;
+
+	UPROPERTY(BlueprintReadOnly)
+	bool IsCharacterMoving;
+
+	UPROPERTY(BlueprintReadOnly)
+	float currentLocomotionStateFloat;
+
+	UPROPERTY(BlueprintReadOnly)
+	float DirectionAngle;
+
+	UPROPERTY(BlueprintReadOnly)
+	ELocomotionState currentLocomotionState;
+
+	/*
+	 * The current locomotion direction of the owning character
+	 */
+	UPROPERTY(BlueprintReadOnly)
+	ELocomotionDirection CurrentLocomotionDirection;
 
 	//	--------------------- COMPONENTS ---------------------
-	
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="FPC/Components")
 	TObjectPtr<UFPCSkeletalMeshComponent> BaseMeshComp;
 
@@ -77,7 +114,7 @@ protected:
 	TObjectPtr<UFPCSpringArmComponent> FPCSpringArmComp;
 
 	//	--------------------- INPUT ---------------------
-	
+
 	/*
 	 * Reference to the Look Input Action object
 	 */
@@ -109,22 +146,43 @@ protected:
 	UPROPERTY(BlueprintReadOnly)
 	TObjectPtr<AFPCPlayerController> FPCPlayerControllerInstance;
 
+	//	--------------------- FUNCTIONS ---------------------
+
+	void SetCurrentLocomotionState(ELocomotionState newLocomotionState);
+
+	/*
+	 * Calculate the direction enum from the given angle using direction limits in Character Data
+	 */
+	ELocomotionDirection CalculateLocomotionDirection(const float LocomotionDirectionAngle) const;
+
+	//	--------------------- OVERRIDES ---------------------
+
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+	virtual void Tick(float DeltaSeconds) override;
+
+	/*
+	 * When this character is possessed by the player controller
+	 */
 	virtual void PossessedBy(AController* NewController) override;
-	/**
+
+	/*
 	 * Setup Player Input
 	 */
 	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
 
 private:
+	// Character direction limit values referenced from the Owning character data asset for ease of use
+	FVector2D ForwardLimits;
+	FVector2D BackwardLimits;
+	float DeadZone;
 
 	/*
 	 * Reference to the character data asset referenced in the game instance
 	 */
 	TObjectPtr<UFPCCharacterData> FPCCharacterData;
-	
+
 	/**
 	 *Reference to Enhanced Input Component
 	 */
@@ -140,7 +198,7 @@ private:
 	 * Move input binding function
 	 */
 	void MoveAround(const FInputActionValue& InputActionValue);
-	
+
 	/*
 	 * Walk/Run toggle input action binding
 	 */
@@ -149,7 +207,7 @@ private:
 	/*
 	 * Run/Sprint toggle input action binding
 	 */
-	void ToggleSprint(const FInputActionValue& InputActionValue);
+	void ToggleSprint();
 
 	/*
 	 * Set the movement component settings for a given locomotion state
