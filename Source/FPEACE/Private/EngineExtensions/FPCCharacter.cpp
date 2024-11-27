@@ -186,10 +186,8 @@ void AFPCCharacter::PossessedBy(AController* NewController)
 		// Bind to Camera Mode switch callback
 		FPCPlayerControllerInstance->OnCameraModeChanged.AddDynamic(this, &AFPCCharacter::SetCameraMode);
 
-		BaseMeshComp->LinkAnimClassLayers(BaseMeshAnimInstance->GetAnimClassFor(ECameraMode::TPS,TEXT("Unarmed"), FString(TEXT("Just for testing"))).LoadSynchronous());
-		TPSBodyMeshComp->LinkAnimClassLayers(BaseMeshAnimInstance->GetAnimClassFor(ECameraMode::TPS,TEXT("Unarmed"), FString(TEXT("Just for testing"))).LoadSynchronous());
-		FPSBodyMeshComp->LinkAnimClassLayers(BaseMeshAnimInstance->GetAnimClassFor(ECameraMode::TPS,TEXT("Unarmed"), FString(TEXT("Just for testing"))).LoadSynchronous());
-		FPSArmsMeshComp->LinkAnimClassLayers(BaseMeshAnimInstance->GetAnimClassFor(ECameraMode::FPS,TEXT("Unarmed"), FString(TEXT("Just for testing"))).LoadSynchronous());
+		BaseMeshComp->LinkAnimClassLayers(BaseMeshAnimInstance->GetAnimClassFor(ECameraMode::TPS,TEXT("Pistol"), FString(TEXT("Just for testing"))).LoadSynchronous());
+		FPSArmsMeshComp->LinkAnimClassLayers(BaseMeshAnimInstance->GetAnimClassFor(ECameraMode::FPS,TEXT("Pistol"), FString(TEXT("Just for testing"))).LoadSynchronous());
 	}
 }
 

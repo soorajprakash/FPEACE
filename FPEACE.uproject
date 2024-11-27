@@ -80,6 +80,10 @@
 		{
 			"Name": "AnimationWarping",
 			"Enabled": true
+		},
+		{
+			"Name": "UE4ToUE5SkeletonSwapper",
+			"Enabled": true
 		}
 	]
 }

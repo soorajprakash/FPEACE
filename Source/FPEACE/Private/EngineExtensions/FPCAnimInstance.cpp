@@ -73,7 +73,7 @@ void UFPCAnimInstance::CalculateLeanAngle(float DeltaSeconds)
 	float currentYaw = OwningCharacter->GetActorRotation().Yaw;
 
 	// Get the yaw angular velocity and multiply by strength 
-	LeanAngle = ((currentYaw - previousYaw) / DeltaSeconds) * OwningCharacterData->TurningLeanStrength;
+	LeanAngle = ((currentYaw - previousYaw) / DeltaSeconds) * GetCharacterData()->TurningLeanStrength;
 
 	// If the character is moving backwards, negate the lean angle
 	if (OwningCharacter->GetCurrentLocomotionDirection() == ELocomotionDirection::Backward)
