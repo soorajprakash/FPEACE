@@ -9,6 +9,7 @@
 #include "GameFramework/Character.h"
 #include "FPCCharacter.generated.h"
 
+class UEnhancedInputComponent;
 class UFPCCharacterData;
 enum class ELocomotionState : uint8;
 class UFPCAnimInstance;
