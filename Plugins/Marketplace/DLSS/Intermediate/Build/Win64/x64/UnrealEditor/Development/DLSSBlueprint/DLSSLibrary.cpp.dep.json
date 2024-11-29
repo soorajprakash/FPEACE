@@ -1,0 +1,37 @@
+{
+    "Version": "1.2",
+    "Data": {
+        "Source": "p:\\unrealengineprojects\\fpeace\\plugins\\marketplace\\dlss\\source\\dlssblueprint\\private\\dlsslibrary.cpp",
+        "ProvidedModule": "",
+        "PCH": "p:\\unrealengineprojects\\fpeace\\intermediate\\build\\win64\\x64\\fpeaceeditor\\development\\unrealed\\sharedpch.unrealed.project.valapi.cpp20.inclorderunreal5_4.h.pch",
+        "Includes": [
+            "p:\\unrealengineprojects\\fpeace\\plugins\\marketplace\\dlss\\intermediate\\build\\win64\\x64\\unrealeditor\\development\\dlssblueprint\\definitions.dlssblueprint.h",
+            "p:\\unrealengineprojects\\fpeace\\plugins\\marketplace\\dlss\\source\\dlssblueprint\\public\\dlsslibrary.h",
+            "p:\\unrealengineprojects\\fpeace\\plugins\\marketplace\\dlss\\intermediate\\build\\win64\\unrealeditor\\inc\\dlssblueprint\\uht\\dlsslibrary.generated.h",
+            "p:\\unrealengineprojects\\fpeace\\plugins\\marketplace\\dlss\\source\\dlss\\public\\dlss.h",
+            "p:\\unrealengineprojects\\fpeace\\plugins\\marketplace\\dlss\\source\\dlss\\public\\dlsssettings.h",
+            "p:\\unrealengineprojects\\fpeace\\plugins\\marketplace\\dlss\\intermediate\\build\\win64\\unrealeditor\\inc\\dlss\\uht\\dlsssettings.generated.h",
+            "p:\\unrealengineprojects\\fpeace\\plugins\\marketplace\\dlss\\source\\dlss\\public\\dlssupscaler.h",
+            "c:\\program files\\epic games\\ue_5.5\\engine\\source\\runtime\\rendercore\\public\\customresourcepool.h",
+            "p:\\unrealengineprojects\\fpeace\\plugins\\marketplace\\dlss\\source\\ngxrhi\\public\\ngxrhi.h",
+            "p:\\unrealengineprojects\\fpeace\\plugins\\marketplace\\dlss\\source\\thirdparty\\ngx\\include\\nvsdk_ngx_params.h",
+            "p:\\unrealengineprojects\\fpeace\\plugins\\marketplace\\dlss\\source\\thirdparty\\ngx\\include\\nvsdk_ngx_defs.h",
+            "p:\\unrealengineprojects\\fpeace\\plugins\\marketplace\\dlss\\source\\thirdparty\\ngx\\include\\nvsdk_ngx_helpers_dlssd.h",
+            "p:\\unrealengineprojects\\fpeace\\plugins\\marketplace\\dlss\\source\\thirdparty\\ngx\\include\\nvsdk_ngx_helpers.h",
+            "p:\\unrealengineprojects\\fpeace\\plugins\\marketplace\\dlss\\source\\thirdparty\\ngx\\include\\nvsdk_ngx.h",
+            "p:\\unrealengineprojects\\fpeace\\plugins\\marketplace\\dlss\\source\\thirdparty\\ngx\\include\\nvsdk_ngx_defs_dlssd.h",
+            "p:\\unrealengineprojects\\fpeace\\plugins\\marketplace\\dlss\\source\\thirdparty\\ngx\\include\\nvsdk_ngx_params_dlssd.h",
+            "c:\\program files\\epic games\\ue_5.5\\engine\\source\\runtime\\projects\\public\\interfaces\\ipluginmanager.h",
+            "c:\\program files\\epic games\\ue_5.5\\engine\\source\\runtime\\projects\\public\\plugindescriptor.h",
+            "c:\\program files\\epic games\\ue_5.5\\engine\\source\\runtime\\projects\\public\\custombuildsteps.h",
+            "c:\\program files\\epic games\\ue_5.5\\engine\\source\\runtime\\projects\\public\\localizationdescriptor.h",
+            "c:\\program files\\epic games\\ue_5.5\\engine\\source\\runtime\\projects\\public\\moduledescriptor.h",
+            "c:\\program files\\epic games\\ue_5.5\\engine\\source\\runtime\\projects\\public\\plugindisalloweddescriptor.h",
+            "c:\\program files\\epic games\\ue_5.5\\engine\\source\\runtime\\projects\\public\\pluginreferencedescriptor.h",
+            "c:\\program files\\epic games\\ue_5.5\\engine\\source\\runtime\\projects\\public\\versescope.h",
+            "p:\\unrealengineprojects\\fpeace\\plugins\\marketplace\\dlss\\intermediate\\build\\win64\\unrealeditor\\inc\\dlssblueprint\\uht\\dlsslibrary.gen.cpp"
+        ],
+        "ImportedModules": [],
+        "ImportedHeaderUnits": []
+    }
+}

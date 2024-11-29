@@ -1,0 +1,13 @@
+/NOLOGO
+/errorReport:prompt
+/MACHINE:x64
+/SUBSYSTEM:WINDOWS
+/DEF
+/NAME:"UnrealEditor-NGXD3D11RHI.dll"
+/IGNORE:4221
+/NODEFAULTLIB
+"P:\UnrealEngineProjects\FPEACE\Intermediate\Build\Win64\x64\FPEACEEditor\Development\UnrealEd\SharedPCH.UnrealEd.Project.ValApi.Cpp20.InclOrderUnreal5_4.h.obj"
+"P:\UnrealEngineProjects\FPEACE\Plugins\Marketplace\DLSS\Intermediate\Build\Win64\x64\UnrealEditor\Development\NGXD3D11RHI\NGXD3D11RHI.cpp.obj"
+"P:\UnrealEngineProjects\FPEACE\Plugins\Marketplace\DLSS\Intermediate\Build\Win64\x64\UnrealEditor\Development\NGXD3D11RHI\PerModuleInline.gen.cpp.obj"
+"P:\UnrealEngineProjects\FPEACE\Plugins\Marketplace\DLSS\Intermediate\Build\Win64\x64\UnrealEditor\Development\NGXD3D11RHI\Default.rc2.res"
+/OUT:"P:\UnrealEngineProjects\FPEACE\Plugins\Marketplace\DLSS\Intermediate\Build\Win64\x64\UnrealEditor\Development\NGXD3D11RHI\UnrealEditor-NGXD3D11RHI.lib"

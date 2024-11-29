@@ -1,0 +1,15 @@
+/NOLOGO
+/errorReport:prompt
+/MACHINE:x64
+/SUBSYSTEM:WINDOWS
+/DEF
+/NAME:"UnrealEditor-StreamlineShaders.dll"
+/IGNORE:4221
+/NODEFAULTLIB
+"P:\UnrealEngineProjects\FPEACE\Intermediate\Build\Win64\x64\FPEACEEditor\Development\UnrealEd\SharedPCH.UnrealEd.Project.ValApi.Cpp20.InclOrderUnreal5_4.h.obj"
+"P:\UnrealEngineProjects\FPEACE\Plugins\Marketplace\Streamline\Intermediate\Build\Win64\x64\UnrealEditor\Development\StreamlineShaders\StreamlineShaders.cpp.obj"
+"P:\UnrealEngineProjects\FPEACE\Plugins\Marketplace\Streamline\Intermediate\Build\Win64\x64\UnrealEditor\Development\StreamlineShaders\UIHintExtractionPass.cpp.obj"
+"P:\UnrealEngineProjects\FPEACE\Plugins\Marketplace\Streamline\Intermediate\Build\Win64\x64\UnrealEditor\Development\StreamlineShaders\VelocityCombinePass.cpp.obj"
+"P:\UnrealEngineProjects\FPEACE\Plugins\Marketplace\Streamline\Intermediate\Build\Win64\x64\UnrealEditor\Development\StreamlineShaders\PerModuleInline.gen.cpp.obj"
+"P:\UnrealEngineProjects\FPEACE\Plugins\Marketplace\Streamline\Intermediate\Build\Win64\x64\UnrealEditor\Development\StreamlineShaders\Default.rc2.res"
+/OUT:"P:\UnrealEngineProjects\FPEACE\Plugins\Marketplace\Streamline\Intermediate\Build\Win64\x64\UnrealEditor\Development\StreamlineShaders\UnrealEditor-StreamlineShaders.lib"

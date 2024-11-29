@@ -1,0 +1,17 @@
+/NOLOGO
+/errorReport:prompt
+/MACHINE:x64
+/SUBSYSTEM:WINDOWS
+/DEF
+/NAME:"UnrealEditor-StreamlineRHI.dll"
+/IGNORE:4221
+/NODEFAULTLIB
+"P:\UnrealEngineProjects\FPEACE\Intermediate\Build\Win64\x64\FPEACEEditor\Development\UnrealEd\SharedPCH.UnrealEd.Project.ValApi.Cpp20.InclOrderUnreal5_4.h.obj"
+"P:\UnrealEngineProjects\FPEACE\Plugins\Marketplace\Streamline\Intermediate\Build\Win64\x64\UnrealEditor\Development\StreamlineRHI\StreamlineAPI.cpp.obj"
+"P:\UnrealEngineProjects\FPEACE\Plugins\Marketplace\Streamline\Intermediate\Build\Win64\x64\UnrealEditor\Development\StreamlineRHI\StreamlineRHI.cpp.obj"
+"P:\UnrealEngineProjects\FPEACE\Plugins\Marketplace\Streamline\Intermediate\Build\Win64\x64\UnrealEditor\Development\StreamlineRHI\StreamlineSecureLoad.cpp.obj"
+"P:\UnrealEngineProjects\FPEACE\Plugins\Marketplace\Streamline\Intermediate\Build\Win64\x64\UnrealEditor\Development\StreamlineRHI\PerModuleInline.gen.cpp.obj"
+"P:\UnrealEngineProjects\FPEACE\Plugins\Marketplace\Streamline\Intermediate\Build\Win64\x64\UnrealEditor\Development\StreamlineRHI\StreamlineRHI.init.gen.cpp.obj"
+"P:\UnrealEngineProjects\FPEACE\Plugins\Marketplace\Streamline\Intermediate\Build\Win64\x64\UnrealEditor\Development\StreamlineRHI\StreamlineSettings.gen.cpp.obj"
+"P:\UnrealEngineProjects\FPEACE\Plugins\Marketplace\Streamline\Intermediate\Build\Win64\x64\UnrealEditor\Development\StreamlineRHI\Default.rc2.res"
+/OUT:"P:\UnrealEngineProjects\FPEACE\Plugins\Marketplace\Streamline\Intermediate\Build\Win64\x64\UnrealEditor\Development\StreamlineRHI\UnrealEditor-StreamlineRHI.lib"
