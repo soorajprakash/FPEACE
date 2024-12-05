@@ -7,6 +7,7 @@
 #include "Animation/AnimInstance.h"
 #include "FPCAnimInstance.generated.h"
 
+class UFPCSkeletalMeshComponent;
 class UFPCCharacterData;
 enum class ELocomotionDirection : uint8;
 enum class ELocomotionState : uint8;
@@ -26,11 +27,30 @@ public:
 	/*
 	 * This is used to only perform operations on the base anim instance for optimization
 	 */
+	UPROPERTY(BlueprintReadWrite)
 	bool isBaseAnimInstance;
-	
+
+	/*
+	 * Reference to the character that is actively using this anim instance
+	 */
 	UPROPERTY(BlueprintReadOnly)
 	TObjectPtr<AFPCCharacter> OwningCharacter;
 
+	/*
+	 * Reference to the skeletal mesh that is actively using this anim instance
+	 */
+	UPROPERTY(BlueprintReadOnly)
+	TObjectPtr<UFPCSkeletalMeshComponent> OwningMesh;
+
+	/*
+	 * For anim blueprints that are layered on top of the base anim instance, this value will be something other than self
+	 */
+	UPROPERTY(BlueprintReadOnly)
+	TObjectPtr<UFPCAnimInstance> OwningAnimInstance;
+
+	/*
+	 * Reference to the movement component in the character that is actively using this anim instance
+	 */
 	UPROPERTY(BlueprintReadOnly)
 	TObjectPtr<UFPCCharacterMovementComponent> OwningCharacterMovementComponent;
 

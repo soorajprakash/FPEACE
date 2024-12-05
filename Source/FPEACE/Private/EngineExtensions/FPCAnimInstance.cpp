@@ -7,6 +7,7 @@
 #include "CommonEnums.h"
 #include "FPCCharacter.h"
 #include "FPCGameInstance.h"
+#include "FPCSkeletalMeshComponent.h"
 #include "DataStructures/FCameraModeAnimSelectionStruct.h"
 #include "DataStructures/FPCCharacterData.h"
 
@@ -50,6 +51,12 @@ void UFPCAnimInstance::NativeBeginPlay()
 	if (OwningCharacter == nullptr)
 		OwningCharacter = CastChecked<AFPCCharacter>(TryGetPawnOwner());
 
+	if (OwningMesh == nullptr)
+		OwningMesh = CastChecked<UFPCSkeletalMeshComponent>(GetOwningComponent());
+
+	if (OwningAnimInstance == nullptr)
+		OwningAnimInstance = CastChecked<UFPCAnimInstance>(OwningMesh->GetAnimInstance());
+
 	if (OwningCharacter && OwningCharacterMovementComponent == nullptr)
 		OwningCharacterMovementComponent = OwningCharacter->GetCharacterMovementComponent();
 }
@@ -82,6 +89,3 @@ void UFPCAnimInstance::CalculateLeanAngle(float DeltaSeconds)
 	LeanAngle = FMath::Clamp(LeanAngle, -30.0f, 30.0f);
 	previousYaw = currentYaw;
 }
-
-
-
