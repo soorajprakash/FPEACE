@@ -100,9 +100,6 @@ protected:
 	TObjectPtr<UFPCSkeletalMeshComponent> FPSBodyMeshComp;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="FPC/Components")
-	TObjectPtr<UFPCSkeletalMeshComponent> FPSArmsMeshComp;
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="FPC/Components")
 	TObjectPtr<UFPCCapsuleComponent> FPCCapsuleComp;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="FPC/Components")

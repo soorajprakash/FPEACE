@@ -28,16 +28,18 @@ void AFPCCharacter::SetCameraMode(ECameraMode NewCameraMode)
 		{
 		case ECameraMode::FPS:
 			TPSBodyMeshComp->SetHiddenInGame(true);
+			TPSBodyMeshComp->SetVisibility(false);
 			FPSBodyMeshComp->SetHiddenInGame(false);
-			FPSArmsMeshComp->SetHiddenInGame(false);
+			FPSBodyMeshComp->SetVisibility(true);
 
-			FPCCameraComp->AttachToComponent(FPSArmsMeshComp, FAttachmentTransformRules::SnapToTargetNotIncludingScale, TEXT("SOCKET_Camera"));
+			FPCCameraComp->AttachToComponent(FPSBodyMeshComp, FAttachmentTransformRules::SnapToTargetNotIncludingScale, TEXT("SOCKET_Camera"));
 			break;
 
 		case ECameraMode::TPS:
 			TPSBodyMeshComp->SetHiddenInGame(false);
+			TPSBodyMeshComp->SetVisibility(true);
 			FPSBodyMeshComp->SetHiddenInGame(true);
-			FPSArmsMeshComp->SetHiddenInGame(true);
+			FPSBodyMeshComp->SetVisibility(false);
 
 			FPCCameraComp->AttachToComponent(FPCSpringArmComp, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
 			break;
@@ -71,12 +73,6 @@ AFPCCharacter::AFPCCharacter(const FObjectInitializer& ObjectInitializer): Super
 	{
 		FPSBodyMeshComp = CreateDefaultSubobject<UFPCSkeletalMeshComponent>(TEXT("FPSBody"));
 		FPSBodyMeshComp->SetupAttachment(BaseMeshComp);
-	}
-
-	if (!FPSArmsMeshComp)
-	{
-		FPSArmsMeshComp = CreateDefaultSubobject<UFPCSkeletalMeshComponent>(TEXT("FPSArms"));
-		FPSArmsMeshComp->SetupAttachment(FPSBodyMeshComp);
 	}
 
 	if (!FPCSpringArmComp)
@@ -186,8 +182,8 @@ void AFPCCharacter::PossessedBy(AController* NewController)
 		// Bind to Camera Mode switch callback
 		FPCPlayerControllerInstance->OnCameraModeChanged.AddDynamic(this, &AFPCCharacter::SetCameraMode);
 
-		BaseMeshComp->LinkAnimClassLayers(BaseMeshAnimInstance->GetAnimClassFor(ECameraMode::TPS,TEXT("Pistol"), FString(TEXT("Just for testing"))).LoadSynchronous());
-		FPSArmsMeshComp->LinkAnimClassLayers(BaseMeshAnimInstance->GetAnimClassFor(ECameraMode::FPS,TEXT("Pistol"), FString(TEXT("Just for testing"))).LoadSynchronous());
+		BaseMeshComp->LinkAnimClassLayers(BaseMeshAnimInstance->GetAnimClassFor(ECameraMode::TPS,TEXT("Unarmed"), FString(TEXT("Just for testing"))).LoadSynchronous());
+		FPSBodyMeshComp->LinkAnimClassLayers(BaseMeshAnimInstance->GetAnimClassFor(ECameraMode::FPS,TEXT("Unarmed"), FString(TEXT("Just for testing"))).LoadSynchronous());
 	}
 }
 
