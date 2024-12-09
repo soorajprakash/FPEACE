@@ -53,7 +53,7 @@ void UFPCAnimInstance::NativeBeginPlay()
 
 	if (OwningMesh == nullptr)
 		OwningMesh = CastChecked<UFPCSkeletalMeshComponent>(GetOwningComponent());
-
+	
 	if (OwningAnimInstance == nullptr)
 		OwningAnimInstance = CastChecked<UFPCAnimInstance>(OwningMesh->GetAnimInstance());
 

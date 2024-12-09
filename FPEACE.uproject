@@ -279,10 +279,6 @@
 			"Enabled": false
 		},
 		{
-			"Name": "VisualStudioSourceCodeAccess",
-			"Enabled": false
-		},
-		{
 			"Name": "WindowsMoviePlayer",
 			"Enabled": false
 		},

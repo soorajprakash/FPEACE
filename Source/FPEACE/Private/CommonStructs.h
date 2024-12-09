@@ -15,9 +15,12 @@ struct FCycleAnimSet
 {
 	GENERATED_BODY()
 
-	FCycleAnimSet(): Forward(nullptr), Backward(nullptr), Right(nullptr), Left(nullptr)
+	FCycleAnimSet(): WeaponHandGripPose(nullptr), Forward(nullptr), Backward(nullptr), Right(nullptr), Left(nullptr)
 	{
 	}
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	TObjectPtr<UAnimSequence> WeaponHandGripPose;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	TObjectPtr<UAnimSequence> Forward;
