@@ -23,6 +23,15 @@ public:
 	UPROPERTY(EditDefaultsOnly)
 	ECameraMode StartingCameraMode;
 
+	UPROPERTY(EditDefaultsOnly)
+	FCharacterCameraModeSettings FPSCameraSettings;
+
+	UPROPERTY(EditDefaultsOnly)
+	FCharacterCameraModeSettings TPSCameraSettings;
+
+	UPROPERTY(EditDefaultsOnly, meta=(ClampMin=45, ClampMax=90))
+	float ControllerRotationPitchClamp = 85.f;
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	TObjectPtr<UDataTable> AnimClassTable;
 

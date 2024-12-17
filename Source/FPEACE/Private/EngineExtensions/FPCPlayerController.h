@@ -30,7 +30,7 @@ public:
 	void ToggleCameraMode();
 	
 	ECameraMode GetCameraMode() const { return currentCameraMode; }
-
+	
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="FPC")
 	ECameraMode currentCameraMode;

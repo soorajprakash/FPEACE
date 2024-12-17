@@ -24,20 +24,32 @@ class UFPCCharacterMovementComponent;
 class UFPCCapsuleComponent;
 class UFPCSkeletalMeshComponent;
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FLocomotionStateChanged, ELocomotionState, State);
+
 UCLASS()
 class FPEACE_API AFPCCharacter : public ACharacter
 {
 	GENERATED_BODY()
 
 public:
+	
 	// Sets default values for this character's properties
 	AFPCCharacter(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
+
+	//	--------------------- DELEGATE DEFINITION ---------------------
+	FLocomotionStateChanged OnLocomotionStateChanged;
+	
 
 	/*
 	 * Sets the Character to either use FPS camera mode or TPS camera mode
 	 */
 	UFUNCTION()
 	void SetCameraMode(ECameraMode NewCameraMode);
+
+	/*
+	 * Changes the settings for the camera and the spring arm for the given mode using the character data
+	 */
+	void SetCameraSettings(ECameraMode CurrentCameraMode);
 
 	/*
 	 * Get the Movement component of this character
@@ -56,6 +68,15 @@ public:
 	ELocomotionDirection GetCurrentLocomotionDirection() const { return CurrentLocomotionDirection; }
 
 protected:
+
+	//	--------------------- ANIMATION FAST-PATH VARIABLES ---------------------
+
+	UPROPERTY(BlueprintReadOnly)
+	bool IsCharacterMoving;
+
+	UPROPERTY(BlueprintReadOnly)
+	float currentLocomotionStateFloat;
+	
 	//	--------------------- DATA ---------------------
 
 	UPROPERTY(BlueprintReadOnly)
@@ -71,13 +92,13 @@ protected:
 	float CharacterAbsoluteSpeed2D;
 
 	UPROPERTY(BlueprintReadOnly)
-	bool IsCharacterMoving;
-
-	UPROPERTY(BlueprintReadOnly)
-	float currentLocomotionStateFloat;
-
-	UPROPERTY(BlueprintReadOnly)
 	float DirectionAngle;
+
+	/*
+	 * This value will be used in the animation blueprint to modify the spine bone(s) to allow the character to look up or down
+	 */
+	UPROPERTY(BlueprintReadOnly)
+	FRotator CharacterLookSpineVertical;
 
 	UPROPERTY(BlueprintReadOnly)
 	ELocomotionState currentLocomotionState;
@@ -153,6 +174,8 @@ protected:
 	 */
 	ELocomotionDirection CalculateLocomotionDirection(const float LocomotionDirectionAngle) const;
 
+	void SetLocomotionDirection(ELocomotionDirection newLocomotionDirection);
+
 	//	--------------------- OVERRIDES ---------------------
 
 	// Called when the game starts or when spawned
@@ -169,6 +192,8 @@ protected:
 	 * Setup Player Input
 	 */
 	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
+
+	virtual void AddControllerPitchInput(float Val) override;
 
 private:
 	// Character direction limit values referenced from the Owning character data asset for ease of use
@@ -212,5 +237,11 @@ private:
 	 */
 	void SetLocomotionStateSettings(ELocomotionState newLocomotionState) const;
 
-	void CheckIfCharacterMoving();
+	/*
+	 * Used to update derived variables for use in animation transition rules
+	 * This allows the animation blueprint to be on FastPath
+	 */
+	void UpdateAnimationTransitionRuleValues();
+
+	UFPCCharacterData* GetCharacterData();
 };

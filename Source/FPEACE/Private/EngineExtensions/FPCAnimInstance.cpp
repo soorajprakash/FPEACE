@@ -53,12 +53,15 @@ void UFPCAnimInstance::NativeBeginPlay()
 
 	if (OwningMesh == nullptr)
 		OwningMesh = CastChecked<UFPCSkeletalMeshComponent>(GetOwningComponent());
-	
+
 	if (OwningAnimInstance == nullptr)
 		OwningAnimInstance = CastChecked<UFPCAnimInstance>(OwningMesh->GetAnimInstance());
 
 	if (OwningCharacter && OwningCharacterMovementComponent == nullptr)
 		OwningCharacterMovementComponent = OwningCharacter->GetCharacterMovementComponent();
+
+	// Subscribe to character events
+	OwningCharacter->OnLocomotionStateChanged.AddDynamic(this, &UFPCAnimInstance::OnCharacterLocomotionStateChanged);
 }
 
 void UFPCAnimInstance::NativeUpdateAnimation(float DeltaSeconds)

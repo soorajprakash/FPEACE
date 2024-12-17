@@ -23,7 +23,6 @@ class FPEACE_API UFPCAnimInstance : public UAnimInstance
 	GENERATED_BODY()
 
 public:
-
 	/*
 	 * This is used to only perform operations on the base anim instance for optimization
 	 */
@@ -60,12 +59,14 @@ public:
 	TSoftClassPtr<UFPCAnimInstance> GetAnimClassFor(ECameraMode TargetCameraMode, FName AnimStateName, const FString& ReasonForGettingThisAnim);
 
 protected:
-	
 	TObjectPtr<UFPCCharacterData> GetCharacterData();
 
 	virtual void NativeBeginPlay() override;
 
 	virtual void NativeUpdateAnimation(float DeltaSeconds) override;
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "FPEACE")
+	void OnCharacterLocomotionStateChanged(ELocomotionState CurrentState);
 
 private:
 	/*

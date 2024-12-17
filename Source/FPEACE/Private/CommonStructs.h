@@ -15,12 +15,18 @@ struct FCycleAnimSet
 {
 	GENERATED_BODY()
 
-	FCycleAnimSet(): WeaponHandGripPose(nullptr), Forward(nullptr), Backward(nullptr), Right(nullptr), Left(nullptr)
+	FCycleAnimSet(): WeaponHandGripPose(nullptr), bAreDirectionalAnimsAdditive(false), bSyncUpperAndLowerBodyPlayers(true), Forward(nullptr), Backward(nullptr), Right(nullptr), Left(nullptr)
 	{
 	}
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	TObjectPtr<UAnimSequence> WeaponHandGripPose;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	bool bAreDirectionalAnimsAdditive;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	bool bSyncUpperAndLowerBodyPlayers;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	TObjectPtr<UAnimSequence> Forward;
@@ -85,4 +91,34 @@ struct FLocomotionStateSetting
 		: MaxWalkSpeed(0), MaxAcceleration(0), BrakingDeceleration(0), BrakingFrictionFactor(0), BrakingFriction(0), bUseSeparateBrakingFriction(false)
 	{
 	}
+};
+
+USTRUCT()
+struct FCharacterCameraModeSettings
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditDefaultsOnly)
+	FVector SpringArmTramsformOffset;
+
+	UPROPERTY(EditDefaultsOnly)
+	FVector SpringArmSocketOffset;
+
+	UPROPERTY(EditDefaultsOnly)
+	FVector SpringArmTargetOffset;
+
+	UPROPERTY(EditDefaultsOnly)
+	float SpringArmLength;
+
+	UPROPERTY(EditDefaultsOnly)
+	bool bUsePawnControlRotation;
+
+	UPROPERTY(EditDefaultsOnly)
+	bool bEnableCameraLag;
+
+	UPROPERTY(EditDefaultsOnly)
+	float CameraLagSpeed;
+
+	UPROPERTY(EditDefaultsOnly)
+	float CameraLagMaxDistance;
 };
