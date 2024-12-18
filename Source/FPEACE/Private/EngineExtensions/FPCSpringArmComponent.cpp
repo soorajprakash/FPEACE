@@ -4,3 +4,8 @@
 
 #include "FPCSpringArmComponent.h"
 
+void UFPCSpringArmComponent::SetArmLengthFromPitch(const UCurveFloat* PitchToArmLengthCurve, const FRotator& ControllerRotation)
+{
+	float SpringArmLength = PitchToArmLengthCurve->GetFloatValue(ControllerRotation.Pitch);
+	TargetArmLength = SpringArmLength;
+}

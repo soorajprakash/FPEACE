@@ -94,6 +94,9 @@ protected:
 	UPROPERTY(BlueprintReadOnly)
 	float DirectionAngle;
 
+	UPROPERTY(BlueprintReadOnly)
+	float CurrentMaxLocomotionSpeed;
+
 	/*
 	 * This value will be used in the animation blueprint to modify the spine bone(s) to allow the character to look up or down
 	 */
@@ -102,6 +105,8 @@ protected:
 
 	UPROPERTY(BlueprintReadOnly)
 	ELocomotionState currentLocomotionState;
+	
+	ELocomotionState TargetLocomotionState;
 
 	/*
 	 * The current locomotion direction of the owning character
@@ -168,6 +173,8 @@ protected:
 	//	--------------------- FUNCTIONS ---------------------
 
 	void SetCurrentLocomotionState(ELocomotionState newLocomotionState);
+	void SetTargetLocomotionState(ELocomotionState newLocomotionState);
+	void SetCurrentLocomotionStateWithSettings(ELocomotionState newLocomotionState);
 
 	/*
 	 * Calculate the direction enum from the given angle using direction limits in Character Data
@@ -194,6 +201,8 @@ protected:
 	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
 
 	virtual void AddControllerPitchInput(float Val) override;
+
+	virtual void AddControllerYawInput(float Val) override;
 
 private:
 	// Character direction limit values referenced from the Owning character data asset for ease of use
@@ -225,23 +234,28 @@ private:
 	/*
 	 * Walk/Run toggle input action binding
 	 */
-	void ToggleWalkRun();
+	void ToggleRunSprint();
 
 	/*
 	 * Run/Sprint toggle input action binding
 	 */
-	void ToggleSprint();
+	void ToggleWalking();
 
 	/*
 	 * Set the movement component settings for a given locomotion state
 	 */
-	void SetLocomotionStateSettings(ELocomotionState newLocomotionState) const;
+	void SetLocomotionStateSettings(ELocomotionState newLocomotionState);
 
 	/*
 	 * Used to update derived variables for use in animation transition rules
 	 * This allows the animation blueprint to be on FastPath
 	 */
 	void UpdateAnimationTransitionRuleValues();
+
+	/*
+	 * Tries to dynamically change states based on character speed and match it to the target state
+	 */
+	void DynamicLocomotionStateUpdate();
 
 	UFPCCharacterData* GetCharacterData();
 };

@@ -14,5 +14,7 @@ UCLASS(BlueprintType, Blueprintable, Meta = (BlueprintSpawnableComponent))
 class UFPCSpringArmComponent : public USpringArmComponent
 {
 	GENERATED_BODY()
-	
+
+public:
+	void SetArmLengthFromPitch(const UCurveFloat* PitchToArmLengthCurve, const FRotator& ControllerRotation);
 };

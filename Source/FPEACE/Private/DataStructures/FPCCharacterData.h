@@ -24,10 +24,7 @@ public:
 	ECameraMode StartingCameraMode;
 
 	UPROPERTY(EditDefaultsOnly)
-	FCharacterCameraModeSettings FPSCameraSettings;
-
-	UPROPERTY(EditDefaultsOnly)
-	FCharacterCameraModeSettings TPSCameraSettings;
+	TMap<ECameraMode, FCharacterCameraModeSettings> CameraModeSettings;
 
 	UPROPERTY(EditDefaultsOnly, meta=(ClampMin=45, ClampMax=90))
 	float ControllerRotationPitchClamp = 85.f;

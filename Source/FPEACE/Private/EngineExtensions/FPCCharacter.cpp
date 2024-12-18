@@ -34,6 +34,7 @@ void AFPCCharacter::SetCameraMode(ECameraMode NewCameraMode)
 			FPSBodyMeshComp->SetVisibility(true);
 
 			FPCSpringArmComp->AttachToComponent(FPSBodyMeshComp, FAttachmentTransformRules::SnapToTargetNotIncludingScale, TEXT("SOCKET_Camera"));
+			FPCSpringArmComp->TargetArmLength = GetCharacterData()->CameraModeSettings[ECameraMode::FPS].MaxSpringArmLength;
 			break;
 
 		case ECameraMode::TPS:
@@ -44,6 +45,7 @@ void AFPCCharacter::SetCameraMode(ECameraMode NewCameraMode)
 			FPSBodyMeshComp->SetVisibility(false);
 
 			FPCSpringArmComp->AttachToComponent(FPCCapsuleComp, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
+			FPCSpringArmComp->SetArmLengthFromPitch(GetCharacterData()->CameraModeSettings[ECameraMode::TPS].PitchToArmLengthCurve, FPCPlayerControllerInstance->GetControlRotation());
 			break;
 		}
 
@@ -54,16 +56,20 @@ void AFPCCharacter::SetCameraMode(ECameraMode NewCameraMode)
 
 void AFPCCharacter::SetCameraSettings(ECameraMode CurrentCameraMode)
 {
-	const FCharacterCameraModeSettings& TargetCameraModeSettings = CurrentCameraMode == ECameraMode::FPS ? GetCharacterData()->FPSCameraSettings : GetCharacterData()->TPSCameraSettings;
+	if (GetCharacterData())
+	{
+		const FCharacterCameraModeSettings& TargetCameraModeSettings = CurrentCameraMode == ECameraMode::FPS
+			                                                               ? FPCCharacterData->CameraModeSettings[ECameraMode::FPS]
+			                                                               : FPCCharacterData->CameraModeSettings[ECameraMode::TPS];
 
-	FPCSpringArmComp->SetRelativeLocation(TargetCameraModeSettings.SpringArmTramsformOffset);
-	FPCSpringArmComp->SocketOffset = TargetCameraModeSettings.SpringArmSocketOffset;
-	FPCSpringArmComp->TargetOffset = TargetCameraModeSettings.SpringArmTargetOffset;
-	FPCSpringArmComp->TargetArmLength = TargetCameraModeSettings.SpringArmLength;
-	FPCSpringArmComp->bUsePawnControlRotation = TargetCameraModeSettings.bUsePawnControlRotation;
-	FPCSpringArmComp->bEnableCameraLag = TargetCameraModeSettings.bEnableCameraLag;
-	FPCSpringArmComp->CameraLagSpeed = TargetCameraModeSettings.CameraLagSpeed;
-	FPCSpringArmComp->CameraLagMaxDistance = TargetCameraModeSettings.CameraLagMaxDistance;
+		FPCSpringArmComp->SetRelativeLocation(TargetCameraModeSettings.SpringArmTramsformOffset);
+		FPCSpringArmComp->SocketOffset = TargetCameraModeSettings.SpringArmSocketOffset;
+		FPCSpringArmComp->TargetOffset = TargetCameraModeSettings.SpringArmTargetOffset;
+		FPCSpringArmComp->bUsePawnControlRotation = TargetCameraModeSettings.bUsePawnControlRotation;
+		FPCSpringArmComp->bEnableCameraLag = TargetCameraModeSettings.bEnableCameraLag;
+		FPCSpringArmComp->CameraLagSpeed = TargetCameraModeSettings.CameraLagSpeed;
+		FPCSpringArmComp->CameraLagMaxDistance = TargetCameraModeSettings.CameraLagMaxDistance;
+	}
 }
 
 // Sets default values
@@ -110,11 +116,28 @@ AFPCCharacter::AFPCCharacter(const FObjectInitializer& ObjectInitializer): Super
 
 void AFPCCharacter::SetCurrentLocomotionState(ELocomotionState newLocomotionState)
 {
-	currentLocomotionState = newLocomotionState;
-	currentLocomotionStateFloat = UKismetMathLibrary::Conv_ByteToDouble(static_cast<uint8>(currentLocomotionState));
-	SetLocomotionStateSettings(currentLocomotionState);
+	if (currentLocomotionState == newLocomotionState)
+		return;
 
+	currentLocomotionState = newLocomotionState;
 	OnLocomotionStateChanged.Broadcast(currentLocomotionState);
+}
+
+void AFPCCharacter::SetTargetLocomotionState(ELocomotionState newLocomotionState)
+{
+	if (TargetLocomotionState == newLocomotionState)
+		return;
+
+	TargetLocomotionState = newLocomotionState;
+}
+
+void AFPCCharacter::SetCurrentLocomotionStateWithSettings(ELocomotionState newLocomotionState)
+{
+	if (currentLocomotionState == newLocomotionState)
+		return;
+
+	SetCurrentLocomotionState(newLocomotionState);
+	SetLocomotionStateSettings(currentLocomotionState);
 }
 
 ELocomotionDirection AFPCCharacter::CalculateLocomotionDirection(const float LocomotionDirectionAngle) const
@@ -154,7 +177,7 @@ void AFPCCharacter::SetLocomotionDirection(ELocomotionDirection newLocomotionDir
 
 	// If the direction is not forward then switch to walking
 	if (CurrentLocomotionDirection != ELocomotionDirection::Forward)
-		SetCurrentLocomotionState(ELocomotionState::Walking);
+		SetCurrentLocomotionStateWithSettings(ELocomotionState::Running);
 }
 
 // Called when the game starts or when spawned
@@ -166,7 +189,8 @@ void AFPCCharacter::BeginPlay()
 	FPCMovementComp = Cast<UFPCCharacterMovementComponent>(GetMovementComponent());
 
 	// Set initial Character values
-	SetLocomotionStateSettings(ELocomotionState::Walking);
+	SetTargetLocomotionState(ELocomotionState::Running);
+	SetCurrentLocomotionStateWithSettings(ELocomotionState::Running);
 
 	// Store required Character data
 	ForwardLimits = GetCharacterData()->CharacterDirectionLimits.ForwardLimits;
@@ -185,11 +209,14 @@ void AFPCCharacter::Tick(float DeltaSeconds)
 	CharacterAbsoluteSpeed2D = UKismetMathLibrary::VSizeXY(CharacterVelocity2D);
 
 	//Calculate the direction angle
-	DirectionAngle = UKismetAnimationLibrary::CalculateDirection(CharacterVelocity2D, GetActorRotation());
+	DirectionAngle = UKismetAnimationLibrary::CalculateDirection(FPCMovementComp->GetLastInputVector(), GetActorRotation());
+	UE_LOG(LogTemp, Warning, TEXT("Direction: %f"), DirectionAngle);
 	SetLocomotionDirection(CalculateLocomotionDirection(DirectionAngle));
 
 	// Update transition rule values
 	UpdateAnimationTransitionRuleValues();
+
+	DynamicLocomotionStateUpdate();
 }
 
 void AFPCCharacter::PossessedBy(AController* NewController)
@@ -220,8 +247,7 @@ void AFPCCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 	{
 		EInputComp->BindAction(LookAction.LoadSynchronous(), ETriggerEvent::Triggered, this, &AFPCCharacter::LookAround);
 		EInputComp->BindAction(MoveAction.LoadSynchronous(), ETriggerEvent::Triggered, this, &AFPCCharacter::MoveAround);
-		EInputComp->BindAction(RunAction.LoadSynchronous(), ETriggerEvent::Started, this, &AFPCCharacter::ToggleWalkRun);
-		EInputComp->BindAction(SprintAction.LoadSynchronous(), ETriggerEvent::Completed, this, &AFPCCharacter::ToggleSprint);
+		EInputComp->BindAction(RunAction.LoadSynchronous(), ETriggerEvent::Started, this, &AFPCCharacter::ToggleRunSprint);
 	}
 }
 
@@ -232,9 +258,22 @@ void AFPCCharacter::AddControllerPitchInput(float Val)
 		FRotator ControlRotation = FPCPlayerControllerInstance->GetControlRotation();
 		ControlRotation.Pitch -= Val; // Subtracting instead of adding since we are normailizing the values in the next step.
 		ControlRotation.Pitch = FRotator::NormalizeAxis(ControlRotation.Pitch); // Normalizing flips the direction.
-		
+
 		// Clamp the pitch between the limits defined in character data asset
 		ControlRotation.Pitch = FMath::Clamp(ControlRotation.Pitch, -FPCCharacterData->ControllerRotationPitchClamp, FPCCharacterData->ControllerRotationPitchClamp);
+
+		// Set the updated control rotation
+		FPCPlayerControllerInstance->SetControlRotation(ControlRotation);
+	}
+}
+
+void AFPCCharacter::AddControllerYawInput(float Val)
+{
+	if (FPCPlayerControllerInstance && GetCharacterData())
+	{
+		FRotator ControlRotation = FPCPlayerControllerInstance->GetControlRotation();
+		ControlRotation.Yaw += Val;
+		ControlRotation.Pitch = FRotator::NormalizeAxis(ControlRotation.Pitch); // Normalizing flips the direction.
 
 		// Set the updated control rotation
 		FPCPlayerControllerInstance->SetControlRotation(ControlRotation);
@@ -246,7 +285,11 @@ void AFPCCharacter::LookAround(const FInputActionValue& InputActionValue)
 	FVector2D input = InputActionValue.Get<FVector2D>();
 	AddControllerYawInput(input.X);
 	AddControllerPitchInput(input.Y);
-	CharacterLookSpineVertical.Roll = -Controller->GetControlRotation().Pitch; // Using negative pitch since the values are normalized in custom AddControllerPitchInput function
+
+	CharacterLookSpineVertical.Roll = -Controller->GetControlRotation().Pitch;
+
+	if (FPCPlayerControllerInstance->GetCameraMode() == ECameraMode::TPS)
+		FPCSpringArmComp->SetArmLengthFromPitch(GetCharacterData()->CameraModeSettings[ECameraMode::TPS].PitchToArmLengthCurve, FPCPlayerControllerInstance->GetControlRotation());
 }
 
 void AFPCCharacter::MoveAround(const FInputActionValue& InputActionValue)
@@ -256,24 +299,24 @@ void AFPCCharacter::MoveAround(const FInputActionValue& InputActionValue)
 	AddMovementInput(FVector(input.Y, input.X, 0));
 }
 
-void AFPCCharacter::ToggleWalkRun()
+void AFPCCharacter::ToggleRunSprint()
 {
-	if (currentLocomotionState != ELocomotionState::Running)
-		SetCurrentLocomotionState(ELocomotionState::Running);
+	if (TargetLocomotionState != ELocomotionState::Running)
+		SetTargetLocomotionState(ELocomotionState::Running);
 	else
-		SetCurrentLocomotionState(ELocomotionState::Walking);
+		SetTargetLocomotionState(ELocomotionState::Sprinting);
 }
 
-void AFPCCharacter::ToggleSprint()
+void AFPCCharacter::ToggleWalking()
 {
-	if (currentLocomotionState != ELocomotionState::Sprinting)
-		SetCurrentLocomotionState(ELocomotionState::Sprinting);
-	else
-		SetCurrentLocomotionState(ELocomotionState::Running);
+	SetTargetLocomotionState(ELocomotionState::Walking);
 }
 
-void AFPCCharacter::SetLocomotionStateSettings(ELocomotionState newLocomotionState) const
+void AFPCCharacter::SetLocomotionStateSettings(ELocomotionState newLocomotionState)
 {
+	CurrentMaxLocomotionSpeed = GetCharacterData()->LocomotionStateSettings[currentLocomotionState].MaxWalkSpeed;
+	currentLocomotionStateFloat = UKismetMathLibrary::Conv_ByteToDouble(static_cast<uint8>(currentLocomotionState));
+
 	switch (newLocomotionState)
 	{
 	case ELocomotionState::Walking:
@@ -318,15 +361,18 @@ void AFPCCharacter::SetLocomotionStateSettings(ELocomotionState newLocomotionSta
 void AFPCCharacter::UpdateAnimationTransitionRuleValues()
 {
 	// Update if the character is moving
-	if (IsCharacterMoving && CharacterVelocity2D.Length() < 0.01f)
+	if (IsCharacterMoving && CharacterVelocity2D.Length() < 10.f)
 	{
 		IsCharacterMoving = false;
-		SetCurrentLocomotionState(ELocomotionState::Walking);
+		SetTargetLocomotionState(ELocomotionState::Running);
 	}
-	else if (!IsCharacterMoving && CharacterVelocity2D.Length() > 0.01f)
-	{
+	else if (!IsCharacterMoving && CharacterVelocity2D.Length() > 1.f)
 		IsCharacterMoving = true;
-	}
+}
+
+void AFPCCharacter::DynamicLocomotionStateUpdate()
+{
+	SetCurrentLocomotionStateWithSettings(TargetLocomotionState);
 }
 
 UFPCCharacterData* AFPCCharacter::GetCharacterData()

@@ -98,6 +98,13 @@ struct FCharacterCameraModeSettings
 {
 	GENERATED_BODY()
 
+	// Constructor to set initial values
+	FCharacterCameraModeSettings(): SpringArmTramsformOffset(), SpringArmSocketOffset(), SpringArmTargetOffset(), MaxSpringArmLength(0), bUsePawnControlRotation(false), bEnableCameraLag(false),
+	                                CameraLagSpeed(0),
+	                                CameraLagMaxDistance(0)
+	{
+	}
+
 	UPROPERTY(EditDefaultsOnly)
 	FVector SpringArmTramsformOffset;
 
@@ -108,7 +115,10 @@ struct FCharacterCameraModeSettings
 	FVector SpringArmTargetOffset;
 
 	UPROPERTY(EditDefaultsOnly)
-	float SpringArmLength;
+	float MaxSpringArmLength;
+
+	UPROPERTY(EditDefaultsOnly)
+	TObjectPtr<UCurveFloat> PitchToArmLengthCurve;
 
 	UPROPERTY(EditDefaultsOnly)
 	bool bUsePawnControlRotation;
