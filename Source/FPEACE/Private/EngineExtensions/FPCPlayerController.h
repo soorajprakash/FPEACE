@@ -19,7 +19,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnCameraModeChanged, ECameraMode, N
  * 
  */
 UCLASS()
-class AFPCPlayerController : public APlayerController
+class FPEACE_API AFPCPlayerController : public APlayerController
 {
 	GENERATED_BODY()
 

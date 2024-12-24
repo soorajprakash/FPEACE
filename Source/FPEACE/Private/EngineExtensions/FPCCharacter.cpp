@@ -58,9 +58,7 @@ void AFPCCharacter::SetCameraSettings(ECameraMode CurrentCameraMode)
 {
 	if (GetCharacterData())
 	{
-		const FCharacterCameraModeSettings& TargetCameraModeSettings = CurrentCameraMode == ECameraMode::FPS
-			                                                               ? FPCCharacterData->CameraModeSettings[ECameraMode::FPS]
-			                                                               : FPCCharacterData->CameraModeSettings[ECameraMode::TPS];
+		const FCharacterCameraModeSettings& TargetCameraModeSettings = FPCCharacterData->CameraModeSettings[CurrentCameraMode];
 
 		FPCSpringArmComp->SetRelativeLocation(TargetCameraModeSettings.SpringArmTramsformOffset);
 		FPCSpringArmComp->SocketOffset = TargetCameraModeSettings.SpringArmSocketOffset;
@@ -176,8 +174,10 @@ void AFPCCharacter::SetLocomotionDirection(ELocomotionDirection newLocomotionDir
 	CurrentLocomotionDirection = newLocomotionDirection;
 
 	// If the direction is not forward then switch to walking
-	if (CurrentLocomotionDirection != ELocomotionDirection::Forward)
+	if (!bIsCharacterArmed && CurrentLocomotionDirection != ELocomotionDirection::Forward)
 		SetCurrentLocomotionStateWithSettings(ELocomotionState::Running);
+	else if (bIsCharacterArmed && CurrentLocomotionDirection != ELocomotionDirection::Forward)
+		SetCurrentLocomotionStateWithSettings(ELocomotionState::Walking);
 }
 
 // Called when the game starts or when spawned
@@ -202,21 +202,18 @@ void AFPCCharacter::Tick(float DeltaSeconds)
 {
 	Super::Tick(DeltaSeconds);
 
-	// Calculate Velocity
-	CharacterVelocity = FPCMovementComp->Velocity;
-	CharacterAbsoluteSpeed = UKismetMathLibrary::VSizeXY(CharacterVelocity);
-	CharacterVelocity2D = FVector(CharacterVelocity.X, CharacterVelocity.Y, 0);
-	CharacterAbsoluteSpeed2D = UKismetMathLibrary::VSizeXY(CharacterVelocity2D);
+	// Fetch movement data
+	const FVector& CharacterVelocity = FPCMovementComp->Velocity;
+	const FVector& CharacterAcceleration = FPCMovementComp->GetCurrentAcceleration();
 
-	//Calculate the direction angle
-	DirectionAngle = UKismetAnimationLibrary::CalculateDirection(FPCMovementComp->GetLastInputVector(), GetActorRotation());
-	UE_LOG(LogTemp, Warning, TEXT("Direction: %f"), DirectionAngle);
-	SetLocomotionDirection(CalculateLocomotionDirection(DirectionAngle));
+	CharacterVelocity2D = FVector(CharacterVelocity.X, CharacterVelocity.Y, 0);
+	CharacterAcceleration2D = FVector(CharacterAcceleration.X, CharacterAcceleration.Y, 0);
+
+	CharacterAbsoluteSpeed = UKismetMathLibrary::VSizeXY(CharacterVelocity);
+	CharacterAbsoluteSpeed2D = UKismetMathLibrary::VSizeXY(CharacterVelocity2D);
 
 	// Update transition rule values
 	UpdateAnimationTransitionRuleValues();
-
-	DynamicLocomotionStateUpdate();
 }
 
 void AFPCCharacter::PossessedBy(AController* NewController)
@@ -294,9 +291,16 @@ void AFPCCharacter::LookAround(const FInputActionValue& InputActionValue)
 
 void AFPCCharacter::MoveAround(const FInputActionValue& InputActionValue)
 {
-	FVector2D input = InputActionValue.Get<FVector2D>();
-	input = input.GetRotated(-GetControlRotation().Yaw); // Rotate the input to face the character's direction
-	AddMovementInput(FVector(input.Y, input.X, 0));
+	FVector2D Input = InputActionValue.Get<FVector2D>();
+	Input = Input.GetRotated(-GetControlRotation().Yaw); // Rotate the input to face the character's direction
+	FVector Input3D = FVector(Input.Y, Input.X, 0);
+	AddMovementInput(Input3D);
+
+	//Calculate the direction angle
+	InputDirectionAngle = UKismetAnimationLibrary::CalculateDirection(Input3D, GetActorRotation());
+
+	DynamicLocomotionStateUpdate();// TODO: This needs to be looked at. Is it even needed?
+	SetLocomotionDirection(CalculateLocomotionDirection(InputDirectionAngle));
 }
 
 void AFPCCharacter::ToggleRunSprint()
@@ -314,60 +318,31 @@ void AFPCCharacter::ToggleWalking()
 
 void AFPCCharacter::SetLocomotionStateSettings(ELocomotionState newLocomotionState)
 {
-	CurrentMaxLocomotionSpeed = GetCharacterData()->LocomotionStateSettings[currentLocomotionState].MaxWalkSpeed;
-	currentLocomotionStateFloat = UKismetMathLibrary::Conv_ByteToDouble(static_cast<uint8>(currentLocomotionState));
+	CurrentMaxLocomotionSpeed = GetCharacterData()->LocomotionStateSettings[newLocomotionState].MaxWalkSpeed;
+	currentLocomotionStateFloat = UKismetMathLibrary::Conv_ByteToDouble(static_cast<uint8>(newLocomotionState));
 
-	switch (newLocomotionState)
-	{
-	case ELocomotionState::Walking:
-		{
-			FLocomotionStateSetting WalkingSettings = FPCCharacterData->LocomotionStateSettings[ELocomotionState::Walking];
-
-			FPCMovementComp->MaxWalkSpeed = WalkingSettings.MaxWalkSpeed;
-			FPCMovementComp->MaxAcceleration = WalkingSettings.MaxAcceleration;
-			FPCMovementComp->BrakingDecelerationWalking = WalkingSettings.BrakingDeceleration;
-			FPCMovementComp->BrakingFrictionFactor = WalkingSettings.BrakingFrictionFactor;
-			FPCMovementComp->BrakingFriction = WalkingSettings.BrakingFriction;
-			break;
-		}
-
-	case ELocomotionState::Running:
-		{
-			FLocomotionStateSetting RunningSettings = FPCCharacterData->LocomotionStateSettings[ELocomotionState::Running];
-
-			FPCMovementComp->MaxWalkSpeed = RunningSettings.MaxWalkSpeed;
-			FPCMovementComp->MaxAcceleration = RunningSettings.MaxAcceleration;
-			FPCMovementComp->BrakingDecelerationWalking = RunningSettings.BrakingDeceleration;
-			FPCMovementComp->BrakingFrictionFactor = RunningSettings.BrakingFrictionFactor;
-			FPCMovementComp->BrakingFriction = RunningSettings.BrakingFriction;
-			break;
-		}
-
-	case ELocomotionState::Sprinting:
-		{
-			FLocomotionStateSetting SprintSettings = FPCCharacterData->LocomotionStateSettings[ELocomotionState::Sprinting];
-
-			FPCMovementComp->MaxWalkSpeed = SprintSettings.MaxWalkSpeed;
-			FPCMovementComp->MaxAcceleration = SprintSettings.MaxAcceleration;
-			FPCMovementComp->BrakingDecelerationWalking = SprintSettings.BrakingDeceleration;
-			FPCMovementComp->BrakingFrictionFactor = SprintSettings.BrakingFrictionFactor;
-			FPCMovementComp->BrakingFriction = SprintSettings.BrakingFriction;
-			break;
-		}
-	default: break;
-	}
+	const FLocomotionStateSetting& StateSettings = FPCCharacterData->LocomotionStateSettings[newLocomotionState];
+	FPCMovementComp->bUseSeparateBrakingFriction = StateSettings.bUseSeparateBrakingFriction;
+	FPCMovementComp->MaxWalkSpeed = StateSettings.MaxWalkSpeed;
+	FPCMovementComp->MaxAcceleration = StateSettings.MaxAcceleration;
+	FPCMovementComp->BrakingDecelerationWalking = StateSettings.BrakingDeceleration;
+	FPCMovementComp->BrakingFrictionFactor = StateSettings.BrakingFrictionFactor;
+	FPCMovementComp->BrakingFriction = StateSettings.BrakingFriction;
 }
 
 void AFPCCharacter::UpdateAnimationTransitionRuleValues()
 {
 	// Update if the character is moving
-	if (IsCharacterMoving && CharacterVelocity2D.Length() < 10.f)
+	if (IsCharacterMoving && CharacterVelocity2D.Length() < 0.01f)
 	{
 		IsCharacterMoving = false;
 		SetTargetLocomotionState(ELocomotionState::Running);
 	}
-	else if (!IsCharacterMoving && CharacterVelocity2D.Length() > 1.f)
+	else if (!IsCharacterMoving && CharacterVelocity2D.Length() > 0.f)
 		IsCharacterMoving = true;
+
+	// Update if the character is accelerating
+	IsCharacterAccelerating = !CharacterAcceleration2D.IsNearlyZero();
 }
 
 void AFPCCharacter::DynamicLocomotionStateUpdate()

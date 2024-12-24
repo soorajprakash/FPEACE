@@ -1,4 +1,5 @@
-// Copyright © 2024 Sooraj Prakash. All rights reserved.Unauthorized distribution or sharing of this code is prohibited.
+// Copyright © 2024 Sooraj Prakash. All rights reserved.
+// Unauthorized distribution of this file, or any part of it, is prohibited.
 
 #pragma once
 
@@ -11,7 +12,7 @@ class UFPCCharacterData;
  * 
  */
 UCLASS()
-class UFPCGameInstance : public UGameInstance
+class FPEACE_API UFPCGameInstance : public UGameInstance
 {
 	GENERATED_BODY()
 

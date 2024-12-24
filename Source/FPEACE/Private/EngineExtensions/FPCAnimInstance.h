@@ -59,7 +59,11 @@ public:
 	TSoftClassPtr<UFPCAnimInstance> GetAnimClassFor(ECameraMode TargetCameraMode, FName AnimStateName, const FString& ReasonForGettingThisAnim);
 
 protected:
-	TObjectPtr<UFPCCharacterData> GetCharacterData();
+	/*
+	 * Reference to the character data asset referenced in the game instance
+	 */
+	UPROPERTY(BlueprintReadOnly)
+	TObjectPtr<UFPCCharacterData> OwningCharacterData;
 
 	virtual void NativeBeginPlay() override;
 
@@ -70,14 +74,11 @@ protected:
 
 private:
 	/*
-	 * Reference to the character data asset referenced in the game instance
-	 */
-	TObjectPtr<UFPCCharacterData> OwningCharacterData;
-
-	/*
 	 * Used to calculate angular velocity
 	 */
 	float previousYaw;
 
 	void CalculateLeanAngle(float DeltaSeconds);
+
+	void InitializeReferences();
 };

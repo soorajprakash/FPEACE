@@ -16,7 +16,7 @@ public class FPEACE : ModuleRules
 
 		PrivateDependencyModuleNames.AddRange(new string[]
 		{
-			"AnimGraphRuntime", "AnimGraph", "BlueprintGraph"
+			"AnimGraphRuntime", "AnimGraph", "BlueprintGraph", "AnimationLocomotionLibraryRuntime"
 		});
 
 		// Uncomment if you are using Slate UI

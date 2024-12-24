@@ -6,15 +6,15 @@
 
 #include "CommonEnums.h"
 #include "FPCCharacter.h"
-#include "FPCGameInstance.h"
 #include "FPCSkeletalMeshComponent.h"
 #include "DataStructures/FCameraModeAnimSelectionStruct.h"
 #include "DataStructures/FPCCharacterData.h"
 
 TSoftClassPtr<UFPCAnimInstance> UFPCAnimInstance::GetAnimClassFor(const ECameraMode TargetCameraMode, const FName AnimStateName, const FString& ReasonForGettingThisAnim)
 {
+	InitializeReferences();
 	TSoftClassPtr<UFPCAnimInstance> ReturnValue;
-	if (GetCharacterData() != nullptr)
+	if (OwningCharacter->GetCharacterData() != nullptr)
 		if (const UDataTable* AnimClassTable = OwningCharacterData->AnimClassTable.Get())
 			if (const FCameraModeAnimSelectionStruct* SelectedItem = AnimClassTable->FindRow<FCameraModeAnimSelectionStruct>(AnimStateName, ReasonForGettingThisAnim))
 			{
@@ -33,32 +33,11 @@ TSoftClassPtr<UFPCAnimInstance> UFPCAnimInstance::GetAnimClassFor(const ECameraM
 	return ReturnValue;
 }
 
-TObjectPtr<UFPCCharacterData> UFPCAnimInstance::GetCharacterData()
-{
-	if (OwningCharacterData == nullptr)
-	{
-		if (const UFPCGameInstance* GameInstance = UFPCGameInstance::GetInstance(this))
-			OwningCharacterData = GameInstance->CharacterData;
-	}
-
-	return OwningCharacterData;
-}
-
 void UFPCAnimInstance::NativeBeginPlay()
 {
 	Super::NativeBeginPlay();
 
-	if (OwningCharacter == nullptr)
-		OwningCharacter = CastChecked<AFPCCharacter>(TryGetPawnOwner());
-
-	if (OwningMesh == nullptr)
-		OwningMesh = CastChecked<UFPCSkeletalMeshComponent>(GetOwningComponent());
-
-	if (OwningAnimInstance == nullptr)
-		OwningAnimInstance = CastChecked<UFPCAnimInstance>(OwningMesh->GetAnimInstance());
-
-	if (OwningCharacter && OwningCharacterMovementComponent == nullptr)
-		OwningCharacterMovementComponent = OwningCharacter->GetCharacterMovementComponent();
+	InitializeReferences();
 
 	// Subscribe to character events
 	OwningCharacter->OnLocomotionStateChanged.AddDynamic(this, &UFPCAnimInstance::OnCharacterLocomotionStateChanged);
@@ -83,7 +62,7 @@ void UFPCAnimInstance::CalculateLeanAngle(float DeltaSeconds)
 	float currentYaw = OwningCharacter->GetActorRotation().Yaw;
 
 	// Get the yaw angular velocity and multiply by strength 
-	LeanAngle = ((currentYaw - previousYaw) / DeltaSeconds) * GetCharacterData()->TurningLeanStrength;
+	LeanAngle = ((currentYaw - previousYaw) / DeltaSeconds) * OwningCharacterData->TurningLeanStrength;
 
 	// If the character is moving backwards, negate the lean angle
 	if (OwningCharacter->GetCurrentLocomotionDirection() == ELocomotionDirection::Backward)
@@ -91,4 +70,22 @@ void UFPCAnimInstance::CalculateLeanAngle(float DeltaSeconds)
 
 	LeanAngle = FMath::Clamp(LeanAngle, -30.0f, 30.0f);
 	previousYaw = currentYaw;
+}
+
+void UFPCAnimInstance::InitializeReferences()
+{
+	if (OwningCharacter == nullptr)
+		OwningCharacter = CastChecked<AFPCCharacter>(TryGetPawnOwner());
+
+	if (OwningMesh == nullptr)
+		OwningMesh = CastChecked<UFPCSkeletalMeshComponent>(GetOwningComponent());
+
+	if (OwningAnimInstance == nullptr)
+		OwningAnimInstance = CastChecked<UFPCAnimInstance>(OwningMesh->GetAnimInstance());
+
+	if (OwningCharacter && OwningCharacterMovementComponent == nullptr)
+		OwningCharacterMovementComponent = OwningCharacter->GetCharacterMovementComponent();
+
+	if (OwningCharacter)
+		OwningCharacterData = OwningCharacter->GetCharacterData();
 }

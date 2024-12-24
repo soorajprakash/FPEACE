@@ -300,6 +300,10 @@
 				"IOS",
 				"Android"
 			]
+		},
+		{
+			"Name": "AnimationLocomotionLibrary",
+			"Enabled": true
 		}
 	],
 	"TargetPlatforms": [

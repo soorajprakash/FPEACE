@@ -11,7 +11,7 @@
  * 
  */
 UCLASS(BlueprintType, Blueprintable, Meta = (BlueprintSpawnableComponent))
-class UFPCSpringArmComponent : public USpringArmComponent
+class FPEACE_API UFPCSpringArmComponent : public USpringArmComponent
 {
 	GENERATED_BODY()
 

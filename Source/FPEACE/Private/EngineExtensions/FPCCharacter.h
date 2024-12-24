@@ -38,8 +38,9 @@ public:
 
 	//	--------------------- DELEGATE DEFINITION ---------------------
 	FLocomotionStateChanged OnLocomotionStateChanged;
-	
 
+	//	--------------------- PUBLIC FUNCTIONS ---------------------
+	
 	/*
 	 * Sets the Character to either use FPS camera mode or TPS camera mode
 	 */
@@ -67,6 +68,11 @@ public:
 	 */
 	ELocomotionDirection GetCurrentLocomotionDirection() const { return CurrentLocomotionDirection; }
 
+	/*
+	 * Get reference to the character data asset
+	 */
+	UFPCCharacterData* GetCharacterData();
+
 protected:
 
 	//	--------------------- ANIMATION FAST-PATH VARIABLES ---------------------
@@ -75,24 +81,27 @@ protected:
 	bool IsCharacterMoving;
 
 	UPROPERTY(BlueprintReadOnly)
+	bool IsCharacterAccelerating;
+
+	UPROPERTY(BlueprintReadOnly)
 	float currentLocomotionStateFloat;
 	
-	//	--------------------- DATA ---------------------
+	//	--------------------- MOVEMENT DATA ---------------------
 
 	UPROPERTY(BlueprintReadOnly)
-	FVector CharacterVelocity;
-
-	UPROPERTY(BlueprintReadOnly)
-	float CharacterAbsoluteSpeed;
+	FVector CharacterAcceleration2D;
 
 	UPROPERTY(BlueprintReadOnly)
 	FVector CharacterVelocity2D;
 
 	UPROPERTY(BlueprintReadOnly)
+	float CharacterAbsoluteSpeed;
+
+	UPROPERTY(BlueprintReadOnly)
 	float CharacterAbsoluteSpeed2D;
 
 	UPROPERTY(BlueprintReadOnly)
-	float DirectionAngle;
+	float InputDirectionAngle;
 
 	UPROPERTY(BlueprintReadOnly)
 	float CurrentMaxLocomotionSpeed;
@@ -107,6 +116,9 @@ protected:
 	ELocomotionState currentLocomotionState;
 	
 	ELocomotionState TargetLocomotionState;
+
+	UPROPERTY(EditDefaultsOnly)
+	bool bIsCharacterArmed;
 
 	/*
 	 * The current locomotion direction of the owning character
@@ -170,7 +182,7 @@ protected:
 	UPROPERTY(BlueprintReadOnly)
 	TObjectPtr<AFPCPlayerController> FPCPlayerControllerInstance;
 
-	//	--------------------- FUNCTIONS ---------------------
+	//	--------------------- PROTECTED FUNCTIONS ---------------------
 
 	void SetCurrentLocomotionState(ELocomotionState newLocomotionState);
 	void SetTargetLocomotionState(ELocomotionState newLocomotionState);
@@ -256,6 +268,4 @@ private:
 	 * Tries to dynamically change states based on character speed and match it to the target state
 	 */
 	void DynamicLocomotionStateUpdate();
-
-	UFPCCharacterData* GetCharacterData();
 };
