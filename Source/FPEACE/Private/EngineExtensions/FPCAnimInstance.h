@@ -47,6 +47,15 @@ public:
 	UPROPERTY(BlueprintReadOnly)
 	TObjectPtr<UFPCAnimInstance> OwningAnimInstance;
 
+	UPROPERTY(BlueprintReadOnly)
+	UFPCAnimInstance* CurrentLinkedAnimInstance;
+
+	/*
+	 * 
+	 */
+	UPROPERTY(BlueprintReadWrite)
+	TObjectPtr<UAnimSequence> CurrentWeaponGripPose;
+
 	/*
 	 * Reference to the movement component in the character that is actively using this anim instance
 	 */

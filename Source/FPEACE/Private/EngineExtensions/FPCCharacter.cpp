@@ -138,6 +138,17 @@ void AFPCCharacter::SetCurrentLocomotionStateWithSettings(ELocomotionState newLo
 	SetLocomotionStateSettings(currentLocomotionState);
 }
 
+void AFPCCharacter::LinkCombatAnimClassToCharacter(FName AnimClassNameToLink)
+{
+	TSubclassOf<UFPCAnimInstance> TPSCombatClass = BaseMeshAnimInstance->GetAnimClassFor(ECameraMode::TPS, AnimClassNameToLink, FString(TEXT("Linking Anim Class To Character"))).LoadSynchronous();
+	BaseMeshComp->LinkAnimClassLayers(TPSCombatClass);
+	BaseMeshAnimInstance->CurrentLinkedAnimInstance = CastChecked<UFPCAnimInstance>(BaseMeshComp->GetLinkedAnimLayerInstanceByClass(TPSCombatClass));
+
+	TSubclassOf<UFPCAnimInstance> FPSCombatClass = BaseMeshAnimInstance->GetAnimClassFor(ECameraMode::FPS, AnimClassNameToLink, FString(TEXT("Linking Anim Class To Character"))).LoadSynchronous();
+	FPSBodyMeshComp->LinkAnimClassLayers(FPSCombatClass);
+	FPSMeshAnimInstance->CurrentLinkedAnimInstance = CastChecked<UFPCAnimInstance>(FPSBodyMeshComp->GetLinkedAnimLayerInstanceByClass(FPSCombatClass));
+}
+
 ELocomotionDirection AFPCCharacter::CalculateLocomotionDirection(const float LocomotionDirectionAngle) const
 {
 	// First check for deadzones
@@ -212,6 +223,10 @@ void AFPCCharacter::Tick(float DeltaSeconds)
 	CharacterAbsoluteSpeed = UKismetMathLibrary::VSizeXY(CharacterVelocity);
 	CharacterAbsoluteSpeed2D = UKismetMathLibrary::VSizeXY(CharacterVelocity2D);
 
+	FVector CurrentWorldLocation = GetActorLocation();
+	CurrentDeltaDistance = FVector::Distance(LastWorldLocation, CurrentWorldLocation);
+	LastWorldLocation = CurrentWorldLocation;
+
 	// Update transition rule values
 	UpdateAnimationTransitionRuleValues();
 }
@@ -222,6 +237,7 @@ void AFPCCharacter::PossessedBy(AController* NewController)
 
 	BaseMeshAnimInstance = CastChecked<UFPCAnimInstance>(BaseMeshComp->GetAnimInstance());
 	BaseMeshAnimInstance->isBaseAnimInstance = true;
+	FPSMeshAnimInstance = CastChecked<UFPCAnimInstance>(FPSBodyMeshComp->GetAnimInstance());
 	FPCPlayerControllerInstance = CastChecked<AFPCPlayerController>(NewController);
 
 	// Component Settings
@@ -230,8 +246,7 @@ void AFPCCharacter::PossessedBy(AController* NewController)
 		// Bind to Camera Mode switch callback
 		FPCPlayerControllerInstance->OnCameraModeChanged.AddDynamic(this, &AFPCCharacter::SetCameraMode);
 
-		BaseMeshComp->LinkAnimClassLayers(BaseMeshAnimInstance->GetAnimClassFor(ECameraMode::TPS,TEXT("Unarmed"), FString(TEXT("Just for testing"))).LoadSynchronous());
-		FPSBodyMeshComp->LinkAnimClassLayers(BaseMeshAnimInstance->GetAnimClassFor(ECameraMode::FPS,TEXT("Unarmed"), FString(TEXT("Just for testing"))).LoadSynchronous());
+		LinkCombatAnimClassToCharacter(TEXT("Unarmed"));
 	}
 }
 
@@ -299,7 +314,7 @@ void AFPCCharacter::MoveAround(const FInputActionValue& InputActionValue)
 	//Calculate the direction angle
 	InputDirectionAngle = UKismetAnimationLibrary::CalculateDirection(Input3D, GetActorRotation());
 
-	DynamicLocomotionStateUpdate();// TODO: This needs to be looked at. Is it even needed?
+	DynamicLocomotionStateUpdate(); // TODO: This needs to be looked at. Is it even needed?
 	SetLocomotionDirection(CalculateLocomotionDirection(InputDirectionAngle));
 }
 
@@ -319,7 +334,7 @@ void AFPCCharacter::ToggleWalking()
 void AFPCCharacter::SetLocomotionStateSettings(ELocomotionState newLocomotionState)
 {
 	CurrentMaxLocomotionSpeed = GetCharacterData()->LocomotionStateSettings[newLocomotionState].MaxWalkSpeed;
-	currentLocomotionStateFloat = UKismetMathLibrary::Conv_ByteToDouble(static_cast<uint8>(newLocomotionState));
+	CurrentLocomotionStateFloat = UKismetMathLibrary::Conv_ByteToDouble(static_cast<uint8>(newLocomotionState));
 
 	const FLocomotionStateSetting& StateSettings = FPCCharacterData->LocomotionStateSettings[newLocomotionState];
 	FPCMovementComp->bUseSeparateBrakingFriction = StateSettings.bUseSeparateBrakingFriction;
@@ -343,6 +358,9 @@ void AFPCCharacter::UpdateAnimationTransitionRuleValues()
 
 	// Update if the character is accelerating
 	IsCharacterAccelerating = !CharacterAcceleration2D.IsNearlyZero();
+
+	// Update if character has reached close to max speed
+	HasCharacterReachedCurrentMaxSpeed = CharacterAbsoluteSpeed2D > CurrentMaxLocomotionSpeed * 0.8f;
 }
 
 void AFPCCharacter::DynamicLocomotionStateUpdate()

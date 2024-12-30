@@ -32,7 +32,6 @@ class FPEACE_API AFPCCharacter : public ACharacter
 	GENERATED_BODY()
 
 public:
-	
 	// Sets default values for this character's properties
 	AFPCCharacter(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
@@ -40,7 +39,7 @@ public:
 	FLocomotionStateChanged OnLocomotionStateChanged;
 
 	//	--------------------- PUBLIC FUNCTIONS ---------------------
-	
+
 	/*
 	 * Sets the Character to either use FPS camera mode or TPS camera mode
 	 */
@@ -64,6 +63,12 @@ public:
 	TObjectPtr<UFPCAnimInstance> BaseMeshAnimInstance;
 
 	/*
+	 * Reference to the anim instance running on the FPS skeletal mesh component
+	 */
+	UPROPERTY(BlueprintReadOnly)
+	TObjectPtr<UFPCAnimInstance> FPSMeshAnimInstance;
+
+	/*
 	 * Public getter for current movement direction
 	 */
 	ELocomotionDirection GetCurrentLocomotionDirection() const { return CurrentLocomotionDirection; }
@@ -74,7 +79,6 @@ public:
 	UFPCCharacterData* GetCharacterData();
 
 protected:
-
 	//	--------------------- ANIMATION FAST-PATH VARIABLES ---------------------
 
 	UPROPERTY(BlueprintReadOnly)
@@ -84,8 +88,11 @@ protected:
 	bool IsCharacterAccelerating;
 
 	UPROPERTY(BlueprintReadOnly)
-	float currentLocomotionStateFloat;
-	
+	float CurrentLocomotionStateFloat;
+
+	UPROPERTY(BlueprintReadOnly)
+	bool HasCharacterReachedCurrentMaxSpeed;
+
 	//	--------------------- MOVEMENT DATA ---------------------
 
 	UPROPERTY(BlueprintReadOnly)
@@ -106,6 +113,9 @@ protected:
 	UPROPERTY(BlueprintReadOnly)
 	float CurrentMaxLocomotionSpeed;
 
+	UPROPERTY(BlueprintReadOnly)
+	float CurrentDeltaDistance;
+
 	/*
 	 * This value will be used in the animation blueprint to modify the spine bone(s) to allow the character to look up or down
 	 */
@@ -114,7 +124,7 @@ protected:
 
 	UPROPERTY(BlueprintReadOnly)
 	ELocomotionState currentLocomotionState;
-	
+
 	ELocomotionState TargetLocomotionState;
 
 	UPROPERTY(EditDefaultsOnly)
@@ -187,6 +197,7 @@ protected:
 	void SetCurrentLocomotionState(ELocomotionState newLocomotionState);
 	void SetTargetLocomotionState(ELocomotionState newLocomotionState);
 	void SetCurrentLocomotionStateWithSettings(ELocomotionState newLocomotionState);
+	void LinkCombatAnimClassToCharacter(FName AnimClassNameToLink);
 
 	/*
 	 * Calculate the direction enum from the given angle using direction limits in Character Data
@@ -221,6 +232,8 @@ private:
 	FVector2D ForwardLimits;
 	FVector2D BackwardLimits;
 	float DeadZone;
+
+	FVector LastWorldLocation;
 
 	/*
 	 * Reference to the character data asset referenced in the game instance
