@@ -23,6 +23,15 @@ class FPEACE_API UFPCAnimInstance : public UAnimInstance
 	GENERATED_BODY()
 
 public:
+
+	//	--------------------- ANIMATION FAST-PATH VARIABLES ---------------------
+	
+	UPROPERTY(BlueprintReadOnly)
+	bool IsCharacterPivoting;
+
+	UPROPERTY(BlueprintReadOnly)
+	bool TriggerCharacterRePivot;
+	
 	/*
 	 * This is used to only perform operations on the base anim instance for optimization
 	 */
@@ -86,6 +95,11 @@ private:
 	 * Used to calculate angular velocity
 	 */
 	float previousYaw;
+
+	/*
+	 * Used to calculate pivoting states
+	 */
+	float PrevVelocityAccelerationDot;
 
 	void CalculateLeanAngle(float DeltaSeconds);
 

@@ -191,6 +191,11 @@ void AFPCCharacter::SetLocomotionDirection(ELocomotionDirection newLocomotionDir
 		SetCurrentLocomotionStateWithSettings(ELocomotionState::Walking);
 }
 
+void AFPCCharacter::SetAccelerationDirection(ELocomotionDirection newAccelerationDirection)
+{
+	CurrentAccelerationDirection = newAccelerationDirection;
+}
+
 // Called when the game starts or when spawned
 void AFPCCharacter::BeginPlay()
 {
@@ -311,11 +316,16 @@ void AFPCCharacter::MoveAround(const FInputActionValue& InputActionValue)
 	FVector Input3D = FVector(Input.Y, Input.X, 0);
 	AddMovementInput(Input3D);
 
-	//Calculate the direction angle
+	//Calculate the direction angles
 	InputDirectionAngle = UKismetAnimationLibrary::CalculateDirection(Input3D, GetActorRotation());
+	VelocityDirectionAngle = UKismetAnimationLibrary::CalculateDirection(CharacterVelocity2D, GetActorRotation());
+
+	// Calculate Play rate
+	CurrentAnimPlayRate = FMath::Clamp(CharacterAbsoluteSpeed2D / CurrentMaxLocomotionSpeed, 0.f, 1.f);
 
 	DynamicLocomotionStateUpdate(); // TODO: This needs to be looked at. Is it even needed?
-	SetLocomotionDirection(CalculateLocomotionDirection(InputDirectionAngle));
+	SetAccelerationDirection(CalculateLocomotionDirection(InputDirectionAngle));
+	SetLocomotionDirection(CalculateLocomotionDirection(VelocityDirectionAngle));
 }
 
 void AFPCCharacter::ToggleRunSprint()

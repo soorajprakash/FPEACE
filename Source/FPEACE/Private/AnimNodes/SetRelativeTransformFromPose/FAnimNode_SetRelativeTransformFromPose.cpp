@@ -47,6 +47,13 @@ void FAnimNode_SetRelativeTransformFromPose::InitializeBoneReferences(const FBon
 	}
 }
 
+void FAnimNode_SetRelativeTransformFromPose::UpdateInternal(const FAnimationUpdateContext& Context)
+{
+	FAnimNode_SkeletalControlBase::UpdateInternal(Context);
+
+	ReferencePose.Update(Context);
+}
+
 void FAnimNode_SetRelativeTransformFromPose::EvaluateSkeletalControl_AnyThread(
 	FComponentSpacePoseContext& Output,
 	TArray<FBoneTransform>& OutBoneTransforms)
@@ -54,13 +61,14 @@ void FAnimNode_SetRelativeTransformFromPose::EvaluateSkeletalControl_AnyThread(
 	const FBoneContainer& BoneContainer = Output.Pose.GetPose().GetBoneContainer();
 
 	// Early out if there are no bone pairs
-	if (BonePairs.Num() == 0)
+	if (BonePairs.Num() == 0 || Output.AnimInstanceProxy == nullptr)
 	{
 		return;
 	}
 
 	// Evaluate the reference pose in component space
 	FComponentSpacePoseContext RefPoseContext(Output.AnimInstanceProxy);
+	// Update the reference pose to ensure the sequence player progresses
 	ReferencePose.EvaluateComponentSpace(RefPoseContext);
 
 	// We'll process each bone pair

@@ -12,7 +12,7 @@ struct FBoneContainer;
 
 // A struct to hold one target-relative bone pair
 USTRUCT(BlueprintInternalUseOnly)
-struct FPEACE_API FBonePair
+struct FBonePair
 {
 	GENERATED_BODY()
 
@@ -25,7 +25,7 @@ public:
 };
 
 USTRUCT(BlueprintInternalUseOnly)
-struct FPEACE_API FAnimNode_SetRelativeTransformFromPose final : public FAnimNode_SkeletalControlBase
+struct FAnimNode_SetRelativeTransformFromPose final : public FAnimNode_SkeletalControlBase
 {
 	GENERATED_BODY()
 
@@ -51,5 +51,6 @@ protected:
 	virtual void EvaluateSkeletalControl_AnyThread(FComponentSpacePoseContext& Output, TArray<FBoneTransform>& OutBoneTransforms) override;
 	virtual bool IsValidToEvaluate(const USkeleton* Skeleton, const FBoneContainer& RequiredBones) override;
 	virtual void InitializeBoneReferences(const FBoneContainer& RequiredBones) override;
+	virtual void UpdateInternal(const FAnimationUpdateContext& Context) override;
 	// End of FAnimNode_SkeletalControlBase interface
 };

@@ -78,6 +78,18 @@ public:
 	 */
 	UFPCCharacterData* GetCharacterData();
 
+	//	--------------------- GETTERS AND SETTERS ---------------------
+
+	FVector GetCharacterAcceleration2D() const
+	{
+		return CharacterAcceleration2D;
+	}
+
+	FVector GetCharacterVelocity2D() const
+	{
+		return CharacterVelocity2D;
+	}
+
 protected:
 	//	--------------------- ANIMATION FAST-PATH VARIABLES ---------------------
 
@@ -93,11 +105,15 @@ protected:
 	UPROPERTY(BlueprintReadOnly)
 	bool HasCharacterReachedCurrentMaxSpeed;
 
+	UPROPERTY(BlueprintReadOnly)
+	float CurrentAnimPlayRate;
+
 	//	--------------------- MOVEMENT DATA ---------------------
 
 	UPROPERTY(BlueprintReadOnly)
 	FVector CharacterAcceleration2D;
 
+protected:
 	UPROPERTY(BlueprintReadOnly)
 	FVector CharacterVelocity2D;
 
@@ -109,6 +125,9 @@ protected:
 
 	UPROPERTY(BlueprintReadOnly)
 	float InputDirectionAngle;
+
+	UPROPERTY(BlueprintReadOnly)
+	float VelocityDirectionAngle;
 
 	UPROPERTY(BlueprintReadOnly)
 	float CurrentMaxLocomotionSpeed;
@@ -135,6 +154,12 @@ protected:
 	 */
 	UPROPERTY(BlueprintReadOnly)
 	ELocomotionDirection CurrentLocomotionDirection;
+
+	/*
+	 * The current direction of the owning character's acceleration
+	 */
+	UPROPERTY(BlueprintReadOnly)
+	ELocomotionDirection CurrentAccelerationDirection;
 
 	//	--------------------- COMPONENTS ---------------------
 
@@ -205,6 +230,7 @@ protected:
 	ELocomotionDirection CalculateLocomotionDirection(const float LocomotionDirectionAngle) const;
 
 	void SetLocomotionDirection(ELocomotionDirection newLocomotionDirection);
+	void SetAccelerationDirection(ELocomotionDirection newAccelerationDirection);
 
 	//	--------------------- OVERRIDES ---------------------
 
