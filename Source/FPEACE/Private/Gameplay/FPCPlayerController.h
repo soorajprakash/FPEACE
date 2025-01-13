@@ -24,27 +24,26 @@ class FPEACE_API AFPCPlayerController : public APlayerController
 	GENERATED_BODY()
 
 public:
-	
 	FOnCameraModeChanged OnCameraModeChanged;
 
 	void ToggleCameraMode();
-	
-	ECameraMode GetCameraMode() const { return currentCameraMode; }
-	
+
+	ECameraMode GetCameraMode() const { return CurrentCameraMode; }
+
 protected:
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category="FPC")
-	ECameraMode currentCameraMode;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	ECameraMode CurrentCameraMode;
 
 	/**
 	 * Reference to the Input mapping context object
 	 */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="FPC/Inputs")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="FPC")
 	TSoftObjectPtr<UInputMappingContext> FPCCharacterInputMapping;
 
 	/*
 	 * Reference to the Camera Switching Input Action object
 	 */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="FPC/Inputs")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="FPC")
 	TSoftObjectPtr<UInputAction> CameraSwitchAction;
 
 	UFUNCTION()
@@ -54,7 +53,6 @@ protected:
 	virtual void OnPossess(APawn* InPawn) override;
 
 private:
-	
 	virtual void BeginPlay() override;
 
 	virtual void SetupInputComponent() override;

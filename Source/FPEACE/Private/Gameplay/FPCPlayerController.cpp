@@ -2,11 +2,11 @@
 // Unauthorized distribution of this file, or any part of it, is prohibited.
 
 
-#include "EngineExtensions/FPCPlayerController.h"
+#include "FPCPlayerController.h"
 #include "CommonEnums.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
-#include "FPCGameInstance.h"
+#include "EngineExtensions/FPCGameInstance.h"
 #include "InputMappingContext.h"
 #include "DataStructures/FPCCharacterData.h"
 
@@ -21,14 +21,15 @@ void AFPCPlayerController::BeginPlay()
 			EILPS->ClearAllMappings();
 			EILPS->AddMappingContext(FPCCharacterInputMapping.LoadSynchronous(), 0);
 		}
+
+	//Set the initial Camera mode for local player
+	SetCharacterCameraMode(UFPCGameInstance::GetInstance(this)->CharacterData->StartingCameraMode);
 }
 
 void AFPCPlayerController::OnPossess(APawn* InPawn)
 {
 	Super::OnPossess(InPawn);
-
-	//Set the initial Camera mode for local player
-	SetCharacterCameraMode(UFPCGameInstance::GetInstance(this)->CharacterData->StartingCameraMode);
+	
 }
 
 void AFPCPlayerController::SetupInputComponent()
@@ -43,12 +44,12 @@ void AFPCPlayerController::SetupInputComponent()
 
 void AFPCPlayerController::SetCharacterCameraMode(ECameraMode newCameraMode)
 {
-	currentCameraMode = newCameraMode;
+	CurrentCameraMode = newCameraMode;
 	OnCameraModeChanged.Broadcast(newCameraMode);
 }
 
 void AFPCPlayerController::ToggleCameraMode()
 {
-	ECameraMode newMode = currentCameraMode == ECameraMode::FPS ? ECameraMode::TPS : ECameraMode::FPS;
+	ECameraMode newMode = CurrentCameraMode == ECameraMode::FPS ? ECameraMode::TPS : ECameraMode::FPS;
 	SetCharacterCameraMode(newMode);
 }

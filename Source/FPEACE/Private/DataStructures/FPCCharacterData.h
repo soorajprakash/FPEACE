@@ -8,6 +8,8 @@
 #include "Engine/DataAsset.h"
 #include "FPCCharacterData.generated.h"
 
+class UFPCAnimInstance;
+class AFPCWeapon;
 enum class ELocomotionState : uint8;
 enum class ECameraMode : uint8;
 
@@ -25,6 +27,9 @@ public:
 
 	UPROPERTY(EditDefaultsOnly)
 	TMap<ECameraMode, FCharacterCameraModeSettings> CameraModeSettings;
+
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<AFPCWeapon> DefaultWeaponBP;
 
 	UPROPERTY(EditDefaultsOnly, meta=(ClampMin=45, ClampMax=90))
 	float ControllerRotationPitchClamp = 85.f;

@@ -9,6 +9,8 @@
 #include "GameFramework/Character.h"
 #include "FPCCharacter.generated.h"
 
+class AFPCWeapon;
+class UFPCChildActorComponent;
 class UEnhancedInputComponent;
 class UFPCCharacterData;
 enum class ELocomotionState : uint8;
@@ -46,6 +48,8 @@ public:
 	UFUNCTION()
 	void SetCameraMode(ECameraMode NewCameraMode);
 
+	void RefreshWeaponVisibility() const;
+
 	/*
 	 * Changes the settings for the camera and the spring arm for the given mode using the character data
 	 */
@@ -60,7 +64,7 @@ public:
 	 * Reference to the anim instance running on the base skeletal mesh component
 	 */
 	UPROPERTY(BlueprintReadOnly)
-	TObjectPtr<UFPCAnimInstance> BaseMeshAnimInstance;
+	TObjectPtr<UFPCAnimInstance> TPSMeshAnimInstance;
 
 	/*
 	 * Reference to the anim instance running on the FPS skeletal mesh component
@@ -71,7 +75,7 @@ public:
 	/*
 	 * Public getter for current movement direction
 	 */
-	ELocomotionDirection GetCurrentLocomotionDirection() const { return CurrentLocomotionDirection; }
+	ELocomotionDirection GetCurrentLocomotionDirection() const { return CurrentVelocityDirection; }
 
 	/*
 	 * Get reference to the character data asset
@@ -97,6 +101,9 @@ protected:
 	bool IsCharacterMoving;
 
 	UPROPERTY(BlueprintReadOnly)
+	bool IsInTPSCameraMode;
+
+	UPROPERTY(BlueprintReadOnly)
 	bool IsCharacterAccelerating;
 
 	UPROPERTY(BlueprintReadOnly)
@@ -108,12 +115,20 @@ protected:
 	UPROPERTY(BlueprintReadOnly)
 	float CurrentAnimPlayRate;
 
+	UPROPERTY(BlueprintReadOnly)
+	bool IsCharacterPivoting;
+
+	UPROPERTY(BlueprintReadOnly)
+	bool IsCharacterInPivotStoppingState;
+
+	UPROPERTY(BlueprintReadOnly)
+	bool TriggerCharacterRePivot;
+
 	//	--------------------- MOVEMENT DATA ---------------------
 
 	UPROPERTY(BlueprintReadOnly)
 	FVector CharacterAcceleration2D;
 
-protected:
 	UPROPERTY(BlueprintReadOnly)
 	FVector CharacterVelocity2D;
 
@@ -124,7 +139,7 @@ protected:
 	float CharacterAbsoluteSpeed2D;
 
 	UPROPERTY(BlueprintReadOnly)
-	float InputDirectionAngle;
+	float AccelerationDirectionAngle;
 
 	UPROPERTY(BlueprintReadOnly)
 	float VelocityDirectionAngle;
@@ -144,16 +159,36 @@ protected:
 	UPROPERTY(BlueprintReadOnly)
 	ELocomotionState currentLocomotionState;
 
+	UPROPERTY(BlueprintReadOnly)
 	ELocomotionState TargetLocomotionState;
 
-	UPROPERTY(EditDefaultsOnly)
+	//	--------------------- MOVE THESE TO PRIVATE ONCE INCORPORATED ---------------------
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	bool bIsCharacterArmed;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	bool bIsCharacterCrouched;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	bool bIsCharacterInProneState;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	bool bIsCharacterInADSState;
+
+	//	-----------------------------------------------------------------------------------
+
+	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<AFPCWeapon> CurrentFPSWeaponRef;
+
+	UPROPERTY(VisibleAnywhere)
+	TObjectPtr<AFPCWeapon> CurrentTPSWeaponRef;
+	
 	/*
 	 * The current locomotion direction of the owning character
 	 */
 	UPROPERTY(BlueprintReadOnly)
-	ELocomotionDirection CurrentLocomotionDirection;
+	ELocomotionDirection CurrentVelocityDirection;
 
 	/*
 	 * The current direction of the owning character's acceleration
@@ -162,9 +197,6 @@ protected:
 	ELocomotionDirection CurrentAccelerationDirection;
 
 	//	--------------------- COMPONENTS ---------------------
-
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="FPC/Components")
-	TObjectPtr<UFPCSkeletalMeshComponent> BaseMeshComp;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="FPC/Components")
 	TObjectPtr<UFPCSkeletalMeshComponent> TPSBodyMeshComp;
@@ -204,12 +236,6 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="FPC/Inputs")
 	TSoftObjectPtr<UInputAction> RunAction;
 
-	/*
-	 * Reference to the Sprint Input Action object
-	 */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="FPC/Inputs")
-	TSoftObjectPtr<UInputAction> SprintAction;
-
 	//	--------------------- OTHER REFS ---------------------
 	/*
 	 * Reference to the FPC Player Controller instance
@@ -219,18 +245,21 @@ protected:
 
 	//	--------------------- PROTECTED FUNCTIONS ---------------------
 
+	void HandleLocomotionStateChange();
 	void SetCurrentLocomotionState(ELocomotionState newLocomotionState);
-	void SetTargetLocomotionState(ELocomotionState newLocomotionState);
 	void SetCurrentLocomotionStateWithSettings(ELocomotionState newLocomotionState);
-	void LinkCombatAnimClassToCharacter(FName AnimClassNameToLink);
+	void LinkCombatAnimClassToCharacter(FName AnimClassNameToLink) const;
+
+	UFUNCTION(BlueprintCallable)
+	void PickUpAndEquipWeapon(const TSubclassOf<AFPCWeapon>& WeaponBP);
 
 	/*
 	 * Calculate the direction enum from the given angle using direction limits in Character Data
 	 */
-	ELocomotionDirection CalculateLocomotionDirection(const float LocomotionDirectionAngle) const;
+	ELocomotionDirection CalculateLocomotionDirection(const float LocomotionDirectionAngle, const ELocomotionDirection CurrentDirection) const;
 
-	void SetLocomotionDirection(ELocomotionDirection newLocomotionDirection);
-	void SetAccelerationDirection(ELocomotionDirection newAccelerationDirection);
+	void SetCurrentVelocityDirection(ELocomotionDirection newVelocityDirection);
+	void SetCurrentAccelerationDirection(ELocomotionDirection newAccelerationDirection);
 
 	//	--------------------- OVERRIDES ---------------------
 
@@ -258,6 +287,12 @@ private:
 	FVector2D ForwardLimits;
 	FVector2D BackwardLimits;
 	float DeadZone;
+
+	/*
+	 * Used to calculate pivoting states
+	 */
+	float PrevVelocityAccelerationDot;
+	FVector PrevNormalizedAcceleration;
 
 	FVector LastWorldLocation;
 
@@ -288,11 +323,6 @@ private:
 	void ToggleRunSprint();
 
 	/*
-	 * Run/Sprint toggle input action binding
-	 */
-	void ToggleWalking();
-
-	/*
 	 * Set the movement component settings for a given locomotion state
 	 */
 	void SetLocomotionStateSettings(ELocomotionState newLocomotionState);
@@ -302,9 +332,4 @@ private:
 	 * This allows the animation blueprint to be on FastPath
 	 */
 	void UpdateAnimationTransitionRuleValues();
-
-	/*
-	 * Tries to dynamically change states based on character speed and match it to the target state
-	 */
-	void DynamicLocomotionStateUpdate();
 };

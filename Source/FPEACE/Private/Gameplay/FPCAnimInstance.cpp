@@ -4,9 +4,10 @@
 
 #include "FPCAnimInstance.h"
 
+#include "AnimationEditorUtils.h"
 #include "CommonEnums.h"
 #include "FPCCharacter.h"
-#include "FPCSkeletalMeshComponent.h"
+#include "EngineExtensions/FPCSkeletalMeshComponent.h"
 #include "DataStructures/FCameraModeAnimSelectionStruct.h"
 #include "DataStructures/FPCCharacterData.h"
 
@@ -54,34 +55,6 @@ void UFPCAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 	{
 		//Update the Lean Angle
 		CalculateLeanAngle(DeltaSeconds);
-	}
-
-	// Check for character pivoting
-	if (OwningCharacter)
-	{
-		TriggerCharacterRePivot = false;
-
-		// Precompute normalized velocity and acceleration for clarity
-		const FVector NormalizedVelocity = OwningCharacter->GetCharacterVelocity2D().GetSafeNormal();
-		const FVector NormalizedAcceleration = OwningCharacter->GetCharacterAcceleration2D().GetSafeNormal();
-
-		// Calculate the dot product once
-		const float VelocityAccelerationDot = FVector::DotProduct(NormalizedVelocity, NormalizedAcceleration);
-
-		if (IsCharacterPivoting)
-		{
-			// Check if the character has stopped pivoting or needs to trigger a re-pivot
-			if (FMath::IsNearlyEqual(VelocityAccelerationDot, 1.0f, 0.01f))
-				IsCharacterPivoting = false;
-			else if (FMath::Sign(PrevVelocityAccelerationDot) != FMath::Sign(VelocityAccelerationDot))
-				TriggerCharacterRePivot = true;
-		}
-		// Start pivoting if the dot product indicates a reversal
-		else if (VelocityAccelerationDot < 0 && !FMath::IsNearlyZero(VelocityAccelerationDot))
-			IsCharacterPivoting = true;
-
-		// Store the current dot product for future comparisons
-		PrevVelocityAccelerationDot = VelocityAccelerationDot;
 	}
 }
 

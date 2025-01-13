@@ -6,7 +6,7 @@
 /*
  * Supported Camera mode types for the game
  */
-UENUM()
+UENUM(BlueprintType)
 enum class ECameraMode: uint8
 {
 	TPS,
@@ -34,12 +34,9 @@ enum class ELocomotionDirection : uint8
 };
 
 UENUM(BlueprintType)
-enum class ECharacterSkeletonType : uint8
+enum class EEvaluatorAnimType : uint8
 {
-	UEFN,
-	UE5,
-	UE4,
-	LPAMG,
-	LPAMG_UE5,
-	MetaHuman
+	Start,
+	Stop,
+	Pivot
 };
