@@ -23,7 +23,6 @@ class FPEACE_API UFPCAnimInstance : public UAnimInstance
 	GENERATED_BODY()
 
 public:
-	
 	/*
 	 * This is used to only perform operations on the base anim instance for optimization
 	 */
@@ -78,9 +77,6 @@ protected:
 	virtual void NativeBeginPlay() override;
 
 	virtual void NativeUpdateAnimation(float DeltaSeconds) override;
-
-	UFUNCTION(BlueprintImplementableEvent, Category = "FPEACE")
-	void OnCharacterLocomotionStateChanged(ELocomotionState CurrentState);
 
 private:
 	/*
