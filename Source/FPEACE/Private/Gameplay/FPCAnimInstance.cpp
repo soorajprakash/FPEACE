@@ -41,9 +41,9 @@ void UFPCAnimInstance::NativeBeginPlay()
 	InitializeReferences();
 }
 
-void UFPCAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
+void UFPCAnimInstance::NativeThreadSafeUpdateAnimation(float DeltaSeconds)
 {
-	Super::NativeUpdateAnimation(DeltaSeconds);
+	Super::NativeThreadSafeUpdateAnimation(DeltaSeconds);
 
 	if (!isBaseAnimInstance)
 		return;

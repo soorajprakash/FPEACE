@@ -128,6 +128,12 @@ protected:
 	bool VelocityDirectionChanged;
 
 	UPROPERTY(BlueprintReadOnly)
+	bool MovementStateChanged;
+
+	UPROPERTY(BlueprintReadOnly)
+	bool AccelerationStateChanged;
+
+	UPROPERTY(BlueprintReadOnly)
 	bool AccelerationDirectionChanged;
 
 	UPROPERTY(BlueprintReadOnly)
@@ -176,6 +182,24 @@ protected:
 
 	UPROPERTY(BlueprintReadOnly)
 	ELocomotionState TargetLocomotionState;
+
+	UPROPERTY(BlueprintReadOnly)
+	ELocomotionState PrevLocomotionState;
+	
+	UPROPERTY(BlueprintReadOnly)
+	ELocomotionState PrevTargetLocomotionState;
+	
+	UPROPERTY(BlueprintReadOnly)
+	ELocomotionDirection PrevVelocityDirection;
+	
+	UPROPERTY(BlueprintReadOnly)
+	ELocomotionDirection PrevAccelerationDirection;
+
+	UPROPERTY(BlueprintReadOnly)
+	bool PrevMovementState;
+
+	UPROPERTY(BlueprintReadOnly)
+	bool PrevAccelerationState;
 
 	//	--------------------- MOVE THESE TO PRIVATE ONCE INCORPORATED ---------------------
 
@@ -278,6 +302,8 @@ protected:
 
 	//	--------------------- OVERRIDES ---------------------
 
+	virtual void OnConstruction(const FTransform& Transform) override;
+	
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
@@ -306,12 +332,7 @@ private:
 	/*
 	 * Prev frame values for comparison
 	 */
-	float PrevVelocityAccelerationDot;
-	FVector PrevNormalizedAcceleration;
-	ELocomotionState PrevLocomotionState;
-	ELocomotionState PrevTargetLocomotionState;
-	ELocomotionDirection PrevVelocityDirection;
-	ELocomotionDirection PrevAccelerationDirection;
+	FVector PivotStartAcceleration;
 
 	FVector LastWorldLocation;
 
@@ -350,5 +371,5 @@ private:
 	 * Used to update derived variables for use in animation transition rules
 	 * This allows the animation blueprint to be on FastPath
 	 */
-	void UpdateAnimationTransitionRuleValues();
+	void UpdateAnimationTransitionValues();
 };
