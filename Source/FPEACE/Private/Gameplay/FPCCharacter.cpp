@@ -60,16 +60,24 @@ AFPCCharacter::AFPCCharacter(const FObjectInitializer& ObjectInitializer): Super
 	}
 }
 
+void AFPCCharacter::OnConstruction(const FTransform& Transform)
+{
+	Super::OnConstruction(Transform);
+
+	// Get references to the Extensions 
+	FPCMovementComp = Cast<UFPCCharacterMovementComponent>(GetMovementComponent());
+	TPSMeshAnimInstance = CastChecked<UFPCAnimInstance>(TPSBodyMeshComp->GetAnimInstance());
+	TPSMeshAnimInstance->isBaseAnimInstance = true;
+	FPSMeshAnimInstance = CastChecked<UFPCAnimInstance>(FPSBodyMeshComp->GetAnimInstance());
+
+	// Set initial Character values
+	TargetLocomotionState = ELocomotionState::Running;
+}
+
 // Called when the game starts or when spawned
 void AFPCCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-
-	// Get references to the Extensions 
-	FPCMovementComp = Cast<UFPCCharacterMovementComponent>(GetMovementComponent());
-
-	// Set initial Character values
-	TargetLocomotionState = ELocomotionState::Running;
 
 	// Store required Character data
 	ForwardLimits = GetCharacterData()->CharacterDirectionLimits.ForwardLimits;
@@ -91,26 +99,19 @@ void AFPCCharacter::Tick(float DeltaSeconds)
 	CharacterAbsoluteSpeed = UKismetMathLibrary::VSizeXY(CharacterVelocity);
 	CharacterAbsoluteSpeed2D = UKismetMathLibrary::VSizeXY(CharacterVelocity2D);
 
-	FVector CurrentWorldLocation = GetActorLocation();
-	CurrentDeltaDistance = FVector::Distance(LastWorldLocation, CurrentWorldLocation);
-	LastWorldLocation = CurrentWorldLocation;
-
-	// Update transition rule values
-	UpdateAnimationTransitionRuleValues();
-
 	// Update the locomotion state of the character to reach the target state
 	HandleLocomotionStateChange();
+
+	// Update transition rule values
+	UpdateAnimationTransitionValues();
 }
 
 void AFPCCharacter::PossessedBy(AController* NewController)
 {
 	Super::PossessedBy(NewController);
 
-	TPSMeshAnimInstance = CastChecked<UFPCAnimInstance>(TPSBodyMeshComp->GetAnimInstance());
-	TPSMeshAnimInstance->isBaseAnimInstance = true;
-	FPSMeshAnimInstance = CastChecked<UFPCAnimInstance>(FPSBodyMeshComp->GetAnimInstance());
 	FPCPlayerControllerInstance = CastChecked<AFPCPlayerController>(NewController);
-
+	
 	// Component Settings
 	if (FPCPlayerControllerInstance)
 	{
@@ -198,22 +199,22 @@ void AFPCCharacter::SetCameraSettings(ECameraMode CurrentCameraMode)
 void AFPCCharacter::HandleLocomotionStateChange()
 {
 	// Don't change the locomotion state if the character is pivoting
-	if (!IsCharacterPivoting)
+	// if (!IsCharacterPivoting)
 	{
 		// Set the character to default locomotion target state if it's not moving
 		// TODO: Allow the default state to be set somewhere globally
-		if (!IsCharacterMoving && TargetLocomotionState != ELocomotionState::Running)
+		if (!IsCharacterMoving && !IsCharacterAccelerating &&TargetLocomotionState != ELocomotionState::Running)
 			TargetLocomotionState = ELocomotionState::Running;
 
 		//Check if the character is in a state where it can only walk.
 		//For Example, when in Crouch state or ADS state or is armed but moving sideways or backwards etc
-		bool canOnlyWalk = bIsCharacterCrouched || bIsCharacterInProneState || bIsCharacterInADSState || (bIsCharacterArmed && CurrentVelocityDirection != ELocomotionDirection::Forward);
+		bool canOnlyWalk = bIsCharacterCrouched || bIsCharacterInProneState || bIsCharacterInADSState || (bIsCharacterArmed && CurrentAccelerationDirection != ELocomotionDirection::Forward);
 
 		if (canOnlyWalk)
 			SetCurrentLocomotionStateWithSettings(ELocomotionState::Walking);
 		else if (currentLocomotionState != TargetLocomotionState)
 		{
-			bool canOnlyRun = bIsCharacterArmed && CurrentVelocityDirection != ELocomotionDirection::Forward && currentLocomotionState != ELocomotionState::Running;
+			bool canOnlyRun = !bIsCharacterArmed && CurrentVelocityDirection != ELocomotionDirection::Forward;
 			SetCurrentLocomotionStateWithSettings(canOnlyRun ? ELocomotionState::Running : TargetLocomotionState);
 		}
 	}
@@ -221,11 +222,7 @@ void AFPCCharacter::HandleLocomotionStateChange()
 
 void AFPCCharacter::SetCurrentLocomotionState(ELocomotionState newLocomotionState)
 {
-	if (currentLocomotionState != newLocomotionState)
-	{
-		currentLocomotionState = newLocomotionState;
-		OnLocomotionStateChanged.Broadcast(currentLocomotionState);
-	}
+	currentLocomotionState = newLocomotionState;
 }
 
 void AFPCCharacter::SetCurrentLocomotionStateWithSettings(ELocomotionState newLocomotionState)
@@ -241,28 +238,8 @@ void AFPCCharacter::LinkCombatAnimClassToCharacter(FName AnimClassNameToLink) co
 {
 	if (TPSMeshAnimInstance->CurrentLinkedAnimInstance)
 	{
-		// TPSBodyMeshComp->LinkAnimClassLayers(nullptr);
-		// TPSBodyMeshComp->SetAnimInstanceClass(nullptr);
-		// TPSBodyMeshComp->SetAnimInstanceClass(TPSMeshAnimInstance->GetClass());
-		// TPSBodyMeshComp->AnimScriptInstance = TPSMeshAnimInstance;
-		// if (const USkeletalMeshComponent* SkeletalMeshComp = TPSBodyMeshComp)
-		// {
-		// 	const TArray<UAnimInstance*>& LinkedAnimInstances = SkeletalMeshComp->GetLinkedAnimInstances();
-		// 	TArray<UFPCAnimInstance*> LinkedFPCAnimInstances;
-		// 	for (int i = 0; i < LinkedAnimInstances.Num(); i++)
-		// 		LinkedFPCAnimInstances.Add(Cast<UFPCAnimInstance>(LinkedAnimInstances[i]));
-		//
-		// 	for (UFPCAnimInstance* LinkedFPCAnimInstance : LinkedFPCAnimInstances)
-		// 	{
-		// 		LinkedFPCAnimInstance->UninitializeAnimation();
-		// 		LinkedFPCAnimInstance->MarkAsGarbage();
-		// 		UE_LOG(LogTemp, Warning, TEXT("Unlinking Anim Class %s : %s"), *LinkedFPCAnimInstance->GetClass()->GetName(),
-		// 		       LinkedFPCAnimInstance->bCreatedByLinkedAnimGraph ? TEXT("True") : TEXT("False"));
-		// 		TPSBodyMeshComp->UnlinkAnimClassLayers(LinkedFPCAnimInstance->GetClass());
-		// 	}
-		// }
-
 		TPSBodyMeshComp->UnlinkAnimClassLayers(TPSMeshAnimInstance->CurrentLinkedAnimInstance->GetClass());
+		TPSBodyMeshComp->ResetLinkedAnimInstances();
 		TPSMeshAnimInstance->CurrentLinkedAnimInstance = nullptr;
 	}
 
@@ -273,8 +250,7 @@ void AFPCCharacter::LinkCombatAnimClassToCharacter(FName AnimClassNameToLink) co
 	if (FPSMeshAnimInstance->CurrentLinkedAnimInstance)
 	{
 		FPSBodyMeshComp->UnlinkAnimClassLayers(FPSMeshAnimInstance->CurrentLinkedAnimInstance->GetClass());
-		FPSMeshAnimInstance->CurrentLinkedAnimInstance = nullptr;
-
+		FPSBodyMeshComp->ResetLinkedAnimInstances();
 		FPSMeshAnimInstance->CurrentLinkedAnimInstance = nullptr;
 	}
 
@@ -361,7 +337,7 @@ void AFPCCharacter::SetCurrentVelocityDirection(ELocomotionDirection newVelocity
 
 void AFPCCharacter::SetCurrentAccelerationDirection(ELocomotionDirection newAccelerationDirection)
 {
-	if (CurrentVelocityDirection == newAccelerationDirection)
+	if (CurrentAccelerationDirection == newAccelerationDirection)
 		return;
 
 	CurrentAccelerationDirection = newAccelerationDirection;
@@ -402,7 +378,7 @@ void AFPCCharacter::LookAround(const FInputActionValue& InputActionValue)
 	AddControllerYawInput(input.X);
 	AddControllerPitchInput(input.Y);
 
-	CharacterLookSpineVertical.Roll = -Controller->GetControlRotation().Pitch;
+	CharacterLookSpineVertical.Roll = -Controller->GetControlRotation().Pitch / 3; //TODO : Remove the magic number and adjust it based on final bone rotation setup in the blueprint
 
 	if (FPCPlayerControllerInstance->GetCameraMode() == ECameraMode::TPS)
 		FPCSpringArmComp->SetArmLengthFromPitch(GetCharacterData()->CameraModeSettings[ECameraMode::TPS].PitchToArmLengthCurve, FPCPlayerControllerInstance->GetControlRotation());
@@ -433,19 +409,19 @@ void AFPCCharacter::ToggleRunSprint()
 
 void AFPCCharacter::SetLocomotionStateSettings(ELocomotionState newLocomotionState)
 {
-	CurrentMaxLocomotionSpeed = GetCharacterData()->LocomotionStateSettings[newLocomotionState].MaxWalkSpeed;
-	CurrentLocomotionStateFloat = UKismetMathLibrary::Conv_ByteToDouble(static_cast<uint8>(newLocomotionState));
-
-	const FLocomotionStateSetting& StateSettings = FPCCharacterData->LocomotionStateSettings[newLocomotionState];
+	const FLocomotionStateSetting& StateSettings = GetCharacterData()->LocomotionStateSettings[newLocomotionState];
 	FPCMovementComp->bUseSeparateBrakingFriction = StateSettings.bUseSeparateBrakingFriction;
 	FPCMovementComp->MaxWalkSpeed = StateSettings.MaxWalkSpeed;
 	FPCMovementComp->MaxAcceleration = StateSettings.MaxAcceleration;
 	FPCMovementComp->BrakingDecelerationWalking = StateSettings.BrakingDeceleration;
 	FPCMovementComp->BrakingFrictionFactor = StateSettings.BrakingFrictionFactor;
 	FPCMovementComp->BrakingFriction = StateSettings.BrakingFriction;
+
+	CurrentMaxLocomotionSpeed = FPCMovementComp->MaxWalkSpeed;
+	CurrentLocomotionStateFloat = UKismetMathLibrary::Conv_ByteToDouble(static_cast<uint8>(newLocomotionState));
 }
 
-void AFPCCharacter::UpdateAnimationTransitionRuleValues()
+void AFPCCharacter::UpdateAnimationTransitionValues()
 {
 	// Update if the character is moving
 	if (IsCharacterPivoting)
@@ -458,15 +434,48 @@ void AFPCCharacter::UpdateAnimationTransitionRuleValues()
 			IsCharacterMoving = true;
 	}
 
+	if (MovementStateChanged)
+		PrevMovementState = IsCharacterMoving;
+	MovementStateChanged = IsCharacterMoving != PrevMovementState;
+
 	// Update if the character is accelerating
 	IsCharacterAccelerating = !CharacterAcceleration2D.IsNearlyZero();
 
+	if (AccelerationStateChanged)
+		PrevAccelerationState = IsCharacterAccelerating;
+	AccelerationStateChanged = IsCharacterAccelerating != PrevAccelerationState;
+
 	// Update if character has reached close to max speed
-	HasCharacterReachedCurrentMaxSpeed = CharacterAbsoluteSpeed2D > CurrentMaxLocomotionSpeed * 0.8f;
+	HasCharacterReachedCurrentMaxSpeed = FMath::IsNearlyEqual(CharacterAbsoluteSpeed2D, CurrentMaxLocomotionSpeed, 10);
+
+	// Calculate the current delta distance covered by the character
+	FVector CurrentWorldLocation = GetActorLocation();
+	CurrentDeltaDistance = FVector::Distance(LastWorldLocation, CurrentWorldLocation);
+	LastWorldLocation = CurrentWorldLocation;
+
+	// Check if Character's Velocity Direction Changed
+	if (VelocityDirectionChanged)
+		PrevVelocityDirection = CurrentVelocityDirection;
+	VelocityDirectionChanged = CurrentVelocityDirection != PrevVelocityDirection;
+
+	// Check if Character's Acceleration Direction Changed
+	if (AccelerationDirectionChanged)
+		PrevAccelerationDirection = CurrentAccelerationDirection;
+	AccelerationDirectionChanged = CurrentAccelerationDirection != PrevAccelerationDirection;
+
+	// Check if Character's Current Locomotion State Changed
+	if (CurrentLocomotionStateChanged)
+		PrevLocomotionState = currentLocomotionState;
+	CurrentLocomotionStateChanged = currentLocomotionState != PrevLocomotionState;
+
+	// Check if Character's Target Locomotion State Changed
+	if (TargetLocomotionStateChanged)
+		PrevTargetLocomotionState = TargetLocomotionState;
+	TargetLocomotionStateChanged = TargetLocomotionState != PrevTargetLocomotionState;
 
 	//	--------------------- CHECK FOR PIVOTING ---------------------
 
-	// Check for character pivoting
+	// Check for character re-pivoting
 	TriggerCharacterRePivot = false;
 
 	// Precompute normalized velocity and acceleration for clarity
@@ -474,27 +483,31 @@ void AFPCCharacter::UpdateAnimationTransitionRuleValues()
 	const FVector NormalizedAcceleration = CharacterAcceleration2D.GetSafeNormal();
 
 	// Calculate the dot product once
-	const float VelocityAccelerationDot = FVector::DotProduct(NormalizedVelocity, NormalizedAcceleration);
-	const float AccelerationDeltaDot = FVector::DotProduct(PrevNormalizedAcceleration, NormalizedAcceleration);
+	CurrentVelocityAccelerationDot = FVector::DotProduct(NormalizedVelocity, NormalizedAcceleration);
 
 	if (IsCharacterPivoting)
 	{
 		// Check if the character is in the stopping part of the pivot or the starting part
-		IsCharacterInPivotStoppingState = VelocityAccelerationDot < 0;
+		IsCharacterInPivotStoppingState = CurrentVelocityAccelerationDot < 0;
 
+		// UE_LOG(LogTemp, Warning, TEXT("RePivotDot : %s"), *PivotStartAcceleration.ToString());
 		// Check if the character has stopped pivoting or needs to trigger a re-pivot
-		if (FMath::IsNearlyEqual(VelocityAccelerationDot, 1.0f, 0.01f))
+		if (FMath::IsNearlyEqual(CurrentVelocityAccelerationDot, 1.0f, 0.01f))
+		{
 			IsCharacterPivoting = false;
-		else if (AccelerationDeltaDot < 0)
-			TriggerCharacterRePivot = true;
+			IsCharacterInPivotStoppingState = false;
+		}
+		else if (TriggerCharacterRePivot)
+			PivotStartAcceleration = NormalizedAcceleration;
+
+		TriggerCharacterRePivot = FVector::DotProduct(PivotStartAcceleration, NormalizedAcceleration) < 0;
 	}
 	// Start pivoting if the dot product indicates a reversal
-	else if (AccelerationDeltaDot < 0 && !FMath::IsNearlyZero(AccelerationDeltaDot))
+	else if (CurrentVelocityAccelerationDot < 0)
+	{
 		IsCharacterPivoting = true;
-
-	// Store the current values for comparison in the next frame
-	PrevVelocityAccelerationDot = VelocityAccelerationDot;
-	PrevNormalizedAcceleration = NormalizedAcceleration;
+		PivotStartAcceleration = NormalizedAcceleration;
+	}
 }
 
 UFPCCharacterData* AFPCCharacter::GetCharacterData()

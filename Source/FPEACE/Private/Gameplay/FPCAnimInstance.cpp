@@ -39,14 +39,11 @@ void UFPCAnimInstance::NativeBeginPlay()
 	Super::NativeBeginPlay();
 
 	InitializeReferences();
-
-	// Subscribe to character events
-	OwningCharacter->OnLocomotionStateChanged.AddDynamic(this, &UFPCAnimInstance::OnCharacterLocomotionStateChanged);
 }
 
-void UFPCAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
+void UFPCAnimInstance::NativeThreadSafeUpdateAnimation(float DeltaSeconds)
 {
-	Super::NativeUpdateAnimation(DeltaSeconds);
+	Super::NativeThreadSafeUpdateAnimation(DeltaSeconds);
 
 	if (!isBaseAnimInstance)
 		return;

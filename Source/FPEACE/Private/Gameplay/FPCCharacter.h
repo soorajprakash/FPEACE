@@ -26,8 +26,6 @@ class UFPCCharacterMovementComponent;
 class UFPCCapsuleComponent;
 class UFPCSkeletalMeshComponent;
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FLocomotionStateChanged, ELocomotionState, State);
-
 UCLASS()
 class FPEACE_API AFPCCharacter : public ACharacter
 {
@@ -36,9 +34,6 @@ class FPEACE_API AFPCCharacter : public ACharacter
 public:
 	// Sets default values for this character's properties
 	AFPCCharacter(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
-
-	//	--------------------- DELEGATE DEFINITION ---------------------
-	FLocomotionStateChanged OnLocomotionStateChanged;
 
 	//	--------------------- PUBLIC FUNCTIONS ---------------------
 
@@ -76,6 +71,11 @@ public:
 	 * Public getter for current movement direction
 	 */
 	ELocomotionDirection GetCurrentLocomotionDirection() const { return CurrentVelocityDirection; }
+
+	/*
+	 * Public getter for current locomotion state
+	 */
+	ELocomotionState GetCurrentLocomotionState() const { return currentLocomotionState; }
 
 	/*
 	 * Get reference to the character data asset
@@ -124,6 +124,24 @@ protected:
 	UPROPERTY(BlueprintReadOnly)
 	bool TriggerCharacterRePivot;
 
+	UPROPERTY(BlueprintReadOnly)
+	bool VelocityDirectionChanged;
+
+	UPROPERTY(BlueprintReadOnly)
+	bool MovementStateChanged;
+
+	UPROPERTY(BlueprintReadOnly)
+	bool AccelerationStateChanged;
+
+	UPROPERTY(BlueprintReadOnly)
+	bool AccelerationDirectionChanged;
+
+	UPROPERTY(BlueprintReadOnly)
+	bool CurrentLocomotionStateChanged;
+
+	UPROPERTY(BlueprintReadOnly)
+	bool TargetLocomotionStateChanged;
+
 	//	--------------------- MOVEMENT DATA ---------------------
 
 	UPROPERTY(BlueprintReadOnly)
@@ -150,6 +168,9 @@ protected:
 	UPROPERTY(BlueprintReadOnly)
 	float CurrentDeltaDistance;
 
+	UPROPERTY(BlueprintReadOnly)
+	float CurrentVelocityAccelerationDot;
+
 	/*
 	 * This value will be used in the animation blueprint to modify the spine bone(s) to allow the character to look up or down
 	 */
@@ -161,6 +182,24 @@ protected:
 
 	UPROPERTY(BlueprintReadOnly)
 	ELocomotionState TargetLocomotionState;
+
+	UPROPERTY(BlueprintReadOnly)
+	ELocomotionState PrevLocomotionState;
+	
+	UPROPERTY(BlueprintReadOnly)
+	ELocomotionState PrevTargetLocomotionState;
+	
+	UPROPERTY(BlueprintReadOnly)
+	ELocomotionDirection PrevVelocityDirection;
+	
+	UPROPERTY(BlueprintReadOnly)
+	ELocomotionDirection PrevAccelerationDirection;
+
+	UPROPERTY(BlueprintReadOnly)
+	bool PrevMovementState;
+
+	UPROPERTY(BlueprintReadOnly)
+	bool PrevAccelerationState;
 
 	//	--------------------- MOVE THESE TO PRIVATE ONCE INCORPORATED ---------------------
 
@@ -183,7 +222,7 @@ protected:
 
 	UPROPERTY(VisibleAnywhere)
 	TObjectPtr<AFPCWeapon> CurrentTPSWeaponRef;
-	
+
 	/*
 	 * The current locomotion direction of the owning character
 	 */
@@ -263,6 +302,8 @@ protected:
 
 	//	--------------------- OVERRIDES ---------------------
 
+	virtual void OnConstruction(const FTransform& Transform) override;
+	
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
@@ -289,10 +330,9 @@ private:
 	float DeadZone;
 
 	/*
-	 * Used to calculate pivoting states
+	 * Prev frame values for comparison
 	 */
-	float PrevVelocityAccelerationDot;
-	FVector PrevNormalizedAcceleration;
+	FVector PivotStartAcceleration;
 
 	FVector LastWorldLocation;
 
@@ -331,5 +371,5 @@ private:
 	 * Used to update derived variables for use in animation transition rules
 	 * This allows the animation blueprint to be on FastPath
 	 */
-	void UpdateAnimationTransitionRuleValues();
+	void UpdateAnimationTransitionValues();
 };
