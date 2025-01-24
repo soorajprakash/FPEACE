@@ -94,11 +94,22 @@ public:
 		return CharacterVelocity2D;
 	}
 
+	float GetYawAngularVelocity() const
+	{
+		return YawAngularVelocity;
+	}
+
 protected:
 	//	--------------------- ANIMATION FAST-PATH VARIABLES ---------------------
 
 	UPROPERTY(BlueprintReadOnly)
 	bool IsCharacterMoving;
+
+	UPROPERTY(BlueprintReadOnly)
+	bool IsCharacterTurningInPlace;
+
+	UPROPERTY(BlueprintReadOnly)
+	float TurnInPlaceStartingYaw;
 
 	UPROPERTY(BlueprintReadOnly)
 	bool IsInTPSCameraMode;
@@ -149,6 +160,12 @@ protected:
 
 	UPROPERTY(BlueprintReadOnly)
 	FVector CharacterVelocity2D;
+
+	UPROPERTY(BlueprintReadOnly)
+	float YawAngularVelocity;
+
+	UPROPERTY(BlueprintReadOnly)
+	float CharacterYawDelta;
 
 	UPROPERTY(BlueprintReadOnly)
 	float CharacterAbsoluteSpeed;
@@ -336,6 +353,8 @@ private:
 
 	FVector LastWorldLocation;
 
+	float PrevYaw;
+
 	/*
 	 * Reference to the character data asset referenced in the game instance
 	 */
@@ -371,5 +390,5 @@ private:
 	 * Used to update derived variables for use in animation transition rules
 	 * This allows the animation blueprint to be on FastPath
 	 */
-	void UpdateAnimationTransitionValues();
+	void UpdateValuesForAnimation();
 };

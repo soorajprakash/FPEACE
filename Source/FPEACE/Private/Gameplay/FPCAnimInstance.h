@@ -79,12 +79,8 @@ protected:
 	virtual void NativeThreadSafeUpdateAnimation(float DeltaSeconds) override;
 
 private:
-	/*
-	 * Used to calculate angular velocity
-	 */
-	float previousYaw;
 
-	void CalculateLeanAngle(float DeltaSeconds);
+	void CalculateLeanAngle();
 
 	void InitializeReferences();
 };

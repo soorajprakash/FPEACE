@@ -4,7 +4,6 @@
 
 #include "FPCAnimInstance.h"
 
-#include "AnimationEditorUtils.h"
 #include "CommonEnums.h"
 #include "FPCCharacter.h"
 #include "EngineExtensions/FPCSkeletalMeshComponent.h"
@@ -51,23 +50,20 @@ void UFPCAnimInstance::NativeThreadSafeUpdateAnimation(float DeltaSeconds)
 	if (OwningCharacterMovementComponent)
 	{
 		//Update the Lean Angle
-		CalculateLeanAngle(DeltaSeconds);
+		CalculateLeanAngle();
 	}
 }
 
-void UFPCAnimInstance::CalculateLeanAngle(float DeltaSeconds)
+void UFPCAnimInstance::CalculateLeanAngle()
 {
-	float currentYaw = OwningCharacter->GetActorRotation().Yaw;
-
 	// Get the yaw angular velocity and multiply by strength 
-	LeanAngle = ((currentYaw - previousYaw) / DeltaSeconds) * OwningCharacterData->TurningLeanStrength;
+	LeanAngle = OwningCharacter->GetYawAngularVelocity() * OwningCharacterData->TurningLeanStrength;
 
 	// If the character is moving backwards, negate the lean angle
 	if (OwningCharacter->GetCurrentLocomotionDirection() == ELocomotionDirection::Backward)
 		LeanAngle *= -1;
 
 	LeanAngle = FMath::Clamp(LeanAngle, -30.0f, 30.0f);
-	previousYaw = currentYaw;
 }
 
 void UFPCAnimInstance::InitializeReferences()

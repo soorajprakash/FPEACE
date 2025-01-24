@@ -12,7 +12,6 @@
 #include "EngineExtensions/FPCSpringArmComponent.h"
 #include "EnhancedInputComponent.h"
 #include "FPCAnimInstance.h"
-#include "EngineExtensions/FPCChildActorComponent.h"
 #include "EngineExtensions/FPCGameInstance.h"
 #include "FPCPlayerController.h"
 #include "FPCWeapon.h"
@@ -99,11 +98,17 @@ void AFPCCharacter::Tick(float DeltaSeconds)
 	CharacterAbsoluteSpeed = UKismetMathLibrary::VSizeXY(CharacterVelocity);
 	CharacterAbsoluteSpeed2D = UKismetMathLibrary::VSizeXY(CharacterVelocity2D);
 
+	// Calculate Yaw Angular Velocity
+	float CurrentYaw = GetActorRotation().Yaw;
+	CharacterYawDelta = CurrentYaw - PrevYaw;
+	YawAngularVelocity = CharacterYawDelta / DeltaSeconds;
+	PrevYaw = CurrentYaw;
+
 	// Update the locomotion state of the character to reach the target state
 	HandleLocomotionStateChange();
 
 	// Update transition rule values
-	UpdateAnimationTransitionValues();
+	UpdateValuesForAnimation();
 }
 
 void AFPCCharacter::PossessedBy(AController* NewController)
@@ -111,7 +116,7 @@ void AFPCCharacter::PossessedBy(AController* NewController)
 	Super::PossessedBy(NewController);
 
 	FPCPlayerControllerInstance = CastChecked<AFPCPlayerController>(NewController);
-	
+
 	// Component Settings
 	if (FPCPlayerControllerInstance)
 	{
@@ -203,7 +208,7 @@ void AFPCCharacter::HandleLocomotionStateChange()
 	{
 		// Set the character to default locomotion target state if it's not moving
 		// TODO: Allow the default state to be set somewhere globally
-		if (!IsCharacterMoving && !IsCharacterAccelerating &&TargetLocomotionState != ELocomotionState::Running)
+		if (!IsCharacterMoving && !IsCharacterAccelerating && TargetLocomotionState != ELocomotionState::Running)
 			TargetLocomotionState = ELocomotionState::Running;
 
 		//Check if the character is in a state where it can only walk.
@@ -421,7 +426,7 @@ void AFPCCharacter::SetLocomotionStateSettings(ELocomotionState newLocomotionSta
 	CurrentLocomotionStateFloat = UKismetMathLibrary::Conv_ByteToDouble(static_cast<uint8>(newLocomotionState));
 }
 
-void AFPCCharacter::UpdateAnimationTransitionValues()
+void AFPCCharacter::UpdateValuesForAnimation()
 {
 	// Update if the character is moving
 	if (IsCharacterPivoting)
@@ -433,6 +438,10 @@ void AFPCCharacter::UpdateAnimationTransitionValues()
 		else if (!IsCharacterMoving && CharacterVelocity2D.Length() > 10)
 			IsCharacterMoving = true;
 	}
+
+	if (!IsCharacterTurningInPlace)
+		TurnInPlaceStartingYaw = GetActorRotation().Yaw;
+	IsCharacterTurningInPlace = !IsCharacterMoving && FMath::Abs(CharacterYawDelta) > 0.1f;
 
 	if (MovementStateChanged)
 		PrevMovementState = IsCharacterMoving;
