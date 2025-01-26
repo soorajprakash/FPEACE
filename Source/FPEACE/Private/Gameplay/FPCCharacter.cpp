@@ -42,7 +42,7 @@ AFPCCharacter::AFPCCharacter(const FObjectInitializer& ObjectInitializer): Super
 		FPSBodyMeshComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		FPSBodyMeshComp->VisibilityBasedAnimTickOption = EVisibilityBasedAnimTickOption::OnlyTickPoseWhenRendered;
 		FPSBodyMeshComp->SetCastShadow(false);
-		FPSBodyMeshComp->SetOnlyOwnerSee(true);
+		// FPSBodyMeshComp->SetOnlyOwnerSee(true);
 	}
 
 	if (!FPCSpringArmComp)
@@ -65,9 +65,6 @@ void AFPCCharacter::OnConstruction(const FTransform& Transform)
 
 	// Get references to the Extensions 
 	FPCMovementComp = Cast<UFPCCharacterMovementComponent>(GetMovementComponent());
-	TPSMeshAnimInstance = CastChecked<UFPCAnimInstance>(TPSBodyMeshComp->GetAnimInstance());
-	TPSMeshAnimInstance->isBaseAnimInstance = true;
-	FPSMeshAnimInstance = CastChecked<UFPCAnimInstance>(FPSBodyMeshComp->GetAnimInstance());
 
 	// Set initial Character values
 	TargetLocomotionState = ELocomotionState::Running;
@@ -78,10 +75,20 @@ void AFPCCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
+	// Component Settings
+	if (FPCPlayerControllerInstance)
+	{
+		// Bind to Camera Mode switch callback
+		FPCPlayerControllerInstance->OnCameraModeChanged.AddDynamic(this, &AFPCCharacter::SetCameraMode);
+	}
+
 	// Store required Character data
 	ForwardLimits = GetCharacterData()->CharacterDirectionLimits.ForwardLimits;
 	BackwardLimits = GetCharacterData()->CharacterDirectionLimits.BackwardLimits;
 	DeadZone = GetCharacterData()->CharacterDirectionLimits.DirectionalDeadzone;
+
+	// TODO : Remove this after testing
+	// PickUpAndEquipWeapon(GetCharacterData()->DefaultWeaponBP);
 }
 
 void AFPCCharacter::Tick(float DeltaSeconds)
@@ -115,17 +122,10 @@ void AFPCCharacter::PossessedBy(AController* NewController)
 {
 	Super::PossessedBy(NewController);
 
-	FPCPlayerControllerInstance = CastChecked<AFPCPlayerController>(NewController);
-
-	// Component Settings
-	if (FPCPlayerControllerInstance)
-	{
-		// Bind to Camera Mode switch callback
-		FPCPlayerControllerInstance->OnCameraModeChanged.AddDynamic(this, &AFPCCharacter::SetCameraMode);
-	}
-
-	// TODO : Remove this after testing
-	PickUpAndEquipWeapon(GetCharacterData()->DefaultWeaponBP);
+	FPCPlayerControllerInstance = Cast<AFPCPlayerController>(NewController);
+	TPSMeshAnimInstance = CastChecked<UFPCAnimInstance>(TPSBodyMeshComp->GetAnimInstance());
+	TPSMeshAnimInstance->isBaseAnimInstance = true;
+	FPSMeshAnimInstance = CastChecked<UFPCAnimInstance>(FPSBodyMeshComp->GetAnimInstance());
 }
 
 // Called to bind functionality to input
@@ -151,7 +151,8 @@ void AFPCCharacter::SetCameraMode(ECameraMode NewCameraMode)
 		// Based on the camera mode, toggle the skeletal meshes
 		// The idea is to basically always have the TPS meshes visible to the world (Since it's needed for multiplayer)
 		// The FPS meshes is only visible to the owner of the character when in FPS mode and never visible to the world
-		TPSBodyMeshComp->SetOwnerNoSee(!IsInTPSCameraMode);
+		// TPSBodyMeshComp->SetOwnerNoSee(!IsInTPSCameraMode);
+		TPSBodyMeshComp->SetHiddenInGame(!IsInTPSCameraMode);
 		FPSBodyMeshComp->SetHiddenInGame(IsInTPSCameraMode);
 		RefreshWeaponVisibility();
 
@@ -179,7 +180,7 @@ void AFPCCharacter::SetCameraMode(ECameraMode NewCameraMode)
 void AFPCCharacter::RefreshWeaponVisibility() const
 {
 	if (CurrentTPSWeaponRef)
-		CurrentTPSWeaponRef->ToggleVisibilityToOwner(IsInTPSCameraMode);
+		CurrentTPSWeaponRef->SetActorHiddenInGame(!IsInTPSCameraMode);
 
 	if (CurrentFPSWeaponRef)
 		CurrentFPSWeaponRef->SetActorHiddenInGame(IsInTPSCameraMode);

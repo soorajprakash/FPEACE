@@ -202,13 +202,13 @@ protected:
 
 	UPROPERTY(BlueprintReadOnly)
 	ELocomotionState PrevLocomotionState;
-	
+
 	UPROPERTY(BlueprintReadOnly)
 	ELocomotionState PrevTargetLocomotionState;
-	
+
 	UPROPERTY(BlueprintReadOnly)
 	ELocomotionDirection PrevVelocityDirection;
-	
+
 	UPROPERTY(BlueprintReadOnly)
 	ELocomotionDirection PrevAccelerationDirection;
 
@@ -254,7 +254,7 @@ protected:
 
 	//	--------------------- COMPONENTS ---------------------
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="FPC/Components")
+	UPROPERTY(Interp, EditAnywhere, BlueprintReadWrite, Category="FPC/Components")
 	TObjectPtr<UFPCSkeletalMeshComponent> TPSBodyMeshComp;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="FPC/Components")
@@ -320,7 +320,7 @@ protected:
 	//	--------------------- OVERRIDES ---------------------
 
 	virtual void OnConstruction(const FTransform& Transform) override;
-	
+
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 

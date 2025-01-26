@@ -26,7 +26,7 @@ public:
 	/*
 	 * This is used to only perform operations on the base anim instance for optimization
 	 */
-	UPROPERTY(BlueprintReadWrite)
+	UPROPERTY(BlueprintReadOnly)
 	bool isBaseAnimInstance;
 
 	/*
