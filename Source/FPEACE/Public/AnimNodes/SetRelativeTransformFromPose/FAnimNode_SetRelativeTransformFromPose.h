@@ -12,7 +12,7 @@ struct FBoneContainer;
 
 // A struct to hold one target-relative bone pair
 USTRUCT(BlueprintInternalUseOnly)
-struct FBonePair
+struct FPEACE_API FBonePair
 {
 	GENERATED_BODY()
 
@@ -25,21 +25,17 @@ public:
 };
 
 USTRUCT(BlueprintInternalUseOnly)
-struct FAnimNode_SetRelativeTransformFromPose final : public FAnimNode_SkeletalControlBase
+struct FPEACE_API FAnimNode_SetRelativeTransformFromPose final : public FAnimNode_SkeletalControlBase
 {
 	GENERATED_BODY()
 
-public:
-	// Array of bone pairs (Target and Relative)
+// Array of bone pairs (Target and Relative)
 	UPROPERTY(EditAnywhere, Category="Settings")
 	TArray<FBonePair> BonePairs;
 
 	// The Reference Pose input (to determine the difference)
 	UPROPERTY(EditAnywhere, Category="Links", meta=(PinShownByDefault))
 	FComponentSpacePoseLink ReferencePose;
-
-	// Constructor
-	FAnimNode_SetRelativeTransformFromPose();
 
 protected:
 	// FAnimNode_Base interface

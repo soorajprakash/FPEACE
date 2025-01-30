@@ -4,10 +4,6 @@
 #include "FAnimNode_SetRelativeTransformFromPose.h"
 #include "Animation/AnimInstanceProxy.h"
 
-FAnimNode_SetRelativeTransformFromPose::FAnimNode_SetRelativeTransformFromPose()
-{
-}
-
 void FAnimNode_SetRelativeTransformFromPose::Initialize_AnyThread(const FAnimationInitializeContext& Context)
 {
 	Super::Initialize_AnyThread(Context);

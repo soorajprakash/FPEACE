@@ -3,7 +3,7 @@
 
 #include "UAnimGraphNode_SetRelativeTransformFromPose.h"
 
-#define LOCTEXT_NAMESPACE "A3Nodes"
+#define LOCTEXT_NAMESPACE "FPEACEEditor"
 
 FText UAnimGraphNode_SetRelativeTransformFromPose::GetNodeTitle(ENodeTitleType::Type TitleType) const
 {
@@ -13,12 +13,6 @@ FText UAnimGraphNode_SetRelativeTransformFromPose::GetNodeTitle(ENodeTitleType::
 FText UAnimGraphNode_SetRelativeTransformFromPose::GetTooltipText() const
 {
 	return LOCTEXT("Set Relative Transform From Pose", "Calculates the relative transform between two bones from a reference pose and applies it to the bone in the current pose");
-}
-
-const FAnimNode_SkeletalControlBase* UAnimGraphNode_SetRelativeTransformFromPose::GetNode() const
-{
-	// Return a pointer to the runtime node which inherits from FAnimNode_SkeletalControlBase
-	return &Node;
 }
 
 
