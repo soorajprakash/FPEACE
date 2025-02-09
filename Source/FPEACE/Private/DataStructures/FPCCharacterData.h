@@ -22,16 +22,16 @@ class FPEACE_API UFPCCharacterData : public UDataAsset
 	GENERATED_BODY()
 
 public:
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	ECameraMode StartingCameraMode;
 
 	UPROPERTY(EditDefaultsOnly)
 	TMap<ECameraMode, FCharacterCameraModeSettings> CameraModeSettings;
 
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	TSubclassOf<AFPCWeapon> DefaultWeaponBP;
 
-	UPROPERTY(EditDefaultsOnly, meta=(ClampMin=45, ClampMax=90))
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(ClampMin=45, ClampMax=90))
 	float ControllerRotationPitchClamp = 85.f;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
@@ -43,6 +43,6 @@ public:
 	UPROPERTY(EditDefaultsOnly)
 	TMap<ELocomotionState, FLocomotionStateSetting> LocomotionStateSettings;
 
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	FCharacterDirectionAngleLimits CharacterDirectionLimits;
 };

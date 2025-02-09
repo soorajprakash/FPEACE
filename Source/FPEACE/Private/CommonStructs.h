@@ -41,6 +41,9 @@ struct FCycleAnimSet
 	TObjectPtr<UAnimSequence> Left;
 };
 
+/*
+ * Used to define the angle limits for a character's direction change registration
+ */
 USTRUCT(BlueprintType)
 struct FCharacterDirectionAngleLimits
 {
@@ -93,6 +96,9 @@ struct FLocomotionStateSetting
 	}
 };
 
+/*
+ * Used to hold the camera settings for different camera modes
+ */
 USTRUCT()
 struct FCharacterCameraModeSettings
 {

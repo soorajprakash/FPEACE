@@ -21,7 +21,8 @@ enum class ELocomotionState : uint8
 {
 	Walking,
 	Running,
-	Sprinting
+	Sprinting,
+	Crouching
 };
 
 UENUM(BlueprintType)
