@@ -2,6 +2,7 @@
 
 
 #include "FPCBlueprintFunctionLibrary.h"
+#include "Animation/AnimRootMotionProvider.h"
 
 bool UFPCBlueprintFunctionLibrary::GetIfAnimSequenceHasRootMotionDelta(UAnimSequence* TargetSequence)
 {

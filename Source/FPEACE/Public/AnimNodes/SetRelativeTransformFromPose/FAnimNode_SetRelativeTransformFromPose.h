@@ -16,7 +16,6 @@ struct FPEACE_API FBonePair
 {
 	GENERATED_BODY()
 
-public:
 	UPROPERTY(EditAnywhere, Category="Settings")
 	FBoneReference TargetBone;
 
@@ -29,7 +28,7 @@ struct FPEACE_API FAnimNode_SetRelativeTransformFromPose final : public FAnimNod
 {
 	GENERATED_BODY()
 
-// Array of bone pairs (Target and Relative)
+	// Array of bone pairs (Target and Relative)
 	UPROPERTY(EditAnywhere, Category="Settings")
 	TArray<FBonePair> BonePairs;
 
