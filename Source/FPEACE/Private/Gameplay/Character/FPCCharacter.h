@@ -162,6 +162,12 @@ protected:
 	 */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="FPC/Inputs")
 	TSoftObjectPtr<UInputAction> CrouchAction;
+
+	/*
+	 * Reference to the Jump Input Action object
+	 */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="FPC/Inputs")
+	TSoftObjectPtr<UInputAction> JumpAction;
 	
 	/*
 	 * Reference to the Camera Switching Input Action object
@@ -217,4 +223,8 @@ private:
 	void ToggleCrouch();
 
 	void ToggleCameraMode();
+
+	void JumpStarted(const FInputActionValue& InputActionValue);
+
+	void JumpEnded(const FInputActionValue& InputActionValue);
 };

@@ -3,11 +3,14 @@
 
 
 #include "FPCCharacterMovementComponent.h"
+
+#include "FPCCapsuleComponent.h"
 #include "FPCCharacter.h"
 #include "FPCCharacterWeaponManagerComponent.h"
 #include "KismetAnimationLibrary.h"
 #include "DataStructures/FPCCharacterData.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "Kismet/KismetSystemLibrary.h"
 
 struct FLocomotionStateSetting;
 
@@ -39,6 +42,7 @@ void UFPCCharacterMovementComponent::InitializeComponent()
 	if (OwningCharacter)
 	{
 		FPCCharacterData = OwningCharacter->GetCharacterData();
+		OwningCharacterCapsule = OwningCharacter->GetFPCCapsuleComp();
 		FPCCharacterWeaponManager = OwningCharacter->GetFPCCharacterWeaponManager();
 	}
 
@@ -60,7 +64,8 @@ void UFPCCharacterMovementComponent::TickComponent(float DeltaTime, enum ELevelT
 
 	CharacterAcceleration2D = FVector(CharacterAcceleration.X, CharacterAcceleration.Y, 0);
 	CharacterVelocity2D = FVector(Velocity.X, Velocity.Y, 0);
-	CharacterAbsoluteSpeed = UKismetMathLibrary::VSizeXY(Velocity);
+	CharacterVelocityZ = Velocity.Z;
+	CharacterAbsoluteSpeed = Velocity.Length();
 	CharacterAbsoluteSpeed2D = UKismetMathLibrary::VSizeXY(CharacterVelocity2D);
 	CharacterNormalizedSpeed = CharacterAbsoluteSpeed / MaxWalkSpeed;
 
@@ -75,19 +80,21 @@ void UFPCCharacterMovementComponent::TickComponent(float DeltaTime, enum ELevelT
 	{
 		VelocityDirectionAngle = UKismetAnimationLibrary::CalculateDirection(CharacterVelocity2D, OwningCharacter->GetActorRotation());
 		SetCurrentVelocityDirection(CalculateLocomotionDirection(VelocityDirectionAngle, CurrentVelocityDirection));
+		UpdateDirectionalMaxWalkSpeed(CurrentVelocityDirection);
 	}
-	
+
 	// Update if the character is moving
 	if (IsCharacterMoving && CharacterVelocity2D.Length() < 1)
 		IsCharacterMoving = false;
 	else if (!IsCharacterMoving && CharacterVelocity2D.Length() > 10)
 		IsCharacterMoving = true;
 
-	IsCharacterAccelerating = !CharacterAcceleration2D.IsNearlyZero();
+	IsCharacterAccelerating = !FMath::IsNearlyZero(CharacterAcceleration2D.Length());
 
 	// Calculate the current delta distance covered by the character
 	FVector CurrentWorldLocation = GetActorLocation();
 	CurrentDeltaDistance = FVector::Distance(LastWorldLocation, CurrentWorldLocation);
+	CurrentDeltaDistanceZ = CurrentWorldLocation.Z - LastWorldLocation.Z;
 	LastWorldLocation = CurrentWorldLocation;
 
 	// Precompute normalized velocity and acceleration for clarity
@@ -102,6 +109,17 @@ void UFPCCharacterMovementComponent::TickComponent(float DeltaTime, enum ELevelT
 	CharacterYawDelta = CurrentYaw - PrevYaw;
 	YawAngularVelocity = CharacterYawDelta / DeltaTime;
 	PrevYaw = CurrentYaw;
+
+	// Calculate the character's distance to ground if in falling state
+	if (IsFalling())
+	{
+		FVector TraceStart = OwningCharacter->GetActorLocation() - OwningCharacterCapsule->GetScaledCapsuleHalfHeight();
+		FVector TraceEnd = TraceStart - FVector(0, 0, 10000);
+		FHitResult HitResult;
+		if (UKismetSystemLibrary::SphereTraceSingle(GetWorld(), TraceStart, TraceEnd, OwningCharacterCapsule->GetScaledCapsuleRadius(),
+		                                            UEngineTypes::ConvertToTraceType(ECC_Visibility), false, TArray<AActor*>{}, EDrawDebugTrace::None, HitResult, true))
+			DistanceToGroundWhileInAir = HitResult.Distance;
+	}
 
 	//	--------------------- CHECK FOR PIVOTING ---------------------
 
@@ -185,12 +203,41 @@ void UFPCCharacterMovementComponent::SetLocomotionStateSettings(ELocomotionState
 {
 	const FLocomotionStateSetting& StateSettings = FPCCharacterData->LocomotionStateSettings[newLocomotionState];
 	bUseSeparateBrakingFriction = StateSettings.bUseSeparateBrakingFriction;
-	MaxWalkSpeed = StateSettings.MaxWalkSpeed;
-	MaxWalkSpeedCrouched = StateSettings.MaxWalkSpeed;
+	MaxWalkSpeed = StateSettings.MaxWalkSpeedForward;
+	MaxWalkSpeedCrouched = StateSettings.MaxWalkSpeedForward;
 	MaxAcceleration = StateSettings.MaxAcceleration;
 	BrakingDecelerationWalking = StateSettings.BrakingDeceleration;
 	BrakingFrictionFactor = StateSettings.BrakingFrictionFactor;
 	BrakingFriction = StateSettings.BrakingFriction;
+}
+
+void UFPCCharacterMovementComponent::UpdateDirectionalMaxWalkSpeed(ELocomotionDirection newVelocityDirection)
+{
+	const FLocomotionStateSetting& StateSettings = FPCCharacterData->LocomotionStateSettings[currentLocomotionState];
+	float maxDirectionalWalkSpeed = 0;
+	switch (newVelocityDirection)
+	{
+	case ELocomotionDirection::Forward:
+		maxDirectionalWalkSpeed = StateSettings.MaxWalkSpeedForward;
+		break;
+
+	case ELocomotionDirection::Backward:
+		maxDirectionalWalkSpeed = StateSettings.MaxWalkSpeedBackward;
+		break;
+
+	case ELocomotionDirection::Right:
+		maxDirectionalWalkSpeed = StateSettings.MaxWalkSpeedRight;
+		break;
+
+	case ELocomotionDirection::Left:
+		maxDirectionalWalkSpeed = StateSettings.MaxWalkSpeedLeft;
+		break;
+	}
+
+	if (currentLocomotionState == ELocomotionState::Crouching)
+		MaxWalkSpeedCrouched = maxDirectionalWalkSpeed;
+	else
+		MaxWalkSpeed = maxDirectionalWalkSpeed;
 }
 
 ELocomotionDirection UFPCCharacterMovementComponent::CalculateLocomotionDirection(const float LocomotionDirectionAngle, const ELocomotionDirection CurrentDirection) const
