@@ -10,3 +10,10 @@ bool UFPCBlueprintFunctionLibrary::GetIfAnimSequenceHasRootMotionDelta(UAnimSequ
 	const float RootMotionDistance = RootMotionTranslation.Size2D();
 	return !FMath::IsNearlyZero(RootMotionDistance);
 }
+
+bool UFPCBlueprintFunctionLibrary::GetIfAnimSequenceHasLoopingEnabled(UAnimSequence* TargetSequence)
+{
+	if (!TargetSequence)
+		return false;
+	return TargetSequence->bLoop;
+}

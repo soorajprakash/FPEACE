@@ -8,6 +8,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "FPCCharacterMovementComponent.generated.h"
 
+class UFPCCapsuleComponent;
 class UFPCCharacterWeaponManagerComponent;
 class AFPCCharacter;
 class UFPCCharacterData;
@@ -29,6 +30,9 @@ protected:
 	TObjectPtr<AFPCCharacter> OwningCharacter;
 
 	UPROPERTY()
+	TObjectPtr<UFPCCapsuleComponent> OwningCharacterCapsule;
+
+	UPROPERTY()
 	TObjectPtr<UFPCCharacterData> FPCCharacterData;
 
 	UPROPERTY()
@@ -40,6 +44,9 @@ public:
 
 	UPROPERTY(BlueprintReadOnly)
 	FVector CharacterVelocity2D = FVector::ZeroVector;
+
+	UPROPERTY(BlueprintReadOnly)
+	float CharacterVelocityZ = 0;
 
 	UPROPERTY(BlueprintReadOnly)
 	float LeanAngle = 0;
@@ -69,7 +76,17 @@ public:
 	float CurrentDeltaDistance = 0;
 
 	UPROPERTY(BlueprintReadOnly)
+	float CurrentDeltaDistanceZ = 0;
+
+	UPROPERTY(BlueprintReadOnly)
 	float CurrentVelocityAccelerationDot = 0;
+
+	/*
+	 * Current distance from the character's lowest point to the ground straight below
+	 * This value is only updated when the character is in the air
+	 */
+	UPROPERTY(BlueprintReadOnly)
+	float DistanceToGroundWhileInAir = 0;
 
 	/*
 	 * The current locomotion direction of the owning character
@@ -146,6 +163,11 @@ private:
 	 * Set the movement component settings for a given locomotion state
 	 */
 	void SetLocomotionStateSettings(ELocomotionState newLocomotionState);
+
+	/*
+	 * Sets the max walk speed using designated values in Character data from the current direction
+	 */
+	void UpdateDirectionalMaxWalkSpeed(ELocomotionDirection newVelocityDirection);
 
 	/*
 	 * Calculate the direction enum from the given angle using direction limits in Character Data

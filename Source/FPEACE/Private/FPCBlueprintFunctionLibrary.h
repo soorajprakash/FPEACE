@@ -17,4 +17,7 @@ class UFPCBlueprintFunctionLibrary : public UBlueprintFunctionLibrary
 public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, meta=(BlueprintThreadSafe))
 	static bool GetIfAnimSequenceHasRootMotionDelta(UAnimSequence* TargetSequence);
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, meta=(BlueprintThreadSafe))
+	static bool GetIfAnimSequenceHasLoopingEnabled(UAnimSequence* TargetSequence);
 };

@@ -15,7 +15,8 @@ struct FCycleAnimSet
 {
 	GENERATED_BODY()
 
-	FCycleAnimSet(): WeaponHandGripPose(nullptr), bAreDirectionalAnimsAdditive(false), bSyncUpperAndLowerBodyPlayers(true), Forward(nullptr), Backward(nullptr), Right(nullptr), Left(nullptr)
+	FCycleAnimSet(): WeaponHandGripPose(nullptr), bAreDirectionalAnimsAdditive(false), bSyncUpperAndLowerBodyPlayers(true), bSyncAsLeader(false), Forward(nullptr), Backward(nullptr), Right(nullptr),
+	                 Left(nullptr)
 	{
 	}
 
@@ -27,6 +28,9 @@ struct FCycleAnimSet
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	bool bSyncUpperAndLowerBodyPlayers;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	bool bSyncAsLeader;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	TObjectPtr<UAnimSequence> Forward;
@@ -72,7 +76,16 @@ struct FLocomotionStateSetting
 	GENERATED_BODY()
 
 	UPROPERTY(EditDefaultsOnly)
-	float MaxWalkSpeed;
+	float MaxWalkSpeedForward;
+
+	UPROPERTY(EditDefaultsOnly)
+	float MaxWalkSpeedBackward;
+
+	UPROPERTY(EditDefaultsOnly)
+	float MaxWalkSpeedRight;
+
+	UPROPERTY(EditDefaultsOnly)
+	float MaxWalkSpeedLeft;
 
 	UPROPERTY(EditDefaultsOnly)
 	float MaxAcceleration;
@@ -91,7 +104,8 @@ struct FLocomotionStateSetting
 
 	// Constructor to set initial values
 	FLocomotionStateSetting()
-		: MaxWalkSpeed(0), MaxAcceleration(0), BrakingDeceleration(0), BrakingFrictionFactor(0), BrakingFriction(0), bUseSeparateBrakingFriction(false)
+		: MaxWalkSpeedForward(0), MaxWalkSpeedBackward(0), MaxWalkSpeedRight(0), MaxWalkSpeedLeft(0), MaxAcceleration(0), BrakingDeceleration(0), BrakingFrictionFactor(0), BrakingFriction(0),
+		  bUseSeparateBrakingFriction(false)
 	{
 	}
 };

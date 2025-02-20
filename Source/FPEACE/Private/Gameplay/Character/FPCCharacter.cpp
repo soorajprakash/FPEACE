@@ -93,6 +93,8 @@ void AFPCCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 		EInputComp->BindAction(MoveAction.LoadSynchronous(), ETriggerEvent::Triggered, this, &AFPCCharacter::MoveAround);
 		EInputComp->BindAction(RunAction.LoadSynchronous(), ETriggerEvent::Started, this, &AFPCCharacter::ToggleRunSprint);
 		EInputComp->BindAction(CrouchAction.LoadSynchronous(), ETriggerEvent::Started, this, &AFPCCharacter::ToggleCrouch);
+		EInputComp->BindAction(JumpAction.LoadSynchronous(),ETriggerEvent::Started,this,&AFPCCharacter::JumpStarted);
+		EInputComp->BindAction(JumpAction.LoadSynchronous(),ETriggerEvent::Completed,this,&AFPCCharacter::JumpEnded);
 		EInputComp->BindAction(CameraSwitchAction.LoadSynchronous(), ETriggerEvent::Completed, this, &AFPCCharacter::ToggleCameraMode);
 	}
 }
@@ -156,6 +158,16 @@ void AFPCCharacter::ToggleCrouch()
 void AFPCCharacter::ToggleCameraMode()
 {
 	FPCCameraManagerComp->ToggleCameraMode();
+}
+
+void AFPCCharacter::JumpStarted(const FInputActionValue& InputActionValue)
+{
+	Jump();
+}
+
+void AFPCCharacter::JumpEnded(const FInputActionValue& InputActionValue)
+{
+	StopJumping();
 }
 
 UFPCCharacterData* AFPCCharacter::GetCharacterData()
