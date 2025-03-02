@@ -34,7 +34,7 @@ AFPCGun::AFPCGun()
 	if (!IronSightMeshComp)
 	{
 		IronSightMeshComp = CreateDefaultSubobject<UFPCStaticMeshComponent>(TEXT("IronsightMeshComp"));
-		IronSightMeshComp->SetupAttachment(ReceiverMeshComp, FName(TEXT("slide")));
+		IronSightMeshComp->SetupAttachment(ReceiverMeshComp, FName(TEXT("SOCKET_Default")));
 	}
 }
 

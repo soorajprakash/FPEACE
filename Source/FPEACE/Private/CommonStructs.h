@@ -5,6 +5,7 @@
 
 #include "CommonStructs.generated.h"
 
+enum class ELocomotionState : uint8;
 class UAnimSequence;
 
 /*
@@ -43,6 +44,32 @@ struct FCycleAnimSet
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	TObjectPtr<UAnimSequence> Left;
+};
+
+
+USTRUCT(BlueprintType)
+struct FCycleAnimSetSoft
+{
+	GENERATED_BODY()
+
+	FCycleAnimSetSoft(): WeaponHandGripPose(nullptr)
+	{
+	}
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	TSoftObjectPtr<UAnimSequence> WeaponHandGripPose;
+};
+
+USTRUCT(BlueprintType)
+struct FUpperLowerAnimSets
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	FCycleAnimSet UpperAnimSet;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	FCycleAnimSet LowerAnimSet;
 };
 
 /*
@@ -108,6 +135,18 @@ struct FLocomotionStateSetting
 		  bUseSeparateBrakingFriction(false)
 	{
 	}
+};
+
+/*
+ * Holds the set of locomotion setting for a given stance
+ */
+USTRUCT()
+struct FLocomotionStanceSetting
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditDefaultsOnly)
+	TMap<ELocomotionState, FLocomotionStateSetting> LocomotionStateSettings;
 };
 
 /*

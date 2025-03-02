@@ -8,6 +8,7 @@
 #include "Engine/DataAsset.h"
 #include "FPCCharacterData.generated.h"
 
+enum class ELocomotionStance : uint8;
 class UFPCAnimInstance;
 class AFPCWeapon;
 enum class ELocomotionState : uint8;
@@ -29,10 +30,13 @@ public:
 	TMap<ECameraMode, FCharacterCameraModeSettings> CameraModeSettings;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	TSubclassOf<AFPCWeapon> DefaultWeaponBP;
+	TSoftClassPtr<AFPCWeapon> DefaultWeaponBP;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(ClampMin=45, ClampMax=90))
 	float ControllerRotationPitchClamp = 85.f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(ClampMin=0, ClampMax=100))
+	float IKBoneOffsetInterpSpeed = 10.f;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	TObjectPtr<UDataTable> AnimClassTable;
@@ -41,7 +45,7 @@ public:
 	float TurningLeanStrength = 0.05;
 
 	UPROPERTY(EditDefaultsOnly)
-	TMap<ELocomotionState, FLocomotionStateSetting> LocomotionStateSettings;
+	TMap<ELocomotionStance, FLocomotionStanceSetting> LocomotionStanceSettings;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	FCharacterDirectionAngleLimits CharacterDirectionLimits;

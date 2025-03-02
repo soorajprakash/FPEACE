@@ -6,8 +6,10 @@
 #include "CoreMinimal.h"
 #include "CommonEnums.h"
 #include "Gameplay/FPCActorComponent.h"
+#include "Gameplay/Weapon/FPCWeapon.h"
 #include "FPCCharacterWeaponManagerComponent.generated.h"
 
+class UFPCCharacterMovementComponent;
 class UFPCCharacterCameraManagerComponent;
 class UFPCCharacterData;
 class UFPCSkeletalMeshComponent;
@@ -35,18 +37,40 @@ public:
 
 	void UpdateWeaponVisibility(const bool IsInTPSCameraMode) const;
 
+	void SwitchADSState(bool UseADS);
+
 protected:
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(BlueprintReadOnly)
 	TObjectPtr<AFPCWeapon> CurrentFPSWeaponRef;
 
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(BlueprintReadOnly)
 	TObjectPtr<AFPCWeapon> CurrentTPSWeaponRef;
-	
+
+	/*
+	 * Reference to the weapon animation settings struct from the current weapon that is equipped
+	 */
+	UPROPERTY(BlueprintReadOnly)
+	FWeaponAnimSettings CurrentWeaponAnimSettings;
+
+	UPROPERTY(BlueprintReadOnly)
+	FVector CurrentWeaponHandIKLocationOffset;
+
+	UPROPERTY(BlueprintReadOnly)
+	FRotator CurrentWeaponHandIKRotationOffset;
+
+	UPROPERTY(BlueprintReadOnly)
+	bool AnyCombatStateChanged = true;
+
 	virtual void InitializeComponent() override;
+
+	virtual void TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 private:
 	UPROPERTY()
 	TObjectPtr<AFPCCharacter> OwningCharacter;
+
+	UPROPERTY()
+	TObjectPtr<UFPCCharacterMovementComponent> OwningCharacterMovementComp;
 
 	UPROPERTY()
 	TObjectPtr<UFPCCharacterData> FPCCharacterData;
@@ -60,9 +84,20 @@ private:
 	UPROPERTY()
 	TObjectPtr<UFPCCharacterCameraManagerComponent> FPCCameraManagerComp;
 
+	FVector TargetWeaponHandIKLocationOffset;
+
+	FRotator TargetWeaponHandIKRotationOffset;
+
 	UFUNCTION(BlueprintCallable)
-	void PickUpAndEquipWeapon(const TSubclassOf<AFPCWeapon>& WeaponBP);
+	void PickUpAndEquipWeapon(const TSoftClassPtr<AFPCWeapon>& WeaponBP);
 
 	UFUNCTION()
 	void CharacterCameraModeChanged(ECameraMode NewCameraMode);
+
+	UFUNCTION()
+	void CharacterCurrentLocomotionStateChanged(ELocomotionState NewLocomotionState);
+
+	void SetTargetWeaponHandIKOffset();
+
+	void UpdateCurrentWeaponHandIKOffset(const float DeltaTime);
 };

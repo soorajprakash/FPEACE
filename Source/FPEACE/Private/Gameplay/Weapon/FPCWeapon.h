@@ -7,9 +7,25 @@
 #include "Gameplay/FPCActor.h"
 #include "FPCWeapon.generated.h"
 
+enum class ELocomotionState : uint8;
 class AFPCCharacter;
 class UFPCAnimInstance;
 enum class ECameraMode : uint8;
+
+
+USTRUCT(Blueprintable)
+struct FWeaponAnimSettings
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditDefaultsOnly)
+	TMap<ELocomotionState, FTransform> DefaultLocomotionStateOffsets;
+
+	UPROPERTY(EditDefaultsOnly)
+	TMap<ELocomotionState, FTransform> ADSLocomotionStateOffsets;
+};
+
+
 /**
  * The base class for all weapons in the game.
  */
@@ -19,7 +35,6 @@ class FPEACE_API AFPCWeapon : public AFPCActor
 	GENERATED_BODY()
 
 public:
-
 	/*
 	 * Setting up the initial values for the weapon instance based on selected target camera mode.
 	 * The weapon will always be for this camera mode in its lifetime and the settings will be applied accordingly at this stage.
@@ -34,14 +49,19 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Weapon")
 	FName WeaponAnimLayerClassName;
-	
-protected:
 
+	FWeaponAnimSettings GetAnimSettings() const { return AnimSettings; }
+
+protected:
 	AFPCWeapon();
 
 	UPROPERTY(BlueprintReadOnly, Category="Weapon")
 	ECameraMode UsedInCameraMode;
-	
+
+	UPROPERTY(EditDefaultsOnly, Category="Weapon")
+	FWeaponAnimSettings AnimSettings;
+
+protected:
 	/*
 	 * Collection of mesh components that make up the weapon.
 	 * Could be used to set up rendering, collision, etc.

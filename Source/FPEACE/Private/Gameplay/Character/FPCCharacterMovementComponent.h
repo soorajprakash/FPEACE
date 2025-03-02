@@ -14,8 +14,11 @@ class AFPCCharacter;
 class UFPCCharacterData;
 enum class ELocomotionDirection : uint8;
 enum class ELocomotionState : uint8;
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FLocomotionStateChangeDelegate, ELocomotionState, NewLocomotionState);
+
 /**
- * 
+ * An extension of the character movement component class of the character
  */
 UCLASS(BlueprintType, Blueprintable, Meta = (BlueprintSpawnableComponent))
 class FPEACE_API UFPCCharacterMovementComponent : public UCharacterMovementComponent
@@ -23,22 +26,27 @@ class FPEACE_API UFPCCharacterMovementComponent : public UCharacterMovementCompo
 	GENERATED_BODY()
 
 public:
-	UFPCCharacterMovementComponent();
+	/*
+	 * Event called when the current locomotion state has been changed
+	 */
+	FLocomotionStateChangeDelegate OnCurrentLocomotionStateChanged;
+
+	/*
+	 * Event called when the target locomotion state has been changed
+	 */
+	FLocomotionStateChangeDelegate OnTargetLocomotionStateChanged;
+
+	void ToggleRunSprint();
+
+	void ToggleCrouch();
+
+	float GetCharacterAbsoluteSpeed2D() const { return CharacterAbsoluteSpeed2D; }
+
+	ELocomotionState GetCurrentLocomotionState() const { return currentLocomotionState; }
 
 protected:
-	UPROPERTY()
-	TObjectPtr<AFPCCharacter> OwningCharacter;
+	UFPCCharacterMovementComponent();
 
-	UPROPERTY()
-	TObjectPtr<UFPCCapsuleComponent> OwningCharacterCapsule;
-
-	UPROPERTY()
-	TObjectPtr<UFPCCharacterData> FPCCharacterData;
-
-	UPROPERTY()
-	TObjectPtr<UFPCCharacterWeaponManagerComponent> FPCCharacterWeaponManager;
-
-public:
 	UPROPERTY(BlueprintReadOnly)
 	FVector CharacterAcceleration2D = FVector::ZeroVector;
 
@@ -92,31 +100,70 @@ public:
 	 * The current locomotion direction of the owning character
 	 */
 	UPROPERTY(BlueprintReadOnly)
-	ELocomotionDirection CurrentVelocityDirection = ELocomotionDirection::Forward;
+	ELocomotionDirection CurrentVelocityDirection;
 
 	/*
 	 * The current direction of the owning character's acceleration
 	 */
 	UPROPERTY(BlueprintReadOnly)
-	ELocomotionDirection CurrentAccelerationDirection = ELocomotionDirection::Forward;
+	ELocomotionDirection CurrentAccelerationDirection;
 
 	UPROPERTY(BlueprintReadOnly)
-	ELocomotionState currentLocomotionState = ELocomotionState::Running;
+	ELocomotionState currentLocomotionState;
+
+	UPROPERTY(BlueprintReadOnly)
+	ELocomotionStance currentLocomotionStance;
 
 	UPROPERTY(BlueprintReadOnly)
 	ELocomotionState TargetLocomotionState = ELocomotionState::Running;
 
 	UPROPERTY(BlueprintReadOnly)
-	ELocomotionState PrevLocomotionState = ELocomotionState::Running;
+	ELocomotionState PrevLocomotionState;
 
 	UPROPERTY(BlueprintReadOnly)
-	ELocomotionState PrevTargetLocomotionState = ELocomotionState::Running;
+	ELocomotionStance PrevLocomotionStance;
 
 	UPROPERTY(BlueprintReadOnly)
-	ELocomotionDirection PrevVelocityDirection = ELocomotionDirection::Forward;
+	ELocomotionState PrevTargetLocomotionState;
 
 	UPROPERTY(BlueprintReadOnly)
-	ELocomotionDirection PrevAccelerationDirection = ELocomotionDirection::Forward;
+	ELocomotionDirection PrevVelocityDirection;
+
+	UPROPERTY(BlueprintReadOnly)
+	ELocomotionDirection PrevAccelerationDirection;
+
+	UPROPERTY(BlueprintReadOnly)
+	bool VelocityDirectionChanged = false;
+
+	UPROPERTY(BlueprintReadOnly)
+	bool IsCharacterSlowingDown = false;
+
+	UPROPERTY(BlueprintReadOnly)
+	bool MovementStateChanged = false;
+
+	UPROPERTY(BlueprintReadOnly)
+	bool AccelerationStateChanged = false;
+
+	UPROPERTY(BlueprintReadOnly)
+	bool AccelerationDirectionChanged = false;
+
+	UPROPERTY(BlueprintReadOnly)
+	bool CurrentLocomotionStateChanged = false;
+
+	UPROPERTY(BlueprintReadOnly)
+	bool CurrentLocomotionStanceChanged = false;
+
+	UPROPERTY(BlueprintReadOnly)
+	bool TargetLocomotionStateChanged = false;
+
+	UPROPERTY(BlueprintReadOnly)
+	bool AnyMovementStateChanged = true;
+
+	UPROPERTY(BlueprintReadOnly)
+	bool PrevMovementState = false;
+
+	UPROPERTY(BlueprintReadOnly)
+	bool PrevAccelerationState = false;
 
 	UPROPERTY(BlueprintReadOnly)
 	bool IsCharacterMoving = false;
@@ -136,9 +183,17 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	bool bIsCharacterInProneState = false;
 
-	void ToggleRunSprint();
+	UPROPERTY()
+	TObjectPtr<AFPCCharacter> OwningCharacter;
 
-	void ToggleCrouch();
+	UPROPERTY()
+	TObjectPtr<UFPCCapsuleComponent> OwningCharacterCapsule;
+
+	UPROPERTY()
+	TObjectPtr<UFPCCharacterData> FPCCharacterData;
+
+	UPROPERTY()
+	TObjectPtr<UFPCCharacterWeaponManagerComponent> FPCCharacterWeaponManager;
 
 private:
 	// Character direction limit values referenced from the Owning character data asset for ease of use
@@ -150,11 +205,21 @@ private:
 
 	FVector LastWorldLocation = FVector::ZeroVector;
 
+	float LastFrameMaxSpeed;
+	ELocomotionDirection LastFrameAccelerationDirection;
+	ELocomotionDirection LastFrameVelocityDirection;
+	ELocomotionStance LastFrameLocomotionStance;
+	ELocomotionState LastFrameLocomotionState;
+	ELocomotionState LastFrameTargetLocomotionState;
+	bool WasMovingLastFrame;
+	bool WasAcceleratingLastFrame;
+
 	virtual void InitializeComponent() override;
 	virtual void TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 	void HandleLocomotionStateChange();
 	void SetCurrentLocomotionState(ELocomotionState newLocomotionState);
+	void SetTargetLocomotionState(ELocomotionState newLocomotionState);
 	void SetCurrentLocomotionStateWithSettings(ELocomotionState newLocomotionState);
 	void SetCurrentVelocityDirection(ELocomotionDirection newVelocityDirection);
 	void SetCurrentAccelerationDirection(ELocomotionDirection newAccelerationDirection);
@@ -168,6 +233,11 @@ private:
 	 * Sets the max walk speed using designated values in Character data from the current direction
 	 */
 	void UpdateDirectionalMaxWalkSpeed(ELocomotionDirection newVelocityDirection);
+
+	/*
+	 * Ticks each frame and checks if any movement states have changed
+	 */
+	void UpdateStateChanges();
 
 	/*
 	 * Calculate the direction enum from the given angle using direction limits in Character Data

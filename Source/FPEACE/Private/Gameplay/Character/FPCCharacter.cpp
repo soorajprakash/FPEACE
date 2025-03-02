@@ -93,8 +93,10 @@ void AFPCCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 		EInputComp->BindAction(MoveAction.LoadSynchronous(), ETriggerEvent::Triggered, this, &AFPCCharacter::MoveAround);
 		EInputComp->BindAction(RunAction.LoadSynchronous(), ETriggerEvent::Started, this, &AFPCCharacter::ToggleRunSprint);
 		EInputComp->BindAction(CrouchAction.LoadSynchronous(), ETriggerEvent::Started, this, &AFPCCharacter::ToggleCrouch);
-		EInputComp->BindAction(JumpAction.LoadSynchronous(),ETriggerEvent::Started,this,&AFPCCharacter::JumpStarted);
-		EInputComp->BindAction(JumpAction.LoadSynchronous(),ETriggerEvent::Completed,this,&AFPCCharacter::JumpEnded);
+		EInputComp->BindAction(JumpAction.LoadSynchronous(), ETriggerEvent::Started, this, &AFPCCharacter::JumpStarted);
+		EInputComp->BindAction(JumpAction.LoadSynchronous(), ETriggerEvent::Completed, this, &AFPCCharacter::JumpEnded);
+		EInputComp->BindAction(ADSAction.LoadSynchronous(), ETriggerEvent::Started, this, &AFPCCharacter::ActivateADS);
+		EInputComp->BindAction(ADSAction.LoadSynchronous(), ETriggerEvent::Completed, this, &AFPCCharacter::DeactivateADS);
 		EInputComp->BindAction(CameraSwitchAction.LoadSynchronous(), ETriggerEvent::Completed, this, &AFPCCharacter::ToggleCameraMode);
 	}
 }
@@ -160,6 +162,16 @@ void AFPCCharacter::ToggleCameraMode()
 	FPCCameraManagerComp->ToggleCameraMode();
 }
 
+void AFPCCharacter::ActivateADS()
+{
+	FPCCharacterWeaponManagerComp->SwitchADSState(true);
+}
+
+void AFPCCharacter::DeactivateADS()
+{
+	FPCCharacterWeaponManagerComp->SwitchADSState(false);
+}
+
 void AFPCCharacter::JumpStarted(const FInputActionValue& InputActionValue)
 {
 	Jump();
@@ -175,7 +187,7 @@ UFPCCharacterData* AFPCCharacter::GetCharacterData()
 	// Get the Character Data asset reference
 	if (FPCCharacterData == nullptr)
 		if (UFPCGameInstance* FPCGameInstance = UFPCGameInstance::GetInstance(this))
-			FPCCharacterData = FPCGameInstance->CharacterData;
+			FPCCharacterData = FPCGameInstance->CharacterData.LoadSynchronous();
 
 	return FPCCharacterData;
 }

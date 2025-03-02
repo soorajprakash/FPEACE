@@ -2,7 +2,6 @@
 // Unauthorized distribution of this file, or any part of it, is prohibited.
 
 #include "FPCWeapon.h"
-
 #include "CommonEnums.h"
 
 AFPCWeapon::AFPCWeapon(): UsedInCameraMode(ECameraMode::TPS)

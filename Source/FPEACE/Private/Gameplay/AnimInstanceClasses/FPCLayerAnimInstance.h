@@ -7,6 +7,7 @@
 #include "FPCAnimInstance.h"
 #include "FPCLayerAnimInstance.generated.h"
 
+class UFPCDirectionalAnimSet;
 class UFPCSkeletalAnimInstance;
 /**
  * The type of anim instance class meant to be used in anim blueprints that define layer logic

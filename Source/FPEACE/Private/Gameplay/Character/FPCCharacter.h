@@ -168,6 +168,12 @@ protected:
 	 */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="FPC/Inputs")
 	TSoftObjectPtr<UInputAction> JumpAction;
+
+	/*
+	 * Reference to the ADS Input Action object
+	 */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="FPC/Inputs")
+	TSoftObjectPtr<UInputAction> ADSAction;
 	
 	/*
 	 * Reference to the Camera Switching Input Action object
@@ -223,6 +229,10 @@ private:
 	void ToggleCrouch();
 
 	void ToggleCameraMode();
+
+	void ActivateADS();
+	
+	void DeactivateADS();
 
 	void JumpStarted(const FInputActionValue& InputActionValue);
 
