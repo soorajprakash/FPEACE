@@ -3,6 +3,15 @@
 
 #include "FPCSkeletalAnimInstance.h"
 
+#include "Gameplay/FPCSkeletalMeshComponent.h"
+#include "Gameplay/Character/FPCCameraComponent.h"
+#include "Gameplay/Character/FPCCharacter.h"
+#include "Gameplay/Character/FPCCharacterCameraManagerComponent.h"
+#include "Gameplay/Character/FPCCharacterMovementComponent.h"
+#include "Gameplay/Character/FPCCharacterWeaponManagerComponent.h"
+#include "Kismet/KismetMathLibrary.h"
+#include "Kismet/KismetSystemLibrary.h"
+
 void UFPCSkeletalAnimInstance::RecordSequenceState(const FString& Key, FSkeletalAnimInstanceSequenceState& CurrentSequenceState)
 {
 	//First wipe all the other state data

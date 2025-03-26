@@ -64,6 +64,13 @@ void FAnimNode_CopyBoneToCurrentPose::EvaluateSkeletalControl_AnyThread(
 	for (const FBoneTarget& mBoneTarget : TargetBones)
 	{
 		const FCompactPoseBoneIndex TargetBoneIndex = mBoneTarget.TargetBone.GetCompactPoseIndex(BoneContainer);
+
+		if (TargetBoneIndex == INDEX_NONE)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Bone %s not found in compact pose!"), *mBoneTarget.TargetBone.BoneName.ToString());
+			continue; // Skip this bone to avoid crash
+		}
+		
 		const FTransform CurrentTargetCS = Output.Pose.GetComponentSpaceTransform(TargetBoneIndex);
 		const FTransform CurrentSourceCS = RefPoseContext.Pose.GetComponentSpaceTransform(TargetBoneIndex);
 

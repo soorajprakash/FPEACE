@@ -35,9 +35,6 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(ClampMin=45, ClampMax=90))
 	float ControllerRotationPitchClamp = 85.f;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(ClampMin=0, ClampMax=100))
-	float IKBoneOffsetInterpSpeed = 10.f;
-
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	TObjectPtr<UDataTable> AnimClassTable;
 

@@ -20,13 +20,23 @@ class AFPCGun : public AFPCWeapon
 	GENERATED_BODY()
 
 public:
-
 	AFPCGun();
-	
-protected:
 
+	//	--------------------- GETTERS ---------------------
+
+	TObjectPtr<UFPCSkeletalMeshComponent> GetReceiverMeshComp() const { return ReceiverMeshComp; }
+
+	TObjectPtr<UFPCStaticMeshComponent> GetMagazineMeshComp() const { return MagazineMeshComp; }
+
+	TObjectPtr<UFPCStaticMeshComponent> GetMuzzleMeshComp() const { return MuzzleMeshComp; }
+
+	TObjectPtr<UFPCStaticMeshComponent> GetOpticMeshComp() const { return OpticMeshComp; }
+
+	TObjectPtr<UFPCStaticMeshComponent> GetIronSightMeshComp() const { return IronSightMeshComp; }
+
+protected:
 	//	--------------------- GUN COMPONENTS ---------------------
-	
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Gun")
 	TObjectPtr<UFPCSkeletalMeshComponent> ReceiverMeshComp;
 

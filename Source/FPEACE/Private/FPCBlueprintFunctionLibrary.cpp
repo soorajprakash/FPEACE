@@ -2,7 +2,6 @@
 
 
 #include "FPCBlueprintFunctionLibrary.h"
-#include "Animation/AnimRootMotionProvider.h"
 
 bool UFPCBlueprintFunctionLibrary::GetIfAnimSequenceHasRootMotionDelta(UAnimSequence* TargetSequence)
 {
@@ -16,4 +15,9 @@ bool UFPCBlueprintFunctionLibrary::GetIfAnimSequenceHasLoopingEnabled(UAnimSeque
 	if (!TargetSequence)
 		return false;
 	return TargetSequence->bLoop;
+}
+
+EAdditiveAnimationType UFPCBlueprintFunctionLibrary::GetAnimSequenceAdditiveType(UAnimSequence* TargetSequence)
+{
+	return TargetSequence->GetAdditiveAnimType();
 }

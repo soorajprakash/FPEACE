@@ -41,6 +41,8 @@ public:
 	void ToggleCrouch();
 
 	float GetCharacterAbsoluteSpeed2D() const { return CharacterAbsoluteSpeed2D; }
+	
+	float GetCharacterYawDelta() const { return CharacterYawDelta; }
 
 	ELocomotionState GetCurrentLocomotionState() const { return currentLocomotionState; }
 
@@ -201,7 +203,7 @@ private:
 	FVector2D BackwardLimits = FVector2D::ZeroVector;
 	float DeadZone = 0;
 
-	float PrevYaw = 0;
+	FRotator PrevRotation;
 
 	FVector LastWorldLocation = FVector::ZeroVector;
 

@@ -3,7 +3,6 @@
 
 
 #include "FPCCharacter.h"
-#include "CommonEnums.h"
 #include "EnhancedInputComponent.h"
 #include "FPCCameraComponent.h"
 #include "FPCCapsuleComponent.h"
@@ -35,14 +34,24 @@ AFPCCharacter::AFPCCharacter(const FObjectInitializer& ObjectInitializer): Super
 
 	// Create Components
 
-	if (!FPSBodyMeshComp)
+	if (!FPSArmsMeshComp)
 	{
-		FPSBodyMeshComp = CreateDefaultSubobject<UFPCSkeletalMeshComponent>(TEXT("FPSBody"));
-		FPSBodyMeshComp->SetupAttachment(TPSBodyMeshComp);
-		FPSBodyMeshComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-		FPSBodyMeshComp->VisibilityBasedAnimTickOption = EVisibilityBasedAnimTickOption::OnlyTickPoseWhenRendered;
-		FPSBodyMeshComp->SetCastShadow(false);
-		FPSBodyMeshComp->SetOnlyOwnerSee(true);
+		FPSArmsMeshComp = CreateDefaultSubobject<UFPCSkeletalMeshComponent>(TEXT("FPSArms"));
+		FPSArmsMeshComp->SetupAttachment(TPSBodyMeshComp);
+		FPSArmsMeshComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		FPSArmsMeshComp->VisibilityBasedAnimTickOption = EVisibilityBasedAnimTickOption::OnlyTickPoseWhenRendered;
+		FPSArmsMeshComp->SetCastShadow(false);
+		FPSArmsMeshComp->SetOnlyOwnerSee(true);
+	}
+
+	if (!FPSLowerBodyMeshComp)
+	{
+		FPSLowerBodyMeshComp = CreateDefaultSubobject<UFPCSkeletalMeshComponent>(TEXT("FPSLowerBody"));
+		FPSLowerBodyMeshComp->SetupAttachment(TPSBodyMeshComp);
+		FPSLowerBodyMeshComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		FPSLowerBodyMeshComp->VisibilityBasedAnimTickOption = EVisibilityBasedAnimTickOption::OnlyTickPoseWhenRendered;
+		FPSLowerBodyMeshComp->SetCastShadow(false);
+		FPSLowerBodyMeshComp->SetOnlyOwnerSee(true);
 	}
 
 	if (!FPCSpringArmComp)
@@ -52,10 +61,10 @@ AFPCCharacter::AFPCCharacter(const FObjectInitializer& ObjectInitializer): Super
 		FPCSpringArmComp->bInheritRoll = false;
 	}
 
-	if (!FPCCameraComp)
+	if (!CharacterCameraComp)
 	{
-		FPCCameraComp = CreateDefaultSubobject<UFPCCameraComponent>(TEXT("FPCCamera"));
-		FPCCameraComp->SetupAttachment(FPCSpringArmComp);
+		CharacterCameraComp = CreateDefaultSubobject<UFPCCameraComponent>(TEXT("TPSCamera"));
+		CharacterCameraComp->SetupAttachment(FPCSpringArmComp);
 	}
 
 	if (!FPCCameraManagerComp)
@@ -165,11 +174,13 @@ void AFPCCharacter::ToggleCameraMode()
 void AFPCCharacter::ActivateADS()
 {
 	FPCCharacterWeaponManagerComp->SwitchADSState(true);
+	FPCCameraManagerComp->SwitchCameraFOV(true);
 }
 
 void AFPCCharacter::DeactivateADS()
 {
 	FPCCharacterWeaponManagerComp->SwitchADSState(false);
+	FPCCameraManagerComp->SwitchCameraFOV(false);
 }
 
 void AFPCCharacter::JumpStarted(const FInputActionValue& InputActionValue)

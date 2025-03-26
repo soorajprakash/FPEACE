@@ -40,6 +40,7 @@ void AFPCWeapon::SetupWeapon(ECameraMode TargetCameraMode, USceneComponent* Atta
 			WeaponComp->SetOnlyOwnerSee(UsedInCameraMode == ECameraMode::FPS);
 			WeaponComp->SetCastShadow(UsedInCameraMode == ECameraMode::TPS);
 			WeaponComp->SetCastHiddenShadow(UsedInCameraMode == ECameraMode::TPS);
+			WeaponComp->FirstPersonPrimitiveType = TargetCameraMode == ECameraMode::FPS ? EFirstPersonPrimitiveType::FirstPerson : EFirstPersonPrimitiveType::None;
 		}
 	}
 }

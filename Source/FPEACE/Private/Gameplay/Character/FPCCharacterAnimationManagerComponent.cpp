@@ -32,7 +32,7 @@ void UFPCCharacterAnimationManagerComponent::InitializeComponent()
 	if (OwningCharacter)
 	{
 		TPSBodyMeshComp = OwningCharacter->GetTPSBodyMeshComp();
-		FPSBodyMeshComp = OwningCharacter->GetFPSBodyMeshComp();
+		FPSBodyMeshComp = OwningCharacter->GetFPSArmsMeshComp();
 		FPCCharacterMovementComp = OwningCharacter->GetCharacterMovementComponent();
 		FPCWeaponManagerComp = OwningCharacter->GetFPCCharacterWeaponManager();
 		FPCCharacterData = OwningCharacter->GetCharacterData();

@@ -47,6 +47,10 @@ void AFPCGun::OnConstruction(const FTransform& Transform)
 {
 	Super::OnConstruction(Transform);
 
+	// Get required Socket Transforms
+	AimSocketActorSpaceTransform = OpticMeshComp->GetSocketTransform(TEXT("SOCKET_Aim"), RTS_Actor);
+	EmitterSocketActorSpaceTransform = MuzzleMeshComp->GetSocketTransform(TEXT("SOCKET_Emitter"), RTS_Actor);
+	
 	// Set up the gun to have no collision
 	// TODO : Collision is probably required. Change this to suit the game's needs
 	SetActorEnableCollision(false);

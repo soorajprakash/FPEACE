@@ -119,10 +119,10 @@ void UFPCCharacterMovementComponent::TickComponent(float DeltaTime, enum ELevelT
 	CurrentVelocityAccelerationDot = FVector::DotProduct(NormalizedVelocity, NormalizedAcceleration);
 
 	// Calculate Yaw Angular Velocity
-	float CurrentYaw = OwningCharacter->GetActorRotation().Yaw;
-	CharacterYawDelta = CurrentYaw - PrevYaw;
+	FRotator CurrentRotation = OwningCharacter->GetActorRotation();
+	CharacterYawDelta = CurrentRotation.Yaw - PrevRotation.Yaw;
 	YawAngularVelocity = CharacterYawDelta / DeltaTime;
-	PrevYaw = CurrentYaw;
+	PrevRotation = CurrentRotation;
 
 	// Calculate the character's distance to ground if in falling state
 	if (IsFalling())
@@ -151,7 +151,7 @@ void UFPCCharacterMovementComponent::TickComponent(float DeltaTime, enum ELevelT
 
 	if (!IsCharacterTurningInPlace)
 		TurnInPlaceStartingYaw = OwningCharacter->GetActorRotation().Yaw;
-	IsCharacterTurningInPlace = !IsCharacterMoving && FMath::Abs(CharacterYawDelta) > 0.1f;
+	IsCharacterTurningInPlace = !IsCharacterMoving && FMath::Abs(CharacterYawDelta) > 0.5f;
 
 	// Update the Lean angle of the character
 	CalculateLeanAngle();
@@ -178,7 +178,7 @@ void UFPCCharacterMovementComponent::HandleLocomotionStateChange()
 	{
 		//Check if the character is in a state where it can only walk.
 		//For Example, when in Crouch state or ADS state or is armed but moving sideways or backwards etc
-		bool canOnlyWalk = IsCrouching() || bIsCharacterInProneState || FPCCharacterWeaponManager->bIsCharacterInADSState || (FPCCharacterWeaponManager->bIsCharacterArmed &&
+		bool canOnlyWalk = IsCrouching() || bIsCharacterInProneState || FPCCharacterWeaponManager->GetWantsToAds() || (FPCCharacterWeaponManager->GetIsCharacterArmed() &&
 			CurrentAccelerationDirection
 			!= ELocomotionDirection::Forward);
 
@@ -188,7 +188,7 @@ void UFPCCharacterMovementComponent::HandleLocomotionStateChange()
 		}
 		else if (currentLocomotionState != TargetLocomotionState)
 		{
-			bool canOnlyRun = !FPCCharacterWeaponManager->bIsCharacterArmed && CurrentVelocityDirection != ELocomotionDirection::Forward;
+			bool canOnlyRun = !FPCCharacterWeaponManager->GetIsCharacterArmed() && CurrentVelocityDirection != ELocomotionDirection::Forward;
 			SetCurrentLocomotionStateWithSettings(canOnlyRun ? ELocomotionState::Running : TargetLocomotionState);
 		}
 	}

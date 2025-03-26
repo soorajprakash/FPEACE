@@ -7,11 +7,13 @@ public class FPEACE : ModuleRules
 {
 	public FPEACE(ReadOnlyTargetRules Target) : base(Target)
 	{
+		PrivateDependencyModuleNames.AddRange(new string[] { "FCTween" });
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 
 		PublicDependencyModuleNames.AddRange(new string[]
 		{
-			"Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput","AnimGraphRuntime", "AnimationLocomotionLibraryRuntime"
+			"Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput", "AnimGraphRuntime",
+			"AnimationLocomotionLibraryRuntime"
 		});
 	}
 }
