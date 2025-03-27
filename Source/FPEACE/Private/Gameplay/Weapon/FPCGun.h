@@ -10,6 +10,30 @@
 class UFPCStaticMeshComponent;
 class UFPCSkeletalMeshComponent;
 
+UENUM(BlueprintType)
+enum EGunFireMode
+{
+	SingleShot,
+	BurstFire,
+	Automatic
+};
+
+USTRUCT(BlueprintType)
+struct FGunSettings
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	TEnumAsByte<EGunFireMode> FireMode;
+
+	/*
+	 * This value is number of bullets per second for automatic fire mode.
+	 * For burst fire, this value is number of bullets per burst.
+	 * For single shot, this value is not used.
+	 */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	float FireRate;
+};
 
 /**
  * The base class for all guns in the game.
@@ -51,6 +75,12 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Gun")
 	TObjectPtr<UFPCStaticMeshComponent> IronSightMeshComp;
+
+
+	//	--------------------- GUN SETTINGS ---------------------
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Gun")
+	FGunSettings GunSettings;
 
 	// --------------------- OVERRIDDEN FUNCTIONS ---------------------
 
