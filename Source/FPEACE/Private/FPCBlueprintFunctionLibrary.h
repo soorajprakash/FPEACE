@@ -6,6 +6,7 @@
 #include "Kismet/BlueprintFunctionLibrary.h"
 #include "FPCBlueprintFunctionLibrary.generated.h"
 
+struct FSequenceEvaluatorReference;
 struct FAnimNode_SequenceEvaluator;
 /**
  * 
@@ -23,10 +24,10 @@ public:
 	static bool GetIfAnimSequenceHasLoopingEnabled(UAnimSequence* TargetSequence);
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, meta=(BlueprintThreadSafe), Category="FPEACE|Animation")
-	static bool GetIfEvaluatorHasValidSequence(const FAnimNode_SequenceEvaluator& SequenceEvaluatorNode);
+	static bool GetIfEvaluatorHasValidSequence(const FSequenceEvaluatorReference& SequenceEvaluatorNode);
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, meta=(BlueprintThreadSafe), Category="FPEACE|Animation")
-	static bool GetIfEvaluatorSequenceIsValidOrEqual(const FAnimNode_SequenceEvaluator& SequenceEvaluatorNode, const UAnimSequenceBase* Sequence);
+	static bool GetIfEvaluatorSequenceIsValidOrEqual(const FSequenceEvaluatorReference& SequenceEvaluatorNode, const UAnimSequenceBase* Sequence);
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, meta=(BlueprintThreadSafe), Category="FPEACE|Animation")
 	static EAdditiveAnimationType GetAnimSequenceAdditiveType(UAnimSequence* TargetSequence);

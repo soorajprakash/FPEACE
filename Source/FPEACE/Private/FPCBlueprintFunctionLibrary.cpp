@@ -2,6 +2,8 @@
 
 
 #include "FPCBlueprintFunctionLibrary.h"
+
+#include "SequenceEvaluatorLibrary.h"
 #include "AnimNodes/AnimNode_SequenceEvaluator.h"
 
 bool UFPCBlueprintFunctionLibrary::GetIfAnimSequenceHasRootMotionDelta(UAnimSequence* TargetSequence)
@@ -18,24 +20,27 @@ bool UFPCBlueprintFunctionLibrary::GetIfAnimSequenceHasLoopingEnabled(UAnimSeque
 	return TargetSequence->bLoop;
 }
 
-bool UFPCBlueprintFunctionLibrary::GetIfEvaluatorHasValidSequence(const FAnimNode_SequenceEvaluator& SequenceEvaluatorNode)
+bool UFPCBlueprintFunctionLibrary::GetIfEvaluatorHasValidSequence(const FSequenceEvaluatorReference& SequenceEvaluatorNode)
 {
-	return SequenceEvaluatorNode.GetSequence() != nullptr;
+	return SequenceEvaluatorNode.GetAnimNode<FAnimNode_SequenceEvaluator>().GetSequence() != nullptr;
 }
 
-bool UFPCBlueprintFunctionLibrary::GetIfEvaluatorSequenceIsValidOrEqual(const FAnimNode_SequenceEvaluator& SequenceEvaluatorNode, const UAnimSequenceBase* Sequence)
+bool UFPCBlueprintFunctionLibrary::GetIfEvaluatorSequenceIsValidOrEqual(const FSequenceEvaluatorReference& SequenceEvaluatorNode, const UAnimSequenceBase* Sequence)
 {
-	UAnimSequenceBase* EvaluatorSequence = SequenceEvaluatorNode.GetSequence();
+	UAnimSequenceBase* EvaluatorSequence = SequenceEvaluatorNode.GetAnimNode<FAnimNode_SequenceEvaluator>().GetSequence();
 
 	if (EvaluatorSequence == nullptr)
 		return false;
 	if (EvaluatorSequence == Sequence)
 		return true;
-	
+
 	return false;
 }
 
 EAdditiveAnimationType UFPCBlueprintFunctionLibrary::GetAnimSequenceAdditiveType(UAnimSequence* TargetSequence)
 {
+	if (!TargetSequence)
+		return AAT_None;
+
 	return TargetSequence->GetAdditiveAnimType();
 }
