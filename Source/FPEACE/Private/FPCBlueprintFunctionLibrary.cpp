@@ -1,4 +1,5 @@
-// Copyright © 2024 Sooraj Prakash. All rights reserved.Unauthorized distribution or sharing of this code is prohibited.
+// Copyright © 2024 Sooraj Prakash. All rights reserved.
+// Unauthorized distribution of this file, or any part of it, is prohibited.
 
 
 #include "FPCBlueprintFunctionLibrary.h"
