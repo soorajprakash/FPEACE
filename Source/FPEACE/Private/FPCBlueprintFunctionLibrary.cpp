@@ -2,6 +2,7 @@
 
 
 #include "FPCBlueprintFunctionLibrary.h"
+#include "AnimNodes/AnimNode_SequenceEvaluator.h"
 
 bool UFPCBlueprintFunctionLibrary::GetIfAnimSequenceHasRootMotionDelta(UAnimSequence* TargetSequence)
 {
@@ -15,6 +16,23 @@ bool UFPCBlueprintFunctionLibrary::GetIfAnimSequenceHasLoopingEnabled(UAnimSeque
 	if (!TargetSequence)
 		return false;
 	return TargetSequence->bLoop;
+}
+
+bool UFPCBlueprintFunctionLibrary::GetIfEvaluatorHasValidSequence(const FAnimNode_SequenceEvaluator& SequenceEvaluatorNode)
+{
+	return SequenceEvaluatorNode.GetSequence() != nullptr;
+}
+
+bool UFPCBlueprintFunctionLibrary::GetIfEvaluatorSequenceIsValidOrEqual(const FAnimNode_SequenceEvaluator& SequenceEvaluatorNode, const UAnimSequenceBase* Sequence)
+{
+	UAnimSequenceBase* EvaluatorSequence = SequenceEvaluatorNode.GetSequence();
+
+	if (EvaluatorSequence == nullptr)
+		return false;
+	if (EvaluatorSequence == Sequence)
+		return true;
+	
+	return false;
 }
 
 EAdditiveAnimationType UFPCBlueprintFunctionLibrary::GetAnimSequenceAdditiveType(UAnimSequence* TargetSequence)
