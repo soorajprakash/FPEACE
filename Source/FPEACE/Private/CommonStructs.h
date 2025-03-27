@@ -5,17 +5,19 @@
 
 #include "CommonStructs.generated.h"
 
+enum class ELocomotionState : uint8;
 class UAnimSequence;
 
 /*
- * A Collection of animation sequences used for a cycle animation directionality
+ * A Collection of soft references to animation sequences used for a cycle animation directionality
  */
 USTRUCT(BlueprintType)
 struct FCycleAnimSet
 {
 	GENERATED_BODY()
 
-	FCycleAnimSet(): WeaponHandGripPose(nullptr), bAreDirectionalAnimsAdditive(false), bSyncUpperAndLowerBodyPlayers(true), bSyncAsLeader(false), Forward(nullptr), Backward(nullptr), Right(nullptr),
+	FCycleAnimSet(): WeaponHandGripPose(nullptr), bAreDirectionalAnimsAdditive(false), bSyncUpperAndLowerBodyPlayers(true), bSyncAsLeader(false), BlendTime(0.3f), Forward(nullptr), Backward(nullptr),
+	                 Right(nullptr),
 	                 Left(nullptr)
 	{
 	}
@@ -31,6 +33,9 @@ struct FCycleAnimSet
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	bool bSyncAsLeader;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, meta=(ClampMin=0, ClampMax=10))
+	float BlendTime;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	TObjectPtr<UAnimSequence> Forward;
@@ -111,6 +116,18 @@ struct FLocomotionStateSetting
 };
 
 /*
+ * Holds the set of locomotion setting for a given stance
+ */
+USTRUCT()
+struct FLocomotionStanceSetting
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditDefaultsOnly)
+	TMap<ELocomotionState, FLocomotionStateSetting> LocomotionStateSettings;
+};
+
+/*
  * Used to hold the camera settings for different camera modes
  */
 USTRUCT()
@@ -142,6 +159,12 @@ struct FCharacterCameraModeSettings
 
 	UPROPERTY(EditDefaultsOnly)
 	bool bUsePawnControlRotation;
+
+	UPROPERTY(EditDefaultsOnly, meta=(ClampMin=40, ClampMax=130))
+	float DefaultCameraFOV = 90;
+
+	UPROPERTY(EditDefaultsOnly, meta=(ClampMin=0.1f, ClampMax=1))
+	float DefaultAimFOVMultiplier = 0.6f;
 
 	UPROPERTY(EditDefaultsOnly)
 	bool bEnableCameraLag;

@@ -32,7 +32,7 @@ void UFPCCharacterAnimationManagerComponent::InitializeComponent()
 	if (OwningCharacter)
 	{
 		TPSBodyMeshComp = OwningCharacter->GetTPSBodyMeshComp();
-		FPSBodyMeshComp = OwningCharacter->GetFPSBodyMeshComp();
+		FPSBodyMeshComp = OwningCharacter->GetFPSArmsMeshComp();
 		FPCCharacterMovementComp = OwningCharacter->GetCharacterMovementComponent();
 		FPCWeaponManagerComp = OwningCharacter->GetFPCCharacterWeaponManager();
 		FPCCharacterData = OwningCharacter->GetCharacterData();
@@ -54,19 +54,19 @@ void UFPCCharacterAnimationManagerComponent::BeginPlay()
 	}
 }
 
-
 // Called every frame
 void UFPCCharacterAnimationManagerComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
 	// Calculate Play rate
-	CurrentAnimPlayRate = FMath::Clamp(FPCCharacterMovementComp->CharacterAbsoluteSpeed2D / FPCCharacterMovementComp->MaxWalkSpeed, 0.f, 1.f);
+	CurrentAnimPlayRate = FMath::Clamp(FPCCharacterMovementComp->GetCharacterAbsoluteSpeed2D() / FPCCharacterMovementComp->MaxWalkSpeed, 0.f, 1.f);
 
 	CharacterLookSpineVertical = FRotator::ZeroRotator;
 	CharacterLookSpineVertical.Roll = -PlayerControllerRef->GetControlRotation().Pitch / 3;
 
-	UpdateValuesForAnimation();
+	// Update if character has reached close to max speed
+	HasCharacterReachedCurrentMaxSpeed = FMath::IsNearlyEqual(FPCCharacterMovementComp->GetCharacterAbsoluteSpeed2D(), FPCCharacterMovementComp->MaxWalkSpeed, 10);
 }
 
 void UFPCCharacterAnimationManagerComponent::LinkCombatAnimClassToCharacter(FName AnimClassNameToLink) const
@@ -75,57 +75,27 @@ void UFPCCharacterAnimationManagerComponent::LinkCombatAnimClassToCharacter(FNam
 	{
 		TPSBodyMeshComp->UnlinkAnimClassLayers(TPSMeshAnimInstance->CurrentLinkedAnimInstance->GetClass());
 		TPSBodyMeshComp->ResetLinkedAnimInstances();
+		TPSMeshAnimInstance->CurrentLinkedAnimInstance->MarkAsGarbage();
 		TPSMeshAnimInstance->CurrentLinkedAnimInstance = nullptr;
 	}
 
 	UClass* TPSCombatAnimClass = GetAnimClassFor(ECameraMode::TPS, AnimClassNameToLink, FString(TEXT("Linking Anim Class To Character"))).LoadSynchronous();
 	TPSBodyMeshComp->LinkAnimClassLayers(TPSCombatAnimClass);
 	TPSMeshAnimInstance->CurrentLinkedAnimInstance = Cast<UFPCLayerAnimInstance>(TPSBodyMeshComp->GetLinkedAnimLayerInstanceByClass(TPSCombatAnimClass));
+	TPSCombatAnimClass = nullptr;
 
 	if (FPSMeshAnimInstance->CurrentLinkedAnimInstance)
 	{
 		FPSBodyMeshComp->UnlinkAnimClassLayers(FPSMeshAnimInstance->CurrentLinkedAnimInstance->GetClass());
 		FPSBodyMeshComp->ResetLinkedAnimInstances();
+		FPSMeshAnimInstance->CurrentLinkedAnimInstance->MarkAsGarbage();
 		FPSMeshAnimInstance->CurrentLinkedAnimInstance = nullptr;
 	}
 
 	UClass* FPSCombatAnimClass = GetAnimClassFor(ECameraMode::FPS, AnimClassNameToLink, FString(TEXT("Linking Anim Class To Character"))).LoadSynchronous();
 	FPSBodyMeshComp->LinkAnimClassLayers(FPSCombatAnimClass);
 	FPSMeshAnimInstance->CurrentLinkedAnimInstance = Cast<UFPCLayerAnimInstance>(FPSBodyMeshComp->GetLinkedAnimLayerInstanceByClass(FPSCombatAnimClass));
-}
-
-void UFPCCharacterAnimationManagerComponent::UpdateValuesForAnimation()
-{
-	if (MovementStateChanged)
-		PrevMovementState = FPCCharacterMovementComp->IsCharacterMoving;
-	MovementStateChanged = FPCCharacterMovementComp->IsCharacterMoving != PrevMovementState;
-
-	if (AccelerationStateChanged)
-		PrevAccelerationState = FPCCharacterMovementComp->IsCharacterAccelerating;
-	AccelerationStateChanged = FPCCharacterMovementComp->IsCharacterAccelerating != PrevAccelerationState;
-
-	// Update if character has reached close to max speed
-	HasCharacterReachedCurrentMaxSpeed = FMath::IsNearlyEqual(FPCCharacterMovementComp->CharacterAbsoluteSpeed2D, FPCCharacterMovementComp->MaxWalkSpeed, 10);
-
-	// Check if Character's Velocity Direction Changed
-	if (VelocityDirectionChanged)
-		FPCCharacterMovementComp->PrevVelocityDirection = FPCCharacterMovementComp->CurrentVelocityDirection;
-	VelocityDirectionChanged = FPCCharacterMovementComp->CurrentVelocityDirection != FPCCharacterMovementComp->PrevVelocityDirection;
-
-	// Check if Character's Acceleration Direction Changed
-	if (AccelerationDirectionChanged)
-		FPCCharacterMovementComp->PrevAccelerationDirection = FPCCharacterMovementComp->CurrentAccelerationDirection;
-	AccelerationDirectionChanged = FPCCharacterMovementComp->CurrentAccelerationDirection != FPCCharacterMovementComp->PrevAccelerationDirection;
-
-	// Check if Character's Current Locomotion State Changed
-	if (CurrentLocomotionStateChanged)
-		FPCCharacterMovementComp->PrevLocomotionState = FPCCharacterMovementComp->currentLocomotionState;
-	CurrentLocomotionStateChanged = FPCCharacterMovementComp->currentLocomotionState != FPCCharacterMovementComp->PrevLocomotionState;
-
-	// Check if Character's Target Locomotion State Changed
-	if (TargetLocomotionStateChanged)
-		FPCCharacterMovementComp->PrevTargetLocomotionState = FPCCharacterMovementComp->TargetLocomotionState;
-	TargetLocomotionStateChanged = FPCCharacterMovementComp->TargetLocomotionState != FPCCharacterMovementComp->PrevTargetLocomotionState;
+	FPSCombatAnimClass = nullptr;
 }
 
 TSoftClassPtr<UFPCLayerAnimInstance> UFPCCharacterAnimationManagerComponent::GetAnimClassFor(ECameraMode TargetCameraMode, FName AnimStateName, const FString& ReasonForGettingThisAnim) const
@@ -147,7 +117,6 @@ TSoftClassPtr<UFPCLayerAnimInstance> UFPCCharacterAnimationManagerComponent::Get
 			}
 		}
 	}
-
 
 	return ReturnValue;
 }

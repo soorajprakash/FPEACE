@@ -5,9 +5,14 @@
 
 #include "CoreMinimal.h"
 #include "CommonEnums.h"
+#include "AnimNotifies/FPCCharacterAnimationStateChangedNotify.h"
 #include "Gameplay/FPCActorComponent.h"
+#include "Gameplay/Weapon/FPCWeapon.h"
+#include "Kismet/KismetMathLibrary.h"
 #include "FPCCharacterWeaponManagerComponent.generated.h"
 
+class FCTweenInstanceFloat;
+class UFPCCharacterMovementComponent;
 class UFPCCharacterCameraManagerComponent;
 class UFPCCharacterData;
 class UFPCSkeletalMeshComponent;
@@ -25,28 +30,98 @@ public:
 	// Sets default values for this component's properties
 	UFPCCharacterWeaponManagerComponent();
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	bool bIsCharacterArmed = false;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	bool bIsCharacterInADSState = false;
-
 	FWeaponEquipEvent OnNewWeaponEquipped;
 
 	void UpdateWeaponVisibility(const bool IsInTPSCameraMode) const;
 
+	void SwitchADSState(bool UseADS);
+
+	UFUNCTION()
+	void OnADSAnimStateChanged(ENotifyAnimationType AnimType, ENotifyAnimationEventType AnimEventType);
+
+	// ----------------------------- GETTERS -----------------------------
+	TObjectPtr<AFPCWeapon> GetCurrentFPSWeaponRef() const { return CurrentFPSWeaponRef; }
+
+	TObjectPtr<AFPCWeapon> GetCurrentTPSWeaponRef() const { return CurrentTPSWeaponRef; }
+
+	FWeaponAnimSettings GetCurrentWeaponAnimSettings() const { return CurrentWeaponAnimSettings; }
+
+	bool GetIsCharacterArmed() const { return bIsCharacterArmed; }
+
+	bool GetWantsToAds() const { return bWantsToADS; }
+
 protected:
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	bool bIsCharacterArmed = false;
+
+	UPROPERTY(BlueprintReadOnly, BlueprintReadOnly)
+	bool bIsCharacterInADSState = false;
+
+	UPROPERTY(BlueprintReadOnly, BlueprintReadOnly)
+	bool bIsADSInProgress = false;
+
+	UPROPERTY(BlueprintReadOnly, BlueprintReadOnly)
+	bool bWantsToADS = false;
+
+	UPROPERTY(BlueprintReadOnly)
 	TObjectPtr<AFPCWeapon> CurrentFPSWeaponRef;
 
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(BlueprintReadOnly)
 	TObjectPtr<AFPCWeapon> CurrentTPSWeaponRef;
-	
+
+	/*
+	 * Reference to the weapon animation settings struct from the current weapon that is equipped
+	 */
+	UPROPERTY(BlueprintReadOnly)
+	FWeaponAnimSettings CurrentWeaponAnimSettings;
+
+	UPROPERTY(BlueprintReadOnly)
+	FWeaponLagSettings CurrentWeaponLagSettings;
+
+	UPROPERTY(BlueprintReadOnly)
+	FVector CurrentWeaponLocationLag;
+
+	UPROPERTY(BlueprintReadOnly)
+	FRotator CurrentWeaponRotationLag;
+
+	UPROPERTY(BlueprintReadOnly)
+	FVector CurrentWeaponRotationLagVector;
+
+	UPROPERTY(BlueprintReadOnly)
+	FTransform CurrentWeaponEmitterSocketOffset;
+
+	UPROPERTY(BlueprintReadOnly)
+	FTransform CurrentWeaponAimSocketOffset;
+
+	UPROPERTY(BlueprintReadOnly)
+	float CurrentADSBlendFactor;
+
+	UPROPERTY(BlueprintReadWrite)
+	FVector CurrentWeaponHandIKLocationOffset;
+
+	UPROPERTY(BlueprintReadWrite)
+	FRotator CurrentWeaponHandIKRotationOffset;
+
+	UPROPERTY(BlueprintReadOnly)
+	bool ADSStateChanged;
+
 	virtual void InitializeComponent() override;
 
+	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+
 private:
+	FVectorSpringState LocationLagSpringState;
+	FVectorSpringState RotationLagSpringState;
+	
+	FCTweenInstanceFloat* ADSBlendFactorTween;
+
+	bool bLastFrameWantsADSState;
+
 	UPROPERTY()
 	TObjectPtr<AFPCCharacter> OwningCharacter;
+
+	UPROPERTY()
+	TObjectPtr<UFPCCharacterMovementComponent> OwningCharacterMovementComp;
 
 	UPROPERTY()
 	TObjectPtr<UFPCCharacterData> FPCCharacterData;
@@ -61,8 +136,17 @@ private:
 	TObjectPtr<UFPCCharacterCameraManagerComponent> FPCCameraManagerComp;
 
 	UFUNCTION(BlueprintCallable)
-	void PickUpAndEquipWeapon(const TSubclassOf<AFPCWeapon>& WeaponBP);
+	void PickUpAndEquipWeapon(const TSoftClassPtr<AFPCWeapon>& WeaponBP);
 
 	UFUNCTION()
 	void CharacterCameraModeChanged(ECameraMode NewCameraMode);
+
+	UFUNCTION()
+	void CharacterCurrentLocomotionStateChanged(ELocomotionState NewLocomotionState);
+
+	void SetCurrentWeaponHandIKOffset();
+
+	void UpdateStateChanges();
+
+	void CalculateCurrentWeaponLagValues();
 };

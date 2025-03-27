@@ -2,7 +2,6 @@
 // Unauthorized distribution of this file, or any part of it, is prohibited.
 
 #include "FPCWeapon.h"
-
 #include "CommonEnums.h"
 
 AFPCWeapon::AFPCWeapon(): UsedInCameraMode(ECameraMode::TPS)
@@ -41,6 +40,7 @@ void AFPCWeapon::SetupWeapon(ECameraMode TargetCameraMode, USceneComponent* Atta
 			WeaponComp->SetOnlyOwnerSee(UsedInCameraMode == ECameraMode::FPS);
 			WeaponComp->SetCastShadow(UsedInCameraMode == ECameraMode::TPS);
 			WeaponComp->SetCastHiddenShadow(UsedInCameraMode == ECameraMode::TPS);
+			WeaponComp->FirstPersonPrimitiveType = TargetCameraMode == ECameraMode::FPS ? EFirstPersonPrimitiveType::FirstPerson : EFirstPersonPrimitiveType::None;
 		}
 	}
 }

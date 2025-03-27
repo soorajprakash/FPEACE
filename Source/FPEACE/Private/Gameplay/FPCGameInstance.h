@@ -20,7 +20,7 @@ public:
 	virtual ~UFPCGameInstance() override;
 
 	UPROPERTY(EditDefaultsOnly)
-	TObjectPtr<UFPCCharacterData> CharacterData;
+	TSoftObjectPtr<UFPCCharacterData> CharacterData;
 
 	static UFPCGameInstance* GetInstance(const UObject* WorldContextObject);
 

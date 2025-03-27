@@ -47,9 +47,14 @@ public:
 		return TPSBodyMeshComp;
 	}
 
-	TObjectPtr<UFPCSkeletalMeshComponent> GetFPSBodyMeshComp() const
+	TObjectPtr<UFPCSkeletalMeshComponent> GetFPSArmsMeshComp() const
 	{
-		return FPSBodyMeshComp;
+		return FPSArmsMeshComp;
+	}
+
+	TObjectPtr<UFPCSkeletalMeshComponent> GetFPSLowerBodyMeshComp() const
+	{
+		return FPSLowerBodyMeshComp;
 	}
 
 	TObjectPtr<UFPCCapsuleComponent> GetFPCCapsuleComp() const
@@ -62,9 +67,9 @@ public:
 		return FPCMovementComp;
 	}
 
-	TObjectPtr<UFPCCameraComponent> GetFPCCameraComp() const
+	TObjectPtr<UFPCCameraComponent> GetCharacterCameraComp() const
 	{
-		return FPCCameraComp;
+		return CharacterCameraComp;
 	}
 
 	TObjectPtr<UFPCSpringArmComponent> GetFPCSpringArmComp() const
@@ -99,7 +104,10 @@ protected:
 	TObjectPtr<UFPCSkeletalMeshComponent> TPSBodyMeshComp;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="FPC/Components")
-	TObjectPtr<UFPCSkeletalMeshComponent> FPSBodyMeshComp;
+	TObjectPtr<UFPCSkeletalMeshComponent> FPSArmsMeshComp;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="FPC/Components")
+	TObjectPtr<UFPCSkeletalMeshComponent> FPSLowerBodyMeshComp;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="FPC/Components")
 	TObjectPtr<UFPCCapsuleComponent> FPCCapsuleComp;
@@ -108,7 +116,7 @@ protected:
 	TObjectPtr<UFPCCharacterMovementComponent> FPCMovementComp;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="FPC/Components")
-	TObjectPtr<UFPCCameraComponent> FPCCameraComp;
+	TObjectPtr<UFPCCameraComponent> CharacterCameraComp;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="FPC/Components")
 	TObjectPtr<UFPCSpringArmComponent> FPCSpringArmComp;
@@ -168,7 +176,13 @@ protected:
 	 */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="FPC/Inputs")
 	TSoftObjectPtr<UInputAction> JumpAction;
-	
+
+	/*
+	 * Reference to the ADS Input Action object
+	 */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="FPC/Inputs")
+	TSoftObjectPtr<UInputAction> ADSAction;
+
 	/*
 	 * Reference to the Camera Switching Input Action object
 	 */
@@ -194,7 +208,6 @@ protected:
 	virtual void AddControllerYawInput(float Val) override;
 
 private:
-	
 	/**
 	 *Reference to Enhanced Input Component
 	 */
@@ -223,6 +236,10 @@ private:
 	void ToggleCrouch();
 
 	void ToggleCameraMode();
+
+	void ActivateADS();
+
+	void DeactivateADS();
 
 	void JumpStarted(const FInputActionValue& InputActionValue);
 

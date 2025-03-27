@@ -4,11 +4,15 @@
 #include "FPCCharacterCameraManagerComponent.h"
 #include "CommonEnums.h"
 #include "CommonStructs.h"
+#include "FCTween.h"
+#include "FPCCameraComponent.h"
 #include "FPCCharacter.h"
+#include "FPCCharacterWeaponManagerComponent.h"
 #include "FPCPlayerController.h"
 #include "DataStructures/FPCCharacterData.h"
 #include "Gameplay/FPCSkeletalMeshComponent.h"
 #include "Gameplay/FPCSpringArmComponent.h"
+#include "Kismet/KismetSystemLibrary.h"
 
 
 void UFPCCharacterCameraManagerComponent::SetCameraMode(ECameraMode NewCameraMode)
@@ -22,13 +26,14 @@ void UFPCCharacterCameraManagerComponent::SetCameraMode(ECameraMode NewCameraMod
 	// The idea is to basically always have the TPS meshes visible to the world (Since it's needed for multiplayer)
 	// The FPS meshes is only visible to the owner of the character when in FPS mode and never visible to the world
 	TPSBodyMeshComp->SetOwnerNoSee(!IsInTPSCameraMode);
-	FPSBodyMeshComp->SetHiddenInGame(IsInTPSCameraMode);
+	FPSArmsMeshComp->SetHiddenInGame(IsInTPSCameraMode);
+	FPSLowerBodyMeshComp->SetHiddenInGame(IsInTPSCameraMode);
 
 	// Set up the spring Arm and Camera components according to current camera mode
 	switch (CurrentCameraMode)
 	{
 	case ECameraMode::FPS:
-		FPCSpringArmComp->AttachToComponent(FPSBodyMeshComp, FAttachmentTransformRules::SnapToTargetNotIncludingScale, TEXT("SOCKET_Camera"));
+		FPCSpringArmComp->AttachToComponent(FPSArmsMeshComp, FAttachmentTransformRules::SnapToTargetNotIncludingScale, TEXT("SOCKET_Camera"));
 		FPCSpringArmComp->TargetArmLength = FPCCharacterData->CameraModeSettings[ECameraMode::FPS].MaxSpringArmLength;
 		break;
 
@@ -49,6 +54,7 @@ void UFPCCharacterCameraManagerComponent::SetCameraSettings(ECameraMode NewCamer
 {
 	const FCharacterCameraModeSettings& TargetCameraModeSettings = FPCCharacterData->CameraModeSettings[NewCameraMode];
 
+	// Spring Arm Settings
 	FPCSpringArmComp->SetRelativeLocation(TargetCameraModeSettings.SpringArmTramsformOffset);
 	FPCSpringArmComp->SocketOffset = TargetCameraModeSettings.SpringArmSocketOffset;
 	FPCSpringArmComp->TargetOffset = TargetCameraModeSettings.SpringArmTargetOffset;
@@ -56,6 +62,18 @@ void UFPCCharacterCameraManagerComponent::SetCameraSettings(ECameraMode NewCamer
 	FPCSpringArmComp->bEnableCameraLag = TargetCameraModeSettings.bEnableCameraLag;
 	FPCSpringArmComp->CameraLagSpeed = TargetCameraModeSettings.CameraLagSpeed;
 	FPCSpringArmComp->CameraLagMaxDistance = TargetCameraModeSettings.CameraLagMaxDistance;
+
+	// Camera Settings
+	FPCCameraComp->SetFieldOfView(GetTargetFOV(NewCameraMode));
+}
+
+float UFPCCharacterCameraManagerComponent::GetTargetFOV(const ECameraMode TargetCameraMode) const
+{
+	float currentDefaultFOV = TargetCameraMode == ECameraMode::TPS ? DefaultTPSCameraFieldOfView : DefaultFPSCameraFieldOfView;
+	float ADSFOVMultiplier = TargetCameraMode == ECameraMode::TPS
+		                         ? FPCCharacterData->CameraModeSettings[ECameraMode::TPS].DefaultAimFOVMultiplier
+		                         : FPCWeaponManagerComp->GetCurrentWeaponAnimSettings().FirstPersonADSFieldOfViewMultiplier;
+	return FPCWeaponManagerComp->GetWantsToAds() ? currentDefaultFOV * ADSFOVMultiplier : currentDefaultFOV;
 }
 
 void UFPCCharacterCameraManagerComponent::InitializeComponent()
@@ -67,11 +85,20 @@ void UFPCCharacterCameraManagerComponent::InitializeComponent()
 
 	if (OwningCharacter)
 	{
+		FPCWeaponManagerComp = OwningCharacter->GetFPCCharacterWeaponManager();
 		FPCSpringArmComp = OwningCharacter->GetFPCSpringArmComp();
-		FPCCameraComp = OwningCharacter->GetFPCCameraComp();
+		FPCCameraComp = OwningCharacter->GetCharacterCameraComp();
 		FPCCharacterData = OwningCharacter->GetCharacterData();
 		TPSBodyMeshComp = OwningCharacter->GetTPSBodyMeshComp();
-		FPSBodyMeshComp = OwningCharacter->GetFPSBodyMeshComp();
+		FPSArmsMeshComp = OwningCharacter->GetFPSArmsMeshComp();
+		FPSLowerBodyMeshComp = OwningCharacter->GetFPSLowerBodyMeshComp();
+	}
+
+	// Setup Values
+	if (FPCCharacterData)
+	{
+		DefaultTPSCameraFieldOfView = FPCCharacterData->CameraModeSettings[ECameraMode::TPS].DefaultCameraFOV;
+		DefaultFPSCameraFieldOfView = FPCCharacterData->CameraModeSettings[ECameraMode::FPS].DefaultCameraFOV;
 	}
 }
 
@@ -88,12 +115,30 @@ void UFPCCharacterCameraManagerComponent::BeginPlay()
 	SetCameraMode(FPCCharacterData->StartingCameraMode);
 }
 
+void UFPCCharacterCameraManagerComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+{
+	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+
+	FRotator CurrentCameraRotation = FPCCameraComp->GetComponentRotation();
+	CameraPitchDelta = CurrentCameraRotation.Pitch - PrevCameraRotation.Pitch;
+	PrevCameraRotation = CurrentCameraRotation;
+	
+	FHitResult HitResult;
+	FVector CameraLocation = FPCCameraComp->GetComponentLocation();
+	FVector EndLocation = CameraLocation + FPCCameraComp->GetForwardVector() * 10000;
+	if (UKismetSystemLibrary::LineTraceSingle(GetWorld(), CameraLocation, EndLocation, UEngineTypes::ConvertToTraceType(ECC_Visibility), false, TArray<AActor*>{}, EDrawDebugTrace::None, HitResult,
+	                                          true))
+		CurrentCameraLookAtHit = HitResult.Location;
+	else
+		CurrentCameraLookAtHit = EndLocation;
+}
+
 // Sets default values for this component's properties
 UFPCCharacterCameraManagerComponent::UFPCCharacterCameraManagerComponent()
 {
 	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
 	// off to improve performance if you don't need them.
-	PrimaryComponentTick.bCanEverTick = false;
+	PrimaryComponentTick.bCanEverTick = true;
 	bWantsInitializeComponent = true;
 }
 
@@ -106,4 +151,14 @@ void UFPCCharacterCameraManagerComponent::UpdateCameraState() const
 void UFPCCharacterCameraManagerComponent::ToggleCameraMode()
 {
 	SetCameraMode(CurrentCameraMode == ECameraMode::FPS ? ECameraMode::TPS : ECameraMode::FPS);
+}
+
+void UFPCCharacterCameraManagerComponent::SwitchCameraFOV(bool UseADS)
+{
+	if (CameraFOVTween)
+		CameraFOVTween->Destroy();
+
+	float startingFOV = FPCCameraComp->FieldOfView;
+	CameraFOVTween = FCTween::Play(startingFOV, GetTargetFOV(CurrentCameraMode), [&](float Value) { FPCCameraComp->SetFieldOfView(Value); },
+	                               FPCWeaponManagerComp->GetCurrentWeaponAnimSettings().FocusTime);
 }

@@ -42,30 +42,6 @@ protected:
 	UPROPERTY(BlueprintReadOnly)
 	float CurrentAnimPlayRate = false;
 
-	UPROPERTY(BlueprintReadOnly)
-	bool VelocityDirectionChanged = false;
-
-	UPROPERTY(BlueprintReadOnly)
-	bool MovementStateChanged = false;
-
-	UPROPERTY(BlueprintReadOnly)
-	bool AccelerationStateChanged = false;
-
-	UPROPERTY(BlueprintReadOnly)
-	bool AccelerationDirectionChanged = false;
-
-	UPROPERTY(BlueprintReadOnly)
-	bool CurrentLocomotionStateChanged = false;
-
-	UPROPERTY(BlueprintReadOnly)
-	bool TargetLocomotionStateChanged = false;
-
-	UPROPERTY(BlueprintReadOnly)
-	bool PrevMovementState = false;
-
-	UPROPERTY(BlueprintReadOnly)
-	bool PrevAccelerationState = false;
-
 	/*
 	 * Reference to the anim instance running on the base skeletal mesh component
 	 */
@@ -107,8 +83,6 @@ private:
 	TObjectPtr<UFPCCharacterWeaponManagerComponent> FPCWeaponManagerComp;
 
 	void LinkCombatAnimClassToCharacter(FName AnimClassNameToLink) const;
-
-	void UpdateValuesForAnimation();
 
 	TSoftClassPtr<UFPCLayerAnimInstance> GetAnimClassFor(ECameraMode TargetCameraMode, FName AnimStateName, const FString& ReasonForGettingThisAnim) const;
 

@@ -82,7 +82,7 @@ public:
 	 */
 	UFUNCTION(BlueprintCallable, BlueprintPure, meta=(BlueprintThreadSafe))
 	void GetMostRecentSequenceStateWithID(const TArray<FString>& IDSubstrings, FSkeletalAnimInstanceSequenceState& OutState);
-
+	
 private:
 	/*
 	 * Holds the states of all registered sequence players or evaluators currently active in the anim instance

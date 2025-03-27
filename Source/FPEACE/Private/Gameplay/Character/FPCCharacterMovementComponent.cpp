@@ -24,12 +24,14 @@ UFPCCharacterMovementComponent::UFPCCharacterMovementComponent()
 
 void UFPCCharacterMovementComponent::ToggleRunSprint()
 {
-	TargetLocomotionState = TargetLocomotionState != ELocomotionState::Running ? ELocomotionState::Running : ELocomotionState::Sprinting;
+	if (IsCharacterAccelerating)
+		SetTargetLocomotionState(TargetLocomotionState != ELocomotionState::Running ? ELocomotionState::Running : ELocomotionState::Sprinting);
 }
 
 void UFPCCharacterMovementComponent::ToggleCrouch()
 {
 	bWantsToCrouch = !bWantsToCrouch;
+	currentLocomotionStance = bWantsToCrouch ? ELocomotionStance::Crouching : ELocomotionStance::Standing;
 }
 
 void UFPCCharacterMovementComponent::InitializeComponent()
@@ -69,27 +71,39 @@ void UFPCCharacterMovementComponent::TickComponent(float DeltaTime, enum ELevelT
 	CharacterAbsoluteSpeed2D = UKismetMathLibrary::VSizeXY(CharacterVelocity2D);
 	CharacterNormalizedSpeed = CharacterAbsoluteSpeed / MaxWalkSpeed;
 
-	//Calculate the direction angles
-	if (!FMath::IsNearlyZero(CharacterAcceleration2D.Size()))
-	{
-		AccelerationDirectionAngle = UKismetAnimationLibrary::CalculateDirection(CharacterAcceleration2D, OwningCharacter->GetActorRotation());
-		SetCurrentAccelerationDirection(CalculateLocomotionDirection(AccelerationDirectionAngle, CurrentAccelerationDirection));
-	}
-
-	if (!FMath::IsNearlyZero(CharacterVelocity2D.Size()))
-	{
-		VelocityDirectionAngle = UKismetAnimationLibrary::CalculateDirection(CharacterVelocity2D, OwningCharacter->GetActorRotation());
-		SetCurrentVelocityDirection(CalculateLocomotionDirection(VelocityDirectionAngle, CurrentVelocityDirection));
-		UpdateDirectionalMaxWalkSpeed(CurrentVelocityDirection);
-	}
-
 	// Update if the character is moving
 	if (IsCharacterMoving && CharacterVelocity2D.Length() < 1)
 		IsCharacterMoving = false;
 	else if (!IsCharacterMoving && CharacterVelocity2D.Length() > 10)
 		IsCharacterMoving = true;
 
-	IsCharacterAccelerating = !FMath::IsNearlyZero(CharacterAcceleration2D.Length());
+	IsCharacterAccelerating = !CharacterAcceleration.IsNearlyZero();
+
+	//Calculate the directions
+	if (IsCharacterAccelerating)
+	{
+		AccelerationDirectionAngle = UKismetAnimationLibrary::CalculateDirection(CharacterAcceleration2D, OwningCharacter->GetActorRotation());
+		SetCurrentAccelerationDirection(CalculateLocomotionDirection(AccelerationDirectionAngle, CurrentAccelerationDirection));
+	}
+	else
+	{
+		AccelerationDirectionAngle = 0;
+		SetCurrentAccelerationDirection(ELocomotionDirection::Center);
+	}
+
+	if (!FMath::IsNearlyZero(CharacterVelocity2D.Size()))
+	{
+		VelocityDirectionAngle = UKismetAnimationLibrary::CalculateDirection(CharacterVelocity2D, OwningCharacter->GetActorRotation());
+		SetCurrentVelocityDirection(CalculateLocomotionDirection(VelocityDirectionAngle, CurrentVelocityDirection));
+
+		// if (currentLocomotionState != ELocomotionState::Stationary)
+		UpdateDirectionalMaxWalkSpeed(CurrentVelocityDirection);
+	}
+	else
+	{
+		VelocityDirectionAngle = 0;
+		SetCurrentVelocityDirection(ELocomotionDirection::Center);
+	}
 
 	// Calculate the current delta distance covered by the character
 	FVector CurrentWorldLocation = GetActorLocation();
@@ -105,10 +119,10 @@ void UFPCCharacterMovementComponent::TickComponent(float DeltaTime, enum ELevelT
 	CurrentVelocityAccelerationDot = FVector::DotProduct(NormalizedVelocity, NormalizedAcceleration);
 
 	// Calculate Yaw Angular Velocity
-	float CurrentYaw = OwningCharacter->GetActorRotation().Yaw;
-	CharacterYawDelta = CurrentYaw - PrevYaw;
+	FRotator CurrentRotation = OwningCharacter->GetActorRotation();
+	CharacterYawDelta = CurrentRotation.Yaw - PrevRotation.Yaw;
 	YawAngularVelocity = CharacterYawDelta / DeltaTime;
-	PrevYaw = CurrentYaw;
+	PrevRotation = CurrentRotation;
 
 	// Calculate the character's distance to ground if in falling state
 	if (IsFalling())
@@ -137,41 +151,67 @@ void UFPCCharacterMovementComponent::TickComponent(float DeltaTime, enum ELevelT
 
 	if (!IsCharacterTurningInPlace)
 		TurnInPlaceStartingYaw = OwningCharacter->GetActorRotation().Yaw;
-	IsCharacterTurningInPlace = !IsCharacterMoving && FMath::Abs(CharacterYawDelta) > 0.1f;
+	IsCharacterTurningInPlace = !IsCharacterMoving && FMath::Abs(CharacterYawDelta) > 0.5f;
 
 	// Update the Lean angle of the character
 	CalculateLeanAngle();
 
 	// Update the locomotion state of the character to reach the target state
 	HandleLocomotionStateChange();
+
+	IsCharacterSlowingDown = LastFrameMaxSpeed > (IsCrouching() ? MaxWalkSpeedCrouched : MaxWalkSpeed);
+	LastFrameMaxSpeed = IsCrouching() ? MaxWalkSpeedCrouched : MaxWalkSpeed;
+
+	UpdateStateChanges();
 }
 
 void UFPCCharacterMovementComponent::HandleLocomotionStateChange()
 {
 	// Set the character to default locomotion target state if it's not moving
 	// TODO: Allow the default state to be set somewhere globally
-	if (!IsCharacterMoving && !IsCharacterAccelerating && TargetLocomotionState != ELocomotionState::Running)
-		TargetLocomotionState = ELocomotionState::Running;
-
-	//Check if the character is in a state where it can only walk.
-	//For Example, when in Crouch state or ADS state or is armed but moving sideways or backwards etc
-	bool canOnlyWalk = IsCrouching() || bIsCharacterInProneState || FPCCharacterWeaponManager->bIsCharacterInADSState || (FPCCharacterWeaponManager->bIsCharacterArmed && CurrentAccelerationDirection
-		!= ELocomotionDirection::Forward);
-
-	if (canOnlyWalk)
+	if (!IsCharacterAccelerating)
 	{
-		SetCurrentLocomotionStateWithSettings(IsCrouching() ? ELocomotionState::Crouching : ELocomotionState::Walking);
+		SetCurrentLocomotionStateWithSettings(ELocomotionState::Stationary);
+		SetTargetLocomotionState(ELocomotionState::Running);
 	}
-	else if (currentLocomotionState != TargetLocomotionState)
+	else
 	{
-		bool canOnlyRun = !FPCCharacterWeaponManager->bIsCharacterArmed && CurrentVelocityDirection != ELocomotionDirection::Forward;
-		SetCurrentLocomotionStateWithSettings(canOnlyRun ? ELocomotionState::Running : TargetLocomotionState);
+		//Check if the character is in a state where it can only walk.
+		//For Example, when in Crouch state or ADS state or is armed but moving sideways or backwards etc
+		bool canOnlyWalk = IsCrouching() || bIsCharacterInProneState || FPCCharacterWeaponManager->GetWantsToAds() || (FPCCharacterWeaponManager->GetIsCharacterArmed() &&
+			CurrentAccelerationDirection
+			!= ELocomotionDirection::Forward);
+
+		if (canOnlyWalk)
+		{
+			SetCurrentLocomotionStateWithSettings(ELocomotionState::Walking);
+		}
+		else if (currentLocomotionState != TargetLocomotionState)
+		{
+			bool canOnlyRun = !FPCCharacterWeaponManager->GetIsCharacterArmed() && CurrentVelocityDirection != ELocomotionDirection::Forward;
+			SetCurrentLocomotionStateWithSettings(canOnlyRun ? ELocomotionState::Running : TargetLocomotionState);
+		}
 	}
 }
 
 void UFPCCharacterMovementComponent::SetCurrentLocomotionState(ELocomotionState newLocomotionState)
 {
+	if (newLocomotionState == currentLocomotionState)
+		return;
+
 	currentLocomotionState = newLocomotionState;
+
+	OnCurrentLocomotionStateChanged.Broadcast(currentLocomotionState);
+}
+
+void UFPCCharacterMovementComponent::SetTargetLocomotionState(ELocomotionState newLocomotionState)
+{
+	if (newLocomotionState == TargetLocomotionState)
+		return;
+
+	TargetLocomotionState = newLocomotionState;
+
+	OnTargetLocomotionStateChanged.Broadcast(TargetLocomotionState);
 }
 
 void UFPCCharacterMovementComponent::SetCurrentLocomotionStateWithSettings(ELocomotionState newLocomotionState)
@@ -179,6 +219,8 @@ void UFPCCharacterMovementComponent::SetCurrentLocomotionStateWithSettings(ELoco
 	if (currentLocomotionState != newLocomotionState)
 	{
 		SetCurrentLocomotionState(newLocomotionState);
+
+		// if (currentLocomotionState != ELocomotionState::Stationary)
 		SetLocomotionStateSettings(currentLocomotionState);
 	}
 }
@@ -201,7 +243,7 @@ void UFPCCharacterMovementComponent::SetCurrentAccelerationDirection(ELocomotion
 
 void UFPCCharacterMovementComponent::SetLocomotionStateSettings(ELocomotionState newLocomotionState)
 {
-	const FLocomotionStateSetting& StateSettings = FPCCharacterData->LocomotionStateSettings[newLocomotionState];
+	const FLocomotionStateSetting& StateSettings = FPCCharacterData->LocomotionStanceSettings[currentLocomotionStance].LocomotionStateSettings[newLocomotionState];
 	bUseSeparateBrakingFriction = StateSettings.bUseSeparateBrakingFriction;
 	MaxWalkSpeed = StateSettings.MaxWalkSpeedForward;
 	MaxWalkSpeedCrouched = StateSettings.MaxWalkSpeedForward;
@@ -213,7 +255,7 @@ void UFPCCharacterMovementComponent::SetLocomotionStateSettings(ELocomotionState
 
 void UFPCCharacterMovementComponent::UpdateDirectionalMaxWalkSpeed(ELocomotionDirection newVelocityDirection)
 {
-	const FLocomotionStateSetting& StateSettings = FPCCharacterData->LocomotionStateSettings[currentLocomotionState];
+	const FLocomotionStateSetting& StateSettings = FPCCharacterData->LocomotionStanceSettings[currentLocomotionStance].LocomotionStateSettings[currentLocomotionState];
 	float maxDirectionalWalkSpeed = 0;
 	switch (newVelocityDirection)
 	{
@@ -232,32 +274,82 @@ void UFPCCharacterMovementComponent::UpdateDirectionalMaxWalkSpeed(ELocomotionDi
 	case ELocomotionDirection::Left:
 		maxDirectionalWalkSpeed = StateSettings.MaxWalkSpeedLeft;
 		break;
+	default: ;
 	}
 
-	if (currentLocomotionState == ELocomotionState::Crouching)
+	if (currentLocomotionStance == ELocomotionStance::Crouching)
 		MaxWalkSpeedCrouched = maxDirectionalWalkSpeed;
 	else
 		MaxWalkSpeed = maxDirectionalWalkSpeed;
 }
 
+void UFPCCharacterMovementComponent::UpdateStateChanges()
+{
+	// Check if the character changed it's moving state
+	MovementStateChanged = IsCharacterMoving != WasMovingLastFrame;
+	if (MovementStateChanged)
+		PrevMovementState = WasMovingLastFrame;
+	WasMovingLastFrame = IsCharacterMoving;
+
+	// Check if the character changed its acceleration state
+	AccelerationStateChanged = IsCharacterAccelerating != WasAcceleratingLastFrame;
+	if (AccelerationStateChanged)
+		PrevAccelerationState = WasAcceleratingLastFrame;
+	WasAcceleratingLastFrame = IsCharacterAccelerating;
+
+	// Check if Character's Current Locomotion State Changed
+	CurrentLocomotionStateChanged = currentLocomotionState != LastFrameLocomotionState;
+	if (CurrentLocomotionStateChanged)
+		PrevLocomotionState = LastFrameLocomotionState;
+	LastFrameLocomotionState = currentLocomotionState;
+
+	// Check if Character's Current Locomotion Stance Changed
+	CurrentLocomotionStanceChanged = currentLocomotionStance != LastFrameLocomotionStance;
+	if (CurrentLocomotionStanceChanged)
+		PrevLocomotionStance = LastFrameLocomotionStance;
+	LastFrameLocomotionStance = currentLocomotionStance;
+
+	// Check if Character's Target Locomotion State Changed
+	TargetLocomotionStateChanged = TargetLocomotionState != LastFrameTargetLocomotionState;
+	if (TargetLocomotionStateChanged)
+		PrevTargetLocomotionState = LastFrameTargetLocomotionState;
+	LastFrameTargetLocomotionState = TargetLocomotionState;
+
+	// Check if Character's Velocity Direction Changed
+	VelocityDirectionChanged = CurrentVelocityDirection != LastFrameVelocityDirection;
+	if (VelocityDirectionChanged)
+		PrevVelocityDirection = LastFrameVelocityDirection;
+	LastFrameVelocityDirection = CurrentVelocityDirection;
+
+	// Check if Character's Acceleration Direction Changed
+	AccelerationDirectionChanged = CurrentAccelerationDirection != LastFrameAccelerationDirection;
+	if (AccelerationDirectionChanged)
+		PrevAccelerationDirection = LastFrameAccelerationDirection;
+	LastFrameAccelerationDirection = CurrentAccelerationDirection;
+
+	// If any of the preceding states changed, this will be true for that frame
+	AnyMovementStateChanged = MovementStateChanged || AccelerationStateChanged || VelocityDirectionChanged ||
+		AccelerationDirectionChanged || CurrentLocomotionStateChanged || CurrentLocomotionStanceChanged || TargetLocomotionStateChanged;
+}
+
 ELocomotionDirection UFPCCharacterMovementComponent::CalculateLocomotionDirection(const float LocomotionDirectionAngle, const ELocomotionDirection CurrentDirection) const
 {
-	// First check for deadzones
+	// First check for dead-zones
 
-	//If current direction is forward and direction angle is within deadzone buffer, keep the direction
+	//If the current direction is forward and direction angle is within deadzone buffer, keep the direction
 	if (CurrentDirection == ELocomotionDirection::Forward && UKismetMathLibrary::InRange_FloatFloat(LocomotionDirectionAngle, ForwardLimits.X - DeadZone, ForwardLimits.Y + DeadZone))
 		return ELocomotionDirection::Forward;
-	//If current direction is backward and direction angle is within deadzone buffer, keep the direction
+	//If the current direction is backward and direction angle is within deadzone buffer, keep the direction
 	if (CurrentDirection == ELocomotionDirection::Backward && (LocomotionDirectionAngle < BackwardLimits.X + DeadZone || LocomotionDirectionAngle > BackwardLimits.Y - DeadZone))
 		return ELocomotionDirection::Backward;
-	//If current direction is right and direction angle is within deadzone buffer, keep the direction
+	//If the current direction is right and direction angle is within deadzone buffer, keep the direction
 	if (CurrentDirection == ELocomotionDirection::Right && UKismetMathLibrary::InRange_FloatFloat(LocomotionDirectionAngle, ForwardLimits.Y - DeadZone, BackwardLimits.Y + DeadZone))
 		return ELocomotionDirection::Right;
-	//If current direction is left and direction angle is within deadzone buffer, keep the direction
+	//If the current direction is left and direction angle is within deadzone buffer, keep the direction
 	if (CurrentDirection == ELocomotionDirection::Left && UKismetMathLibrary::InRange_FloatFloat(LocomotionDirectionAngle, BackwardLimits.X - DeadZone, ForwardLimits.X + DeadZone))
 		return ELocomotionDirection::Left;
 
-	// If the above conditions weren't met, calculate the direction manually
+	// If the preceding conditions weren't met, calculate the direction manually
 
 	//Check for Forward range
 	if (UKismetMathLibrary::InRange_FloatFloat(LocomotionDirectionAngle, ForwardLimits.X, ForwardLimits.Y))

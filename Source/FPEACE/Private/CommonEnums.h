@@ -19,15 +19,27 @@ enum class ECameraMode: uint8
 UENUM(BlueprintType)
 enum class ELocomotionState : uint8
 {
+	Stationary,
 	Walking,
 	Running,
-	Sprinting,
-	Crouching
+	Sprinting
+};
+
+/*
+ * Different states of character stances
+ */
+UENUM(BlueprintType)
+enum class ELocomotionStance : uint8
+{
+	Standing,
+	Crouching,
+	Proning
 };
 
 UENUM(BlueprintType)
 enum class ELocomotionDirection : uint8
 {
+	Center,
 	Forward,
 	Backward,
 	Right,
@@ -35,9 +47,11 @@ enum class ELocomotionDirection : uint8
 };
 
 UENUM(BlueprintType)
-enum class EEvaluatorAnimType : uint8
+enum class ELocomotionAnimType : uint8
 {
+	Idle,
 	Start,
 	Stop,
-	Pivot
+	Pivot,
+	Cycle
 };

@@ -3,11 +3,29 @@
 
 #include "FPCSkeletalAnimInstance.h"
 
+#include "Gameplay/FPCSkeletalMeshComponent.h"
+#include "Gameplay/Character/FPCCameraComponent.h"
+#include "Gameplay/Character/FPCCharacter.h"
+#include "Gameplay/Character/FPCCharacterCameraManagerComponent.h"
+#include "Gameplay/Character/FPCCharacterMovementComponent.h"
+#include "Gameplay/Character/FPCCharacterWeaponManagerComponent.h"
+#include "Kismet/KismetMathLibrary.h"
+#include "Kismet/KismetSystemLibrary.h"
+
 void UFPCSkeletalAnimInstance::RecordSequenceState(const FString& Key, FSkeletalAnimInstanceSequenceState& CurrentSequenceState)
 {
+	//First wipe all the other state data
+	for (TPair<FString, FSkeletalAnimInstanceSequenceState>& DataPair : SequenceStates)
+		if (DataPair.Key != Key)
+			DataPair.Value = FSkeletalAnimInstanceSequenceState();
+
 	// Record the time stamp of the state
 	CurrentSequenceState.TimeStamp = GetWorld()->GetTimeSeconds();
-	SequenceStates.Add(Key, CurrentSequenceState);
+
+	if (SequenceStates.Contains(Key))
+		SequenceStates[Key] = CurrentSequenceState;
+	else
+		SequenceStates.Add(Key, CurrentSequenceState);
 }
 
 bool UFPCSkeletalAnimInstance::GetSequenceState(const FString& MediaplayerID, FSkeletalAnimInstanceSequenceState& OutState) const

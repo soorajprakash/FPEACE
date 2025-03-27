@@ -16,5 +16,4 @@ UCLASS(BlueprintType, Blueprintable, Meta = (BlueprintSpawnableComponent))
 class FPEACE_API UFPCCameraComponent : public UCameraComponent
 {
 	GENERATED_BODY()
-
 };
