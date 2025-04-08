@@ -178,7 +178,8 @@ void UFPCCharacterMovementComponent::HandleLocomotionStateChange()
 	{
 		//Check if the character is in a state where it can only walk.
 		//For Example, when in Crouch state or ADS state or is armed but moving sideways or backwards etc
-		bool canOnlyWalk = IsCrouching() || bIsCharacterInProneState || FPCCharacterWeaponManager->GetWantsToAds() || (FPCCharacterWeaponManager->GetIsCharacterArmed() &&
+		bool canOnlyWalk = IsCrouching() || bIsCharacterInProneState || FPCCharacterWeaponManager->GetWantsToAds() || FPCCharacterWeaponManager->GetWantsToUseWeapon() || (FPCCharacterWeaponManager->
+			GetIsCharacterArmed() &&
 			CurrentAccelerationDirection
 			!= ELocomotionDirection::Forward);
 

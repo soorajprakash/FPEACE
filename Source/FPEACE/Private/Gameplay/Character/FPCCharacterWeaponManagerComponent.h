@@ -11,6 +11,7 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "FPCCharacterWeaponManagerComponent.generated.h"
 
+class UFPCCharacterAnimationManagerComponent;
 class FCTweenInstanceFloat;
 class UFPCCharacterMovementComponent;
 class UFPCCharacterCameraManagerComponent;
@@ -36,6 +37,8 @@ public:
 
 	void SwitchADSState(bool UseADS);
 
+	void ToggleWeaponUse(const bool UseWeapon);
+
 	UFUNCTION()
 	void OnADSAnimStateChanged(ENotifyAnimationType AnimType, ENotifyAnimationEventType AnimEventType);
 
@@ -50,18 +53,23 @@ public:
 
 	bool GetWantsToAds() const { return bWantsToADS; }
 
+	bool GetWantsToUseWeapon() const { return bWantsToUseWeapon; }
+
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	bool bIsCharacterArmed = false;
 
-	UPROPERTY(BlueprintReadOnly, BlueprintReadOnly)
+	UPROPERTY(BlueprintReadOnly)
 	bool bIsCharacterInADSState = false;
 
-	UPROPERTY(BlueprintReadOnly, BlueprintReadOnly)
+	UPROPERTY(BlueprintReadOnly)
 	bool bIsADSInProgress = false;
 
-	UPROPERTY(BlueprintReadOnly, BlueprintReadOnly)
+	UPROPERTY(BlueprintReadOnly)
 	bool bWantsToADS = false;
+
+	UPROPERTY(BlueprintReadOnly)
+	bool bWantsToUseWeapon = false;
 
 	UPROPERTY(BlueprintReadOnly)
 	TObjectPtr<AFPCWeapon> CurrentFPSWeaponRef;
@@ -112,7 +120,7 @@ protected:
 private:
 	FVectorSpringState LocationLagSpringState;
 	FVectorSpringState RotationLagSpringState;
-	
+
 	FCTweenInstanceFloat* ADSBlendFactorTween;
 
 	bool bLastFrameWantsADSState;
@@ -135,8 +143,11 @@ private:
 	UPROPERTY()
 	TObjectPtr<UFPCCharacterCameraManagerComponent> FPCCameraManagerComp;
 
+	UPROPERTY()
+	TObjectPtr<UFPCCharacterAnimationManagerComponent> FPCAnimationManagerComp;
+
 	UFUNCTION(BlueprintCallable)
-	void PickUpAndEquipWeapon(const TSoftClassPtr<AFPCWeapon>& WeaponBP);
+	void EquipWeapon(const TSoftClassPtr<AFPCWeapon>& WeaponBP);
 
 	UFUNCTION()
 	void CharacterCameraModeChanged(ECameraMode NewCameraMode);

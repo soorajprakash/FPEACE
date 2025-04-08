@@ -3,10 +3,12 @@
 
 #include "FPCWeapon.h"
 #include "CommonEnums.h"
+#include "Gameplay/Character/FPCCharacter.h"
+#include "Gameplay/Character/FPCPlayerController.h"
 
 AFPCWeapon::AFPCWeapon(): UsedInCameraMode(ECameraMode::TPS)
 {
-	PrimaryActorTick.bCanEverTick = false;
+	PrimaryActorTick.bCanEverTick = true;
 }
 
 void AFPCWeapon::OnConstruction(const FTransform& Transform)
@@ -14,6 +16,11 @@ void AFPCWeapon::OnConstruction(const FTransform& Transform)
 	Super::OnConstruction(Transform);
 
 	WeaponMeshComps = GatherWeaponMeshComps();
+}
+
+void AFPCWeapon::Tick(float DeltaSeconds)
+{
+	Super::Tick(DeltaSeconds);
 }
 
 TArray<TObjectPtr<UMeshComponent>> AFPCWeapon::GatherWeaponMeshComps()
@@ -25,9 +32,37 @@ TArray<TObjectPtr<UMeshComponent>> AFPCWeapon::GatherWeaponMeshComps()
 	return TArray<TObjectPtr<UMeshComponent>>();
 }
 
-void AFPCWeapon::SetupWeapon(ECameraMode TargetCameraMode, USceneComponent* AttachCharacterMesh)
+void AFPCWeapon::UseWeapon()
 {
-	SetOwner(AttachCharacterMesh->GetOwner());
+	/*
+	 * Do the logic of using the weapon here.
+	 * Guns can fire bullets, mêlée weapons can be swiped, fists can be used to punch, etc.
+	 */
+}
+
+void AFPCWeapon::SetupWeapon(const ECameraMode TargetCameraMode, USceneComponent* AttachCharacterMesh)
+{
+	//Get References from Owning Character
+	if (OwningCharacter == nullptr)
+		OwningCharacter = Cast<AFPCCharacter>(AttachCharacterMesh->GetOwner());
+
+	if (OwningCharacter)
+	{
+		SetOwner(OwningCharacter);
+
+		if (!OwningCharacterMovementComponent)
+			OwningCharacterMovementComponent = OwningCharacter->GetCharacterMovementComponent();
+
+		if (!OwningCharacterCameraManager)
+			OwningCharacterCameraManager = OwningCharacter->GetFPCCharacterCameraManager();
+
+		if (!OwningCharacterWeaponManager)
+			OwningCharacterWeaponManager = OwningCharacter->GetFPCCharacterWeaponManager();
+
+		if (!OwningCharacterAnimationManager)
+			OwningCharacterAnimationManager = OwningCharacter->GetFPCCharacterAnimationManager();
+	}
+
 	UsedInCameraMode = TargetCameraMode;
 
 	// Attach this weapon instance to the character's mesh

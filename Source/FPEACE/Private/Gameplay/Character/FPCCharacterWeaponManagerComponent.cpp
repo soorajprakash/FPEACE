@@ -9,13 +9,21 @@
 #include "Gameplay/FPCSkeletalMeshComponent.h"
 #include "Gameplay/Weapon/FPCWeapon.h"
 #include "FCTween.h"
+#include "FPCCharacterAnimationManagerComponent.h"
+#include "Gameplay/AnimInstanceClasses/FPCLayerAnimInstance.h"
+#include "Gameplay/AnimInstanceClasses/FPCSkeletalAnimInstance.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
 
 // Sets default values for this component's properties
-UFPCCharacterWeaponManagerComponent::UFPCCharacterWeaponManagerComponent()
+UFPCCharacterWeaponManagerComponent::UFPCCharacterWeaponManagerComponent(): CurrentWeaponLocationLag(), CurrentWeaponRotationLag(),
+                                                                            CurrentWeaponRotationLagVector(),
+                                                                            CurrentADSBlendFactor(0),
+                                                                            CurrentWeaponHandIKLocationOffset(),
+                                                                            CurrentWeaponHandIKRotationOffset(), ADSStateChanged(false),
+                                                                            ADSBlendFactorTween(nullptr), bLastFrameWantsADSState(false)
 {
-	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
+	// Set this component to be initialized when the game starts, and to be ticked every frame. You can turn these features
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = true;
 	bWantsInitializeComponent = true;
@@ -35,6 +43,7 @@ void UFPCCharacterWeaponManagerComponent::InitializeComponent()
 		TPSBodyMeshComp = OwningCharacter->GetTPSBodyMeshComp();
 		FPSBodyMeshComp = OwningCharacter->GetFPSArmsMeshComp();
 		FPCCameraManagerComp = OwningCharacter->GetFPCCharacterCameraManager();
+		FPCAnimationManagerComp = OwningCharacter->GetFPCCharacterAnimationManager();
 	}
 
 	if (FPCCameraManagerComp)
@@ -52,7 +61,6 @@ void UFPCCharacterWeaponManagerComponent::TickComponent(float DeltaTime, enum EL
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
 	UpdateStateChanges();
-
 	CalculateCurrentWeaponLagValues();
 }
 
@@ -77,6 +85,14 @@ void UFPCCharacterWeaponManagerComponent::SwitchADSState(bool UseADS)
 	SetCurrentWeaponHandIKOffset();
 }
 
+void UFPCCharacterWeaponManagerComponent::ToggleWeaponUse(const bool UseWeapon)
+{
+	CurrentFPSWeaponRef->SetIsWeaponInUse(UseWeapon);
+	CurrentTPSWeaponRef->SetIsWeaponInUse(UseWeapon);
+
+	bWantsToUseWeapon = UseWeapon;
+}
+
 void UFPCCharacterWeaponManagerComponent::OnADSAnimStateChanged(ENotifyAnimationType AnimType, ENotifyAnimationEventType AnimEventType)
 {
 	if (AnimType == EnterADS || AnimType == ExitADS)
@@ -86,7 +102,7 @@ void UFPCCharacterWeaponManagerComponent::OnADSAnimStateChanged(ENotifyAnimation
 	}
 }
 
-void UFPCCharacterWeaponManagerComponent::PickUpAndEquipWeapon(const TSoftClassPtr<AFPCWeapon>& WeaponBP)
+void UFPCCharacterWeaponManagerComponent::EquipWeapon(const TSoftClassPtr<AFPCWeapon>& WeaponBP)
 {
 	// Destroy current weapon instance and disarm the character
 	if (CurrentFPSWeaponRef)
@@ -195,7 +211,7 @@ void UFPCCharacterWeaponManagerComponent::CalculateCurrentWeaponLagValues()
 	                                                                  UGameplayStatics::GetWorldDeltaSeconds(GetWorld()), CurrentLagSection.Mass);
 
 	CurrentWeaponRotationLagVector = UKismetMathLibrary::VectorSpringInterp(CurrentWeaponRotationLagVector, TargetWeaponRotationLag, RotationLagSpringState, CurrentLagSection.Stiffness,
-	                                                                         CurrentLagSection.Damping,
-	                                                                         UGameplayStatics::GetWorldDeltaSeconds(GetWorld()), CurrentLagSection.Mass);
+	                                                                        CurrentLagSection.Damping,
+	                                                                        UGameplayStatics::GetWorldDeltaSeconds(GetWorld()), CurrentLagSection.Mass);
 	CurrentWeaponRotationLag = FRotator(CurrentWeaponRotationLagVector.Y, CurrentWeaponRotationLagVector.Z, CurrentWeaponRotationLagVector.X);
 }

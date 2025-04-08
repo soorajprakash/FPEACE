@@ -7,10 +7,18 @@
 #include "Gameplay/FPCActor.h"
 #include "FPCWeapon.generated.h"
 
+class AFPCPlayerController;
+class UFPCCharacterAnimationManagerComponent;
+class UFPCCharacterCameraManagerComponent;
+class UFPCCharacterWeaponManagerComponent;
+class UFPCCharacterMovementComponent;
+class UFPCSkeletalMeshComponent;
 enum class ELocomotionState : uint8;
 class AFPCCharacter;
 class UFPCAnimInstance;
 enum class ECameraMode : uint8;
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnWeaponSuccessfullyUsed);
 
 USTRUCT(BlueprintType)
 struct FWeaponAnimSettings
@@ -41,6 +49,10 @@ USTRUCT(BlueprintType)
 struct FWeaponLagSettingSection
 {
 	GENERATED_BODY()
+
+	FWeaponLagSettingSection(): HorizontalLocationLag(), VerticalLocationLag(), HorizontalRotationLag(), VerticalRotationLag(), Stiffness(0), Damping(0), Mass(0)
+	{
+	}
 
 	UPROPERTY(EditAnywhere, Category="Location")
 	FVector HorizontalLocationLag;
@@ -88,10 +100,25 @@ public:
 	FWeaponLagSettings GetLagSettings() const { return LagSettings; }
 
 	/*
+	 * This is triggered when the weapon was successfully welded.
+	 * When gun was fired, when mêlée weapon was swung, etc.
+	 */
+	FOnWeaponSuccessfullyUsed OnWeaponSuccessfullyUsed;
+
+	/*
+	 * Generic function to be called when the weapon is used.
+	 * Guns can fire bullets, mêlée weapons can be swiped, fists can be used to punch, etc.
+	 */
+	virtual void UseWeapon();
+
+	/*
 	 * Setting up the initial values for the weapon instance based on selected target camera mode.
 	 * The weapon will always be for this camera mode in its lifetime and the settings will be applied accordingly at this stage.
 	 */
-	void SetupWeapon(ECameraMode TargetCameraMode, USceneComponent* AttachCharacterMesh);
+	virtual void SetupWeapon(const ECameraMode TargetCameraMode, USceneComponent* AttachCharacterMesh);
+
+	UFUNCTION(BlueprintCallable)
+	virtual UFPCSkeletalMeshComponent* GetBaseMeshComp() const { return nullptr; }
 
 	/*
 	 * Whether the weapon instance is visible to the owner of the character.
@@ -102,6 +129,10 @@ public:
 	// --------------------------------- GETTERS ---------------------------------
 	FTransform GetAimSocketTransform() const { return AimSocketActorSpaceTransform; }
 	FTransform GetEmitterSocketTransform() const { return EmitterSocketActorSpaceTransform; }
+
+	// --------------------------------- SETTERS ---------------------------------
+
+	void SetIsWeaponInUse(bool bIsInUse) { bIsWeaponInUse = bIsInUse; }
 
 protected:
 	AFPCWeapon();
@@ -121,6 +152,52 @@ protected:
 	UPROPERTY(BlueprintReadOnly)
 	FTransform EmitterSocketActorSpaceTransform;
 
+	UPROPERTY(BlueprintReadOnly)
+	bool bIsWeaponReadyToBeUsed = true;
+
+	UPROPERTY(BlueprintReadOnly)
+	bool bIsWeaponInCoolDown = false;
+
+	UPROPERTY(BlueprintReadOnly)
+	bool bIsWeaponInUse;
+
+	/*
+	 * Reference to the character that is actively using this weapon
+	 */
+	UPROPERTY(BlueprintReadOnly)
+	TObjectPtr<AFPCCharacter> OwningCharacter;
+
+	/*
+	 * Reference to the skeletal mesh that is actively using this weapon
+	 */
+	UPROPERTY(BlueprintReadOnly)
+	TObjectPtr<UFPCSkeletalMeshComponent> OwningMesh;
+
+	/*
+	 * Reference to the movement component in the character that is actively using this weapon
+	 */
+	UPROPERTY(BlueprintReadOnly)
+	TObjectPtr<UFPCCharacterMovementComponent> OwningCharacterMovementComponent;
+
+	/*
+	 * Reference to the weapon manager component in the owning character
+	 */
+	UPROPERTY(BlueprintReadOnly)
+	TObjectPtr<UFPCCharacterWeaponManagerComponent> OwningCharacterWeaponManager;
+
+	/*
+	 * Reference to the camera manager component in the owning character
+	 */
+	UPROPERTY(BlueprintReadOnly)
+	TObjectPtr<UFPCCharacterCameraManagerComponent> OwningCharacterCameraManager;
+
+	/*
+	 * Reference to the animation manager component in the owning character
+	 */
+	UPROPERTY(BlueprintReadOnly)
+	TObjectPtr<UFPCCharacterAnimationManagerComponent> OwningCharacterAnimationManager;
+
+
 	/*
 	 * Collection of mesh components that make up the weapon.
 	 * Could be used to set up rendering, collision, etc.
@@ -131,6 +208,8 @@ protected:
 	// --------------------- OVERRIDDEN FUNCTIONS ---------------------
 
 	virtual void OnConstruction(const FTransform& Transform) override;
+
+	virtual void Tick(float DeltaSeconds) override;
 
 	// --------------------- OTHER FUNCTIONS ---------------------
 	virtual TArray<TObjectPtr<UMeshComponent>> GatherWeaponMeshComps();

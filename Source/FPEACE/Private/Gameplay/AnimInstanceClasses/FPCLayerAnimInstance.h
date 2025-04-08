@@ -30,6 +30,9 @@ public:
 	UPROPERTY(BlueprintReadWrite)
 	TObjectPtr<UAnimSequence> CurrentWeaponGripPose;
 
+	UFUNCTION(BlueprintImplementableEvent)
+	void OnCurrentWeaponUsed();
+
 protected:
 	virtual void NativeInitializeAnimation() override;
 };

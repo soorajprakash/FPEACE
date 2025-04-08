@@ -15,6 +15,7 @@
 #include "Gameplay/FPCGameInstance.h"
 #include "Gameplay/FPCSkeletalMeshComponent.h"
 #include "Gameplay/FPCSpringArmComponent.h"
+#include "ObjectPoolSubsystem.h"
 
 // Sets default values
 AFPCCharacter::AFPCCharacter(const FObjectInitializer& ObjectInitializer): Super(
@@ -91,6 +92,14 @@ void AFPCCharacter::PossessedBy(AController* NewController)
 	Super::PossessedBy(NewController);
 }
 
+void AFPCCharacter::OnConstruction(const FTransform& Transform)
+{
+	Super::OnConstruction(Transform);
+
+	if (const UWorld* World = GetWorld())
+		WorldObjectPool = World->GetSubsystem<UObjectPool>();
+}
+
 // Called to bind functionality to input
 void AFPCCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
@@ -106,6 +115,8 @@ void AFPCCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 		EInputComp->BindAction(JumpAction.LoadSynchronous(), ETriggerEvent::Completed, this, &AFPCCharacter::JumpEnded);
 		EInputComp->BindAction(ADSAction.LoadSynchronous(), ETriggerEvent::Started, this, &AFPCCharacter::ActivateADS);
 		EInputComp->BindAction(ADSAction.LoadSynchronous(), ETriggerEvent::Completed, this, &AFPCCharacter::DeactivateADS);
+		EInputComp->BindAction(FireAction.LoadSynchronous(), ETriggerEvent::Started, this, &AFPCCharacter::StartUsingWeapon);
+		EInputComp->BindAction(FireAction.LoadSynchronous(), ETriggerEvent::Completed, this, &AFPCCharacter::StopUsingWeapon);
 		EInputComp->BindAction(CameraSwitchAction.LoadSynchronous(), ETriggerEvent::Completed, this, &AFPCCharacter::ToggleCameraMode);
 	}
 }
@@ -181,6 +192,16 @@ void AFPCCharacter::DeactivateADS()
 {
 	FPCCharacterWeaponManagerComp->SwitchADSState(false);
 	FPCCameraManagerComp->SwitchCameraFOV(false);
+}
+
+void AFPCCharacter::StartUsingWeapon()
+{
+	FPCCharacterWeaponManagerComp->ToggleWeaponUse(true);
+}
+
+void AFPCCharacter::StopUsingWeapon()
+{
+	FPCCharacterWeaponManagerComp->ToggleWeaponUse(false);
 }
 
 void AFPCCharacter::JumpStarted(const FInputActionValue& InputActionValue)

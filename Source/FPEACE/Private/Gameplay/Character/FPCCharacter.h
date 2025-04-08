@@ -8,6 +8,7 @@
 #include "GameFramework/Character.h"
 #include "FPCCharacter.generated.h"
 
+class UObjectPool;
 class UFPCCharacterAnimationManagerComponent;
 class UFPCCharacterCameraManagerComponent;
 class UInputAction;
@@ -29,6 +30,10 @@ public:
 	// Sets default values for this character's properties
 	AFPCCharacter(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
+	//	--------------------- PUBLIC VARIABLES ---------------------
+	UPROPERTY()
+	TObjectPtr<UObjectPool> WorldObjectPool;
+
 	//	--------------------- PUBLIC FUNCTIONS ---------------------
 
 	/*
@@ -42,151 +47,124 @@ public:
 	 */
 	UFPCCharacterData* GetCharacterData();
 
-	TObjectPtr<UFPCSkeletalMeshComponent> GetTPSBodyMeshComp() const
-	{
-		return TPSBodyMeshComp;
-	}
+	TObjectPtr<UFPCSkeletalMeshComponent> GetTPSBodyMeshComp() const { return TPSBodyMeshComp; }
 
-	TObjectPtr<UFPCSkeletalMeshComponent> GetFPSArmsMeshComp() const
-	{
-		return FPSArmsMeshComp;
-	}
+	TObjectPtr<UFPCSkeletalMeshComponent> GetFPSArmsMeshComp() const { return FPSArmsMeshComp; }
 
-	TObjectPtr<UFPCSkeletalMeshComponent> GetFPSLowerBodyMeshComp() const
-	{
-		return FPSLowerBodyMeshComp;
-	}
+	TObjectPtr<UFPCSkeletalMeshComponent> GetFPSLowerBodyMeshComp() const { return FPSLowerBodyMeshComp; }
 
-	TObjectPtr<UFPCCapsuleComponent> GetFPCCapsuleComp() const
-	{
-		return FPCCapsuleComp;
-	}
+	TObjectPtr<UFPCCapsuleComponent> GetFPCCapsuleComp() const { return FPCCapsuleComp; }
 
-	TObjectPtr<UFPCCharacterMovementComponent> GetFPCMovementComp() const
-	{
-		return FPCMovementComp;
-	}
+	TObjectPtr<UFPCCharacterMovementComponent> GetFPCMovementComp() const { return FPCMovementComp; }
 
-	TObjectPtr<UFPCCameraComponent> GetCharacterCameraComp() const
-	{
-		return CharacterCameraComp;
-	}
+	TObjectPtr<UFPCCameraComponent> GetCharacterCameraComp() const { return CharacterCameraComp; }
 
-	TObjectPtr<UFPCSpringArmComponent> GetFPCSpringArmComp() const
-	{
-		return FPCSpringArmComp;
-	}
+	TObjectPtr<UFPCSpringArmComponent> GetFPCSpringArmComp() const { return FPCSpringArmComp; }
 
-	TObjectPtr<AFPCPlayerController> GetFPCPlayerController() const
-	{
-		return FPCPlayerControllerInstance;
-	}
+	TObjectPtr<AFPCPlayerController> GetFPCPlayerController() const { return FPCPlayerControllerInstance; }
 
-	TObjectPtr<UFPCCharacterWeaponManagerComponent> GetFPCCharacterWeaponManager() const
-	{
-		return FPCCharacterWeaponManagerComp;
-	}
+	TObjectPtr<UFPCCharacterWeaponManagerComponent> GetFPCCharacterWeaponManager() const { return FPCCharacterWeaponManagerComp; }
 
-	TObjectPtr<UFPCCharacterCameraManagerComponent> GetFPCCharacterCameraManager() const
-	{
-		return FPCCameraManagerComp;
-	}
+	TObjectPtr<UFPCCharacterCameraManagerComponent> GetFPCCharacterCameraManager() const { return FPCCameraManagerComp; }
 
-	TObjectPtr<UFPCCharacterAnimationManagerComponent> GetFPCCharacterAnimationManager() const
-	{
-		return FPCCharacterAnimationManagerComp;
-	}
+	TObjectPtr<UFPCCharacterAnimationManagerComponent> GetFPCCharacterAnimationManager() const { return FPCCharacterAnimationManagerComp; }
 
 protected:
 	//	--------------------- COMPONENTS ---------------------
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="FPC/Components")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="FPEACE|Components")
 	TObjectPtr<UFPCSkeletalMeshComponent> TPSBodyMeshComp;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="FPC/Components")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="FPEACE|Components")
 	TObjectPtr<UFPCSkeletalMeshComponent> FPSArmsMeshComp;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="FPC/Components")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="FPEACE|Components")
 	TObjectPtr<UFPCSkeletalMeshComponent> FPSLowerBodyMeshComp;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="FPC/Components")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="FPEACE|Components")
 	TObjectPtr<UFPCCapsuleComponent> FPCCapsuleComp;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="FPC/Components")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="FPEACE|Components")
 	TObjectPtr<UFPCCharacterMovementComponent> FPCMovementComp;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="FPC/Components")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="FPEACE|Components")
 	TObjectPtr<UFPCCameraComponent> CharacterCameraComp;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="FPC/Components")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="FPEACE|Components")
 	TObjectPtr<UFPCSpringArmComponent> FPCSpringArmComp;
+
+	/*
+	 * Reference to the Character's weapon manager component
+	 */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="FPEACE|Components")
+	TObjectPtr<UFPCCharacterWeaponManagerComponent> FPCCharacterWeaponManagerComp;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="FPEACE|Components")
+	TObjectPtr<UFPCCharacterCameraManagerComponent> FPCCameraManagerComp;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="FPEACE|Components")
+	TObjectPtr<UFPCCharacterAnimationManagerComponent> FPCCharacterAnimationManagerComp;
 
 	/*
 	 * Reference to the FPC Player Controller instance
 	 */
-	UPROPERTY(BlueprintReadOnly)
+	UPROPERTY(BlueprintReadOnly, Category="FPEACE")
 	TObjectPtr<AFPCPlayerController> FPCPlayerControllerInstance;
 
 	/*
 	 * Reference to the character data asset referenced in the game instance
 	 */
-	UPROPERTY(BlueprintReadOnly)
+	UPROPERTY(BlueprintReadOnly, Category="FPEACE")
 	TObjectPtr<UFPCCharacterData> FPCCharacterData;
-
-	/*
-	 * Reference to the Character's weapon manager component
-	 */
-	UPROPERTY(BlueprintReadOnly)
-	TObjectPtr<UFPCCharacterWeaponManagerComponent> FPCCharacterWeaponManagerComp;
-
-	UPROPERTY(BlueprintReadOnly)
-	TObjectPtr<UFPCCharacterCameraManagerComponent> FPCCameraManagerComp;
-
-	UPROPERTY(BlueprintReadOnly)
-	TObjectPtr<UFPCCharacterAnimationManagerComponent> FPCCharacterAnimationManagerComp;
 
 	//	--------------------- INPUT ---------------------
 
 	/*
 	 * Reference to the Look Input Action object
 	 */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="FPC/Inputs")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="FPEACE|Inputs")
 	TSoftObjectPtr<UInputAction> LookAction;
 
 	/*
 	 * Reference to the Move Input Action object
 	 */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="FPC/Inputs")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="FPEACE|Inputs")
 	TSoftObjectPtr<UInputAction> MoveAction;
 
 	/*
 	 * Reference to the Run Input Action object
 	 */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="FPC/Inputs")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="FPEACE|Inputs")
 	TSoftObjectPtr<UInputAction> RunAction;
 
 	/*
 	 * Reference to the Crouch Input Action object
 	 */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="FPC/Inputs")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="FPEACE|Inputs")
 	TSoftObjectPtr<UInputAction> CrouchAction;
 
 	/*
 	 * Reference to the Jump Input Action object
 	 */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="FPC/Inputs")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="FPEACE|Inputs")
 	TSoftObjectPtr<UInputAction> JumpAction;
 
 	/*
 	 * Reference to the ADS Input Action object
 	 */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="FPC/Inputs")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="FPEACE|Inputs")
 	TSoftObjectPtr<UInputAction> ADSAction;
+
+	/*
+	 * Reference to the ADS Input Action object
+	 */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="FPEACE|Inputs")
+	TSoftObjectPtr<UInputAction> FireAction;
 
 	/*
 	 * Reference to the Camera Switching Input Action object
 	 */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="FPC")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="FPEACE|Inputs")
 	TSoftObjectPtr<UInputAction> CameraSwitchAction;
 
 	//	--------------------- OVERRIDES ---------------------
@@ -197,6 +175,8 @@ protected:
 	 * When this character is possessed by the player controller
 	 */
 	virtual void PossessedBy(AController* NewController) override;
+
+	virtual void OnConstruction(const FTransform& Transform) override;
 
 	/*
 	 * Setup Player Input
@@ -240,6 +220,10 @@ private:
 	void ActivateADS();
 
 	void DeactivateADS();
+
+	void StartUsingWeapon();
+
+	void StopUsingWeapon();
 
 	void JumpStarted(const FInputActionValue& InputActionValue);
 

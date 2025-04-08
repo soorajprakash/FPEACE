@@ -25,6 +25,9 @@ public:
 	// Sets default values for this component's properties
 	UFPCCharacterAnimationManagerComponent();
 
+	UFPCSkeletalAnimInstance* GetTPSMeshAnimInstance() const { return TPSMeshAnimInstance; }
+	UFPCSkeletalAnimInstance* GetFPSMeshAnimInstance() const { return FPSMeshAnimInstance; }
+
 protected:
 	virtual void InitializeComponent() override;
 
@@ -85,7 +88,13 @@ private:
 	void LinkCombatAnimClassToCharacter(FName AnimClassNameToLink) const;
 
 	TSoftClassPtr<UFPCLayerAnimInstance> GetAnimClassFor(ECameraMode TargetCameraMode, FName AnimStateName, const FString& ReasonForGettingThisAnim) const;
-
+	
 	UFUNCTION()
 	void OnEquipNewWeapon(AFPCWeapon* SpawnedWeapon);
+
+	UFUNCTION()
+	void OnCurrentFPSWeaponUsed();
+
+	UFUNCTION()
+	void OnCurrentTPSWeaponUsed();
 };

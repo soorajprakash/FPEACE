@@ -43,6 +43,8 @@ public:
 
 	//	--------------------- GETTERS ---------------------
 
+	ECameraMode GetCurrentCameraMode() const { return CurrentCameraMode; }
+
 	FVector GetCurrentCameraLookAtHit() const { return CurrentCameraLookAtHit; }
 
 	float GetCameraPitchDelta() const { return CameraPitchDelta; }
