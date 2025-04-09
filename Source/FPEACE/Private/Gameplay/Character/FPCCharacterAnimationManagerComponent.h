@@ -90,7 +90,7 @@ private:
 	TSoftClassPtr<UFPCLayerAnimInstance> GetAnimClassFor(ECameraMode TargetCameraMode, FName AnimStateName, const FString& ReasonForGettingThisAnim) const;
 	
 	UFUNCTION()
-	void OnEquipNewWeapon(AFPCWeapon* SpawnedWeapon);
+	void OnEquipNewWeapon(AFPCWeapon* SpawnedFPSWeapon, AFPCWeapon* SpawnedTPSWeapon);
 
 	UFUNCTION()
 	void OnCurrentFPSWeaponUsed();

@@ -25,10 +25,13 @@ struct FGunSettings
 {
 	GENERATED_BODY()
 
-	FGunSettings(): FireMode(SingleShot), FireRate(10), FireCoolDownInterval(0.3f), BurstFireInterval(0.1f), MagCapacity(10)
+	FGunSettings(): FireMode(SingleShot), FireRate(10), FireCoolDownInterval(0.3f), BurstFireInterval(0.1f), MagCapacity(10), BulletSpreadAngle(5), BulletSpreadAngle_Aiming(1)
 	{
 	}
 
+	/*
+	 * The mode in which the gun will shoot
+	 */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	TEnumAsByte<EGunFireMode> FireMode;
 
@@ -42,14 +45,14 @@ struct FGunSettings
 
 	/*
 	 * This is the cool-down time between each single bullet shot.
-	 * This value is not used for single shot mode.
+	 * This value is not used for single shot and automatic mode.
 	 */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	float FireCoolDownInterval;
 
 	/*
 	 * This is the cool-down time between each single bullet shot within a burst.
-	 * This value is not used for single shot mode.
+	 * This value is not used for single shot and automatic mode.
 	 */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	float BurstFireInterval;
@@ -59,6 +62,18 @@ struct FGunSettings
 	 */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	int MagCapacity;
+
+	/*
+	 * The angle of the bullet spread cone in degrees of this gun when aiming down sight
+	 */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	float BulletSpreadAngle_Aiming;
+
+	/*
+	 * The angle of the bullet spread cone in degrees of this gun when not aiming down sight
+	 */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	float BulletSpreadAngle;
 
 	/*
 	 * The velocity of the fired bullet in centimeters per second.
@@ -103,6 +118,13 @@ public:
 	virtual UFPCSkeletalMeshComponent* GetBaseMeshComp() const override { return ReceiverMeshComp; }
 
 protected:
+	/*
+	 * The time between bullets fired currently being used for this weapon
+	 * This will be used in the animation blueprint to calculate the play rate of the fire animation
+	 */
+	UPROPERTY(BlueprintReadOnly)
+	float GunFireInterval;
+
 	//	--------------------- GUN COMPONENTS ---------------------
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Gun")

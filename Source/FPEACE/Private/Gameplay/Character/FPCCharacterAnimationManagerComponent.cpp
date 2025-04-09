@@ -121,20 +121,21 @@ TSoftClassPtr<UFPCLayerAnimInstance> UFPCCharacterAnimationManagerComponent::Get
 	return ReturnValue;
 }
 
-void UFPCCharacterAnimationManagerComponent::OnEquipNewWeapon(AFPCWeapon* SpawnedWeapon)
+void UFPCCharacterAnimationManagerComponent::OnEquipNewWeapon(AFPCWeapon* SpawnedFPSWeapon, AFPCWeapon* SpawnedTPSWeapon)
 {
 	// Link the animation class to the character
-	if (SpawnedWeapon)
-		LinkCombatAnimClassToCharacter(SpawnedWeapon->WeaponAnimLayerClassName);
+	if (SpawnedFPSWeapon)
+		LinkCombatAnimClassToCharacter(SpawnedFPSWeapon->WeaponAnimLayerClassName);
 	else
 		LinkCombatAnimClassToCharacter(TEXT("Unarmed"));
 
+	// Notify Layer about new weapon
+	FPSMeshAnimInstance->CurrentLinkedAnimInstance->OnWeaponEquipped(SpawnedFPSWeapon);
+	TPSMeshAnimInstance->CurrentLinkedAnimInstance->OnWeaponEquipped(SpawnedTPSWeapon);
+
 	// Subscribe to the weapon's animation related events events
-	if (FPCWeaponManagerComp)
-	{
-		FPCWeaponManagerComp->GetCurrentFPSWeaponRef()->OnWeaponSuccessfullyUsed.AddDynamic(this,&UFPCCharacterAnimationManagerComponent::OnCurrentFPSWeaponUsed);
-		FPCWeaponManagerComp->GetCurrentTPSWeaponRef()->OnWeaponSuccessfullyUsed.AddDynamic(this,&UFPCCharacterAnimationManagerComponent::OnCurrentTPSWeaponUsed);
-	}
+	SpawnedFPSWeapon->OnWeaponSuccessfullyUsed.AddDynamic(this, &UFPCCharacterAnimationManagerComponent::OnCurrentFPSWeaponUsed);
+	SpawnedTPSWeapon->OnWeaponSuccessfullyUsed.AddDynamic(this, &UFPCCharacterAnimationManagerComponent::OnCurrentTPSWeaponUsed);
 }
 
 void UFPCCharacterAnimationManagerComponent::OnCurrentFPSWeaponUsed()

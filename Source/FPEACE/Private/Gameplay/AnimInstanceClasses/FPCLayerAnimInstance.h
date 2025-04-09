@@ -7,6 +7,7 @@
 #include "FPCAnimInstance.h"
 #include "FPCLayerAnimInstance.generated.h"
 
+class AFPCWeapon;
 class UFPCSkeletalAnimInstance;
 /**
  * The type of anim instance class meant to be used in anim blueprints that define layer logic
@@ -32,6 +33,9 @@ public:
 
 	UFUNCTION(BlueprintImplementableEvent)
 	void OnCurrentWeaponUsed();
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void OnWeaponEquipped(const AFPCWeapon* SpawnedWeapon);
 
 protected:
 	virtual void NativeInitializeAnimation() override;

@@ -152,7 +152,7 @@ void UFPCCharacterWeaponManagerComponent::EquipWeapon(const TSoftClassPtr<AFPCWe
 	SetCurrentWeaponHandIKOffset();
 
 	// Can use the name from either FPS or TPS weapon ref since they will be the same
-	OnNewWeaponEquipped.Broadcast(CurrentFPSWeaponRef);
+	OnNewWeaponEquipped.Broadcast(CurrentFPSWeaponRef, CurrentTPSWeaponRef);
 }
 
 void UFPCCharacterWeaponManagerComponent::CharacterCameraModeChanged(ECameraMode NewCameraMode)

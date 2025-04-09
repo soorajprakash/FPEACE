@@ -10,6 +10,7 @@
 #include "FPCBullet.h"
 #include "ObjectPoolSubsystem.h"
 #include "Gameplay/Character/FPCCharacter.h"
+#include "Gameplay/Character/FPCCharacterWeaponManagerComponent.h"
 #include "Kismet/KismetMathLibrary.h"
 
 AFPCGun::AFPCGun()
@@ -151,6 +152,24 @@ void AFPCGun::OnConstruction(const FTransform& Transform)
 	AimSocketActorSpaceTransform = OpticMeshComp->GetSocketTransform(TEXT("SOCKET_Aim"), RTS_Actor);
 	EmitterSocketActorSpaceTransform = MuzzleMeshComp->GetSocketTransform(TEXT("SOCKET_Emitter"), RTS_Actor);
 
+	// Setup the fire rate interval
+	switch (GunSettings.FireMode)
+	{
+	case SingleShot:
+		GunFireInterval = 1 / GunSettings.FireRate;
+		break;
+
+	case BurstFire:
+		GunFireInterval = GunSettings.BurstFireInterval;
+		break;
+
+	case Automatic:
+		GunFireInterval = 1 / GunSettings.FireRate;
+		break;
+
+	default: break;
+	}
+
 	// Set up the gun to have no collision
 	// TODO : Collision is probably required. Change this to suit the game's needs
 	SetActorEnableCollision(false);
@@ -206,8 +225,16 @@ void AFPCGun::Fire()
 
 	if (UsedInCameraMode == OwningCharacterCameraManager->GetCurrentCameraMode())
 	{
-		FRotator FireDirection = FRotationMatrix::MakeFromY((OwningCharacterCameraManager->GetCurrentCameraLookAtHit() - BulletSpawnTransform.GetLocation())).Rotator();
-		BulletSpawnTransform.SetRotation(FireDirection.Quaternion());
+		// This is the direction vector that points directly at the point the user is looking at
+		FVector AccurateFireDirectionVector = OwningCharacterCameraManager->GetCurrentCameraLookAtHit() - BulletSpawnTransform.GetLocation();
+
+		// Now we add inaccuracy to it using the gun settings depending on whether it's aiming down sight.
+		float BulletSpreadAngle = OwningCharacterWeaponManager->GetIsCharacterInADSState() ? GunSettings.BulletSpreadAngle_Aiming : GunSettings.BulletSpreadAngle;
+		float HalfAngleRad = FMath::DegreesToRadians(BulletSpreadAngle * 0.5f);
+		FVector SpreadFireDirection = FMath::VRandCone(AccurateFireDirectionVector, HalfAngleRad).GetSafeNormal();
+
+		FRotator BulletRotation = FRotationMatrix::MakeFromY(SpreadFireDirection).Rotator();
+		BulletSpawnTransform.SetRotation(BulletRotation.Quaternion());
 		if (AFPCBullet* NewBullet = AcquireBullet())
 			NewBullet->PropelBullet(*OwningCharacter, *this, BulletSpawnTransform, GunSettings.BulletVelocity);
 	}

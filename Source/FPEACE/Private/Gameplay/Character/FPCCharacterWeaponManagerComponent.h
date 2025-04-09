@@ -20,7 +20,7 @@ class UFPCSkeletalMeshComponent;
 class AFPCCharacter;
 class AFPCWeapon;
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FWeaponEquipEvent, AFPCWeapon*, SpawnedWeaponRef);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FWeaponEquipEvent, AFPCWeapon*, SpawnedFPSWeaponRef, AFPCWeapon*, SpawnedTPSWeaponRef);
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class FPEACE_API UFPCCharacterWeaponManagerComponent : public UFPCActorComponent
@@ -52,6 +52,8 @@ public:
 	bool GetIsCharacterArmed() const { return bIsCharacterArmed; }
 
 	bool GetWantsToAds() const { return bWantsToADS; }
+
+	bool GetIsCharacterInADSState() const { return bIsCharacterInADSState; }
 
 	bool GetWantsToUseWeapon() const { return bWantsToUseWeapon; }
 
