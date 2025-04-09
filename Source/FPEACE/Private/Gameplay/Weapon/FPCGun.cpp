@@ -88,6 +88,20 @@ void AFPCGun::UseWeapon()
 				BurstModeFire();
 				break;
 			}
+
+		case Automatic:
+			{
+				Fire();
+				bIsWeaponInCoolDown = true;
+				GunCoolDownHandle.Invalidate();
+				FTimerDelegate CooldownTimerDelegate = FTimerDelegate::CreateLambda([this]()
+				{
+					bIsWeaponInCoolDown = false;
+				});
+
+				GetWorld()->GetTimerManager().SetTimer(GunCoolDownHandle, CooldownTimerDelegate, 1 / GunSettings.FireRate, false);
+				break;
+			}
 		default: break;
 		}
 	}
@@ -107,6 +121,13 @@ void AFPCGun::UseWeapon()
 		case BurstFire:
 			{
 				if (!bIsWeaponInCoolDown && bWasTriggerLiftedAfterLastFire)
+					bIsWeaponReadyToBeUsed = true;
+				break;
+			}
+
+		case Automatic:
+			{
+				if (!bIsWeaponInCoolDown)
 					bIsWeaponReadyToBeUsed = true;
 				break;
 			}
