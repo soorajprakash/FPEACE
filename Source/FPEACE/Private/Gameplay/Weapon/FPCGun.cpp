@@ -10,6 +10,7 @@
 #include "FPCBullet.h"
 #include "ObjectPoolSubsystem.h"
 #include "Gameplay/Character/FPCCharacter.h"
+#include "Kismet/KismetMathLibrary.h"
 
 AFPCGun::AFPCGun()
 {
@@ -188,21 +189,25 @@ void AFPCGun::Fire()
 	FTransform EmitterSocketTransform = MuzzleMeshComp->GetSocketTransform(TEXT("SOCKET_Emitter"));
 
 	// For FPS camera mode, we need to shoot the bullet from the aim socket's height but at the emitter's distance
-	if (UsedInCameraMode == ECameraMode::FPS && OwningCharacterCameraManager->GetCurrentCameraMode() == ECameraMode::FPS)
+	// The bullet gets propelled in the direction from the muzzle location to the camera's intended target
+	if (UsedInCameraMode == ECameraMode::FPS)
 	{
 		const FTransform AimSocketTransform = OpticMeshComp->GetSocketTransform(TEXT("SOCKET_Aim"));
 		const FVector RelativeEmitterLocation = AimSocketTransform.InverseTransformPosition(EmitterSocketTransform.GetLocation());
 		const FVector FinalSpawnLocation = AimSocketTransform.TransformPosition(FVector(0, RelativeEmitterLocation.Y, 0));
+
 		BulletSpawnTransform = AimSocketTransform;
 		BulletSpawnTransform.SetLocation(FinalSpawnLocation);
-
-		if (AFPCBullet* NewBullet = AcquireBullet())
-			NewBullet->PropelBullet(*OwningCharacter, *this, BulletSpawnTransform, GunSettings.BulletVelocity);
 	}
-	else if (UsedInCameraMode == ECameraMode::TPS && OwningCharacterCameraManager->GetCurrentCameraMode() == ECameraMode::TPS)
+	else if (UsedInCameraMode == ECameraMode::TPS)
 	{
 		BulletSpawnTransform = EmitterSocketTransform;
+	}
 
+	if (UsedInCameraMode == OwningCharacterCameraManager->GetCurrentCameraMode())
+	{
+		FRotator FireDirection = FRotationMatrix::MakeFromY((OwningCharacterCameraManager->GetCurrentCameraLookAtHit() - BulletSpawnTransform.GetLocation())).Rotator();
+		BulletSpawnTransform.SetRotation(FireDirection.Quaternion());
 		if (AFPCBullet* NewBullet = AcquireBullet())
 			NewBullet->PropelBullet(*OwningCharacter, *this, BulletSpawnTransform, GunSettings.BulletVelocity);
 	}
