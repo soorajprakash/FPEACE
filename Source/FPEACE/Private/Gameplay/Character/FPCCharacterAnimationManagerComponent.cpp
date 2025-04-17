@@ -11,6 +11,7 @@
 #include "Gameplay/FPCSkeletalMeshComponent.h"
 #include "Gameplay/AnimInstanceClasses/FPCLayerAnimInstance.h"
 #include "Gameplay/AnimInstanceClasses/FPCSkeletalAnimInstance.h"
+#include "Gameplay/Weapon/FPCGun.h"
 
 
 // Sets default values for this component's properties
@@ -136,6 +137,16 @@ void UFPCCharacterAnimationManagerComponent::OnEquipNewWeapon(AFPCWeapon* Spawne
 	// Subscribe to the weapon's animation related events events
 	SpawnedFPSWeapon->OnWeaponSuccessfullyUsed.AddDynamic(this, &UFPCCharacterAnimationManagerComponent::OnCurrentFPSWeaponUsed);
 	SpawnedTPSWeapon->OnWeaponSuccessfullyUsed.AddDynamic(this, &UFPCCharacterAnimationManagerComponent::OnCurrentTPSWeaponUsed);
+
+	if (AFPCGun* SpawnedFPSGun = Cast<AFPCGun>(SpawnedFPSWeapon))
+	{
+		SpawnedFPSGun->OnReloadStarted.AddDynamic(this, &UFPCCharacterAnimationManagerComponent::OnFPSGunReloadStart);
+	}
+
+	if (AFPCGun* SpawnedTPSGun = Cast<AFPCGun>(SpawnedTPSWeapon))
+	{
+		SpawnedTPSGun->OnReloadStarted.AddDynamic(this, &UFPCCharacterAnimationManagerComponent::OnTPSGunReloadStart);
+	}
 }
 
 void UFPCCharacterAnimationManagerComponent::OnCurrentFPSWeaponUsed()
@@ -146,4 +157,14 @@ void UFPCCharacterAnimationManagerComponent::OnCurrentFPSWeaponUsed()
 void UFPCCharacterAnimationManagerComponent::OnCurrentTPSWeaponUsed()
 {
 	TPSMeshAnimInstance->CurrentLinkedAnimInstance->OnCurrentWeaponUsed();
+}
+
+void UFPCCharacterAnimationManagerComponent::OnFPSGunReloadStart(bool bEmptyReload)
+{
+	FPSMeshAnimInstance->CurrentLinkedAnimInstance->OnCurrentWeaponReloadStart(bEmptyReload);
+}
+
+void UFPCCharacterAnimationManagerComponent::OnTPSGunReloadStart(bool bEmptyReload)
+{
+	TPSMeshAnimInstance->CurrentLinkedAnimInstance->OnCurrentWeaponReloadStart(bEmptyReload);
 }

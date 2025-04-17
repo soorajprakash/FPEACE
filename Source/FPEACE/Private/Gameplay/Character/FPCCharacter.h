@@ -156,10 +156,16 @@ protected:
 	TSoftObjectPtr<UInputAction> ADSAction;
 
 	/*
-	 * Reference to the ADS Input Action object
+	 * Reference to the Fire Input Action object
 	 */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="FPEACE|Inputs")
 	TSoftObjectPtr<UInputAction> FireAction;
+
+	/*
+	 * Reference to the Reload Input Action object
+	 */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="FPEACE|Inputs")
+	TSoftObjectPtr<UInputAction> ReloadAction;
 
 	/*
 	 * Reference to the Camera Switching Input Action object
@@ -177,7 +183,6 @@ protected:
 	virtual void PossessedBy(AController* NewController) override;
 
 	virtual void OnConstruction(const FTransform& Transform) override;
-
 	/*
 	 * Setup Player Input
 	 */
@@ -188,6 +193,9 @@ protected:
 	virtual void AddControllerYawInput(float Val) override;
 
 private:
+
+	//	--------------------- INPUT BINDING FUNCTIONS ---------------------
+	
 	/**
 	 *Reference to Enhanced Input Component
 	 */
@@ -220,6 +228,8 @@ private:
 	void ActivateADS();
 
 	void DeactivateADS();
+
+	void TriggerWeaponReload(const FInputActionValue& InputActionValue);
 
 	void StartUsingWeapon();
 

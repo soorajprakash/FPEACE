@@ -118,6 +118,7 @@ void AFPCCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 		EInputComp->BindAction(FireAction.LoadSynchronous(), ETriggerEvent::Started, this, &AFPCCharacter::StartUsingWeapon);
 		EInputComp->BindAction(FireAction.LoadSynchronous(), ETriggerEvent::Completed, this, &AFPCCharacter::StopUsingWeapon);
 		EInputComp->BindAction(CameraSwitchAction.LoadSynchronous(), ETriggerEvent::Completed, this, &AFPCCharacter::ToggleCameraMode);
+		EInputComp->BindAction(ReloadAction.LoadSynchronous(), ETriggerEvent::Started, this, &AFPCCharacter::TriggerWeaponReload);
 	}
 }
 
@@ -192,6 +193,11 @@ void AFPCCharacter::DeactivateADS()
 {
 	FPCCharacterWeaponManagerComp->SwitchADSState(false);
 	FPCCameraManagerComp->SwitchCameraFOV(false);
+}
+
+void AFPCCharacter::TriggerWeaponReload(const FInputActionValue& InputActionValue)
+{
+	FPCCharacterWeaponManagerComp->TryWeaponReload();
 }
 
 void AFPCCharacter::StartUsingWeapon()

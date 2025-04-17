@@ -8,6 +8,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "FPCCharacterMovementComponent.generated.h"
 
+class AFPCPlayerController;
 class UFPCCapsuleComponent;
 class UFPCCharacterWeaponManagerComponent;
 class AFPCCharacter;
@@ -45,6 +46,8 @@ public:
 	float GetCharacterYawDelta() const { return CharacterYawDelta; }
 
 	ELocomotionState GetCurrentLocomotionState() const { return currentLocomotionState; }
+
+	void AddControllerPitchAndYawInput(float Pitch,float Yaw);
 
 protected:
 	UFPCCharacterMovementComponent();
@@ -193,6 +196,9 @@ protected:
 
 	UPROPERTY()
 	TObjectPtr<UFPCCharacterData> FPCCharacterData;
+
+	UPROPERTY()
+	TObjectPtr<AFPCPlayerController> FPCPlayerController;
 
 	UPROPERTY()
 	TObjectPtr<UFPCCharacterWeaponManagerComponent> FPCCharacterWeaponManager;

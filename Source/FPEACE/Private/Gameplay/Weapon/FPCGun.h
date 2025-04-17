@@ -7,10 +7,16 @@
 #include "FPCWeapon.h"
 #include "FPCGun.generated.h"
 
+class URecoilHelper;
+class UCurveVector;
 class AFPCBullet;
 class UFPCStaticMeshComponent;
 class UFPCSkeletalMeshComponent;
 class UNiagaraSystem;
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnMagWasEmptied, AFPCGun*, GunRef);
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnReloadStarted, bool, bEmptyReload);
 
 UENUM(BlueprintType)
 enum EGunFireMode
@@ -21,11 +27,34 @@ enum EGunFireMode
 };
 
 USTRUCT(BlueprintType)
+struct FGunRecoilSettings
+{
+	GENERATED_BODY()
+
+	FGunRecoilSettings(): RecoilCurve(nullptr), RecoveryTime(1), RecoverySpeed(10.0f)
+	{
+	}
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	TObjectPtr<UCurveVector> RecoilCurve;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(ClampMin=-1.0f, ClampMax=1.0f))
+	float RecoilStrengthMultiplier = -0.5f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	float RecoveryTime;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	float RecoverySpeed;
+};
+
+USTRUCT(BlueprintType)
 struct FGunSettings
 {
 	GENERATED_BODY()
 
-	FGunSettings(): FireMode(SingleShot), FireRate(10), FireCoolDownInterval(0.3f), BurstFireInterval(0.1f), MagCapacity(10), BulletSpreadAngle(5), BulletSpreadAngle_Aiming(1)
+	FGunSettings(): FireMode(SingleShot), FireRate(10), FireCoolDownInterval(0.3f), BurstFireInterval(0.1f), MagCapacity(10), MagCount(10), BulletSpreadAngle_Aiming(1),
+	                BulletSpreadAngle(5)
 	{
 	}
 
@@ -64,6 +93,11 @@ struct FGunSettings
 	int MagCapacity;
 
 	/*
+	 * The number of magazines the player holds for this weapon
+	 */
+	int MagCount;
+
+	/*
 	 * The angle of the bullet spread cone in degrees of this gun when aiming down sight
 	 */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
@@ -80,6 +114,12 @@ struct FGunSettings
 	 */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	float BulletVelocity = 35000;
+
+	/*
+	 * The recoil settings of this gun
+	 */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	FGunRecoilSettings RecoilSettings;
 };
 
 /**
@@ -89,9 +129,20 @@ UCLASS()
 class AFPCGun : public AFPCWeapon
 {
 	GENERATED_BODY()
+	friend class UGunReloadedNotify;
 
 public:
 	AFPCGun();
+
+	/*
+	 * This is triggered the instant the last bullet in the magazine was fired.
+	 */
+	FOnMagWasEmptied OnMagWasEmptied;
+
+	/*
+	 * This is triggered the instant the last bullet in the magazine was fired.
+	 */
+	FOnReloadStarted OnReloadStarted;
 
 	/*
 	 * Spawn the Niagara system for the muzzle flash effect.
@@ -102,6 +153,18 @@ public:
 	 * Checks for conditions to fire the gun and fires the bullet.
 	 */
 	virtual void UseWeapon() override;
+
+	/*
+	 * Tries to sStart the reload animation and sets the gun to be in a reloading state.
+	 * Won't work if the gun is already reloading or if the mag count is 0.
+	 */
+	void TryBeginReload();
+
+	/*
+	 * Called by the anim notify class
+	 * Marks the reloading mag part of the animation to be finished
+	 */
+	void OnMagReloadFinishedPlaying();
 
 	//	--------------------- GETTERS ---------------------
 
@@ -117,14 +180,11 @@ public:
 
 	virtual UFPCSkeletalMeshComponent* GetBaseMeshComp() const override { return ReceiverMeshComp; }
 
-protected:
-	/*
-	 * The time between bullets fired currently being used for this weapon
-	 * This will be used in the animation blueprint to calculate the play rate of the fire animation
-	 */
-	UPROPERTY(BlueprintReadOnly)
-	float GunFireInterval;
+	int GetTotalBulletsInUnusedMagazines() const { return GunSettings.MagCount * GunSettings.MagCapacity; }
 
+	bool GetIsGunReloading() const { return bIsReloading; }
+
+protected:
 	//	--------------------- GUN COMPONENTS ---------------------
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Gun")
@@ -168,7 +228,22 @@ protected:
 	virtual void SetupWeapon(const ECameraMode TargetCameraMode, USceneComponent* AttachCharacterMesh) override;
 
 private:
+	UPROPERTY()
+	TObjectPtr<URecoilHelper> GunRecoilHelper;
+
 	bool bWasTriggerLiftedAfterLastFire = true;
+
+	bool bIsReloading = false;
+
+	/*
+	 * The number of bullets currently remaining in the mag
+	 */
+	int RemainingBulletsInMag;
+
+	/*
+	 * Total number of spare magazines the player has for this weapon.
+	 */
+	int RemainingMagazines;
 
 	/*
 	 * Used when the gun is in burst fire mode.

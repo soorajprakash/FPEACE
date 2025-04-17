@@ -11,6 +11,7 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "FPCCharacterWeaponManagerComponent.generated.h"
 
+class AFPCGun;
 class UFPCCharacterAnimationManagerComponent;
 class FCTweenInstanceFloat;
 class UFPCCharacterMovementComponent;
@@ -39,13 +40,17 @@ public:
 
 	void ToggleWeaponUse(const bool UseWeapon);
 
+	void TryWeaponReload() const;
+
 	UFUNCTION()
 	void OnADSAnimStateChanged(ENotifyAnimationType AnimType, ENotifyAnimationEventType AnimEventType);
 
 	// ----------------------------- GETTERS -----------------------------
 	TObjectPtr<AFPCWeapon> GetCurrentFPSWeaponRef() const { return CurrentFPSWeaponRef; }
+	TObjectPtr<AFPCGun> GetCurrentFPSGunRef() const { return CurrentFPSGunRef; }
 
 	TObjectPtr<AFPCWeapon> GetCurrentTPSWeaponRef() const { return CurrentTPSWeaponRef; }
+	TObjectPtr<AFPCGun> GetCurrentTPSGunRef() const { return CurrentTPSGunRef; }
 
 	FWeaponAnimSettings GetCurrentWeaponAnimSettings() const { return CurrentWeaponAnimSettings; }
 
@@ -56,6 +61,8 @@ public:
 	bool GetIsCharacterInADSState() const { return bIsCharacterInADSState; }
 
 	bool GetWantsToUseWeapon() const { return bWantsToUseWeapon; }
+	
+	bool GetWasWeaponUsedRecently() const { return bWasWeaponUsedRecently; }
 
 protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
@@ -74,10 +81,19 @@ protected:
 	bool bWantsToUseWeapon = false;
 
 	UPROPERTY(BlueprintReadOnly)
+	bool bWasWeaponUsedRecently = false;
+
+	UPROPERTY(BlueprintReadOnly)
 	TObjectPtr<AFPCWeapon> CurrentFPSWeaponRef;
 
 	UPROPERTY(BlueprintReadOnly)
+	TObjectPtr<AFPCGun> CurrentFPSGunRef;
+
+	UPROPERTY(BlueprintReadOnly)
 	TObjectPtr<AFPCWeapon> CurrentTPSWeaponRef;
+
+	UPROPERTY(BlueprintReadOnly)
+	TObjectPtr<AFPCGun> CurrentTPSGunRef;
 
 	/*
 	 * Reference to the weapon animation settings struct from the current weapon that is equipped
@@ -126,6 +142,8 @@ private:
 	FCTweenInstanceFloat* ADSBlendFactorTween;
 
 	bool bLastFrameWantsADSState;
+
+	FTimerHandle WeaponUseCoolDownTimer;
 
 	UPROPERTY()
 	TObjectPtr<AFPCCharacter> OwningCharacter;

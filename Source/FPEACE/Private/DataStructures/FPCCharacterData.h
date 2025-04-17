@@ -41,6 +41,12 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta = (ClampMin = 0.00001f, ClampMax = 0.1))
 	float TurningLeanStrength = 0.05;
 
+	/*
+	 * This is the time after the use of a weapon after which the character is marked as not using a weapon.
+	 */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	float WeaponUseCoolDownTime = 1;
+
 	UPROPERTY(EditDefaultsOnly)
 	TMap<ELocomotionStance, FLocomotionStanceSetting> LocomotionStanceSettings;
 

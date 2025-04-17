@@ -10,8 +10,10 @@
 #include "Gameplay/Weapon/FPCWeapon.h"
 #include "FCTween.h"
 #include "FPCCharacterAnimationManagerComponent.h"
+#include "DataStructures/FPCCharacterData.h"
 #include "Gameplay/AnimInstanceClasses/FPCLayerAnimInstance.h"
 #include "Gameplay/AnimInstanceClasses/FPCSkeletalAnimInstance.h"
+#include "Gameplay/Weapon/RecoilHelper.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
 
@@ -91,6 +93,30 @@ void UFPCCharacterWeaponManagerComponent::ToggleWeaponUse(const bool UseWeapon)
 	CurrentTPSWeaponRef->SetIsWeaponInUse(UseWeapon);
 
 	bWantsToUseWeapon = UseWeapon;
+
+	if (UseWeapon)
+	{
+		bWasWeaponUsedRecently = true;
+		WeaponUseCoolDownTimer.Invalidate();
+	}
+	else
+	{
+		FTimerDelegate WeaponUseCoolDownDelegate = FTimerDelegate::CreateLambda([this]
+		{
+			bWasWeaponUsedRecently = false;
+		});
+
+		GetWorld()->GetTimerManager().SetTimer(WeaponUseCoolDownTimer, WeaponUseCoolDownDelegate, FPCCharacterData->WeaponUseCoolDownTime, false);
+	}
+}
+
+void UFPCCharacterWeaponManagerComponent::TryWeaponReload() const
+{
+	if (CurrentFPSGunRef && CurrentTPSGunRef)
+	{
+		CurrentFPSGunRef->TryBeginReload();
+		CurrentTPSGunRef->TryBeginReload();
+	}
 }
 
 void UFPCCharacterWeaponManagerComponent::OnADSAnimStateChanged(ENotifyAnimationType AnimType, ENotifyAnimationEventType AnimEventType)
@@ -122,7 +148,9 @@ void UFPCCharacterWeaponManagerComponent::EquipWeapon(const TSoftClassPtr<AFPCWe
 		UClass* WeaponBPRef = WeaponBP.LoadSynchronous();
 		// Spawn one weapon instance for each FPS and TPS mesh
 		CurrentFPSWeaponRef = Cast<AFPCWeapon>(GetWorld()->SpawnActor(WeaponBPRef));
+		CurrentFPSGunRef = Cast<AFPCGun>(CurrentFPSWeaponRef);
 		CurrentTPSWeaponRef = Cast<AFPCWeapon>(GetWorld()->SpawnActor(WeaponBPRef));
+		CurrentTPSGunRef = Cast<AFPCGun>(CurrentTPSWeaponRef);
 
 		if (CurrentFPSWeaponRef && CurrentTPSWeaponRef)
 		{

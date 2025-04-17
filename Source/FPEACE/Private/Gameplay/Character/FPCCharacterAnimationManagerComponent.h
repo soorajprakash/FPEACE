@@ -6,6 +6,7 @@
 #include "CoreMinimal.h"
 #include "FPCCharacterMovementComponent.h"
 #include "Gameplay/FPCActorComponent.h"
+#include "Gameplay/Weapon/FPCGun.h"
 #include "Gameplay/Weapon/FPCWeapon.h"
 #include "FPCCharacterAnimationManagerComponent.generated.h"
 
@@ -88,7 +89,13 @@ private:
 	void LinkCombatAnimClassToCharacter(FName AnimClassNameToLink) const;
 
 	TSoftClassPtr<UFPCLayerAnimInstance> GetAnimClassFor(ECameraMode TargetCameraMode, FName AnimStateName, const FString& ReasonForGettingThisAnim) const;
-	
+
+	UFUNCTION()
+	void OnFPSGunReloadStart(bool bEmptyReload);
+
+	UFUNCTION()
+	void OnTPSGunReloadStart(bool bEmptyReload);
+
 	UFUNCTION()
 	void OnEquipNewWeapon(AFPCWeapon* SpawnedFPSWeapon, AFPCWeapon* SpawnedTPSWeapon);
 

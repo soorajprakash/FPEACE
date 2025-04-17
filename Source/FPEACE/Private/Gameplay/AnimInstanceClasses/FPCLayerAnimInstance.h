@@ -35,6 +35,9 @@ public:
 	void OnCurrentWeaponUsed();
 
 	UFUNCTION(BlueprintImplementableEvent)
+	void OnCurrentWeaponReloadStart(bool bEmptyReload);
+
+	UFUNCTION(BlueprintImplementableEvent)
 	void OnWeaponEquipped(const AFPCWeapon* SpawnedWeapon);
 
 protected:
