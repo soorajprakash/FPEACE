@@ -4,6 +4,7 @@
 
 #include "FPCBullet.h"
 
+#include "FPCGun.h"
 #include "ObjectPoolSubsystem.h"
 #include "Components/BoxComponent.h"
 #include "Gameplay/FPCProjectileMovementComponent.h"
@@ -44,7 +45,13 @@ AFPCBullet::AFPCBullet()
 	}
 }
 
-void AFPCBullet::PropelBullet(AFPCCharacter& OwnerCharacter, AFPCGun& OwnerGun, const FTransform& FireFromTransform, const float BulletVelocity)
+void AFPCBullet::SetOwners(AFPCCharacter* OwnerCharacter, AFPCGun* OwnerGun)
+{
+	OwningCharacter = OwnerCharacter;
+	OwningGun = OwnerGun;
+}
+
+void AFPCBullet::PropelBullet(const FTransform& FireFromTransform, const float BulletVelocity)
 {
 	SetActorLocation(FireFromTransform.GetLocation());
 	// Use the socket's Y axis as the desired forward direction.
@@ -54,6 +61,8 @@ void AFPCBullet::PropelBullet(AFPCCharacter& OwnerCharacter, AFPCGun& OwnerGun, 
 	FVector DesiredUp = FireFromTransform.GetRotation().GetAxisZ().GetSafeNormal();
 	SetActorRotation(FRotationMatrix::MakeFromZX(DesiredForward, DesiredUp).Rotator());
 
+	ToggleBulletActivation(true);
+
 	if (BulletMovementComp)
 	{
 		BulletMovementComp->InitialSpeed = BulletVelocity * 0.5f;
@@ -62,10 +71,6 @@ void AFPCBullet::PropelBullet(AFPCCharacter& OwnerCharacter, AFPCGun& OwnerGun, 
 	}
 
 	HasbulletBeenFired = true;
-
-	// Set Owners
-	OwningCharacter = &OwnerCharacter;
-	OwningGun = &OwnerGun;
 }
 
 void AFPCBullet::OnPushedToPool_Implementation()
@@ -81,8 +86,6 @@ void AFPCBullet::OnPushedToPool_Implementation()
 void AFPCBullet::OnPulledFromPool_Implementation()
 {
 	Super::OnPulledFromPool_Implementation();
-
-	ToggleBulletActivation(true);
 }
 
 void AFPCBullet::Tick(float DeltaSeconds)
@@ -98,7 +101,7 @@ void AFPCBullet::Tick(float DeltaSeconds)
 	}
 }
 
-void AFPCBullet::ToggleBulletActivation(const bool bActivate)
+void AFPCBullet::ToggleBulletActivation(const bool bActivate) const
 {
 	// Bullet Mesh Comp
 	BulletMeshComp->SetActive(bActivate);

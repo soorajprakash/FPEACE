@@ -279,8 +279,9 @@ void AFPCGun::Fire()
 
 		FRotator BulletRotation = FRotationMatrix::MakeFromY(SpreadFireDirection).Rotator();
 		BulletSpawnTransform.SetRotation(BulletRotation.Quaternion());
+
 		if (AFPCBullet* NewBullet = AcquireBullet())
-			NewBullet->PropelBullet(*OwningCharacter, *this, BulletSpawnTransform, GunSettings.BulletVelocity);
+			NewBullet->PropelBullet(BulletSpawnTransform, GunSettings.BulletVelocity);
 	}
 
 	OnWeaponSuccessfullyUsed.Broadcast();
@@ -317,12 +318,15 @@ void AFPCGun::BurstModeFire()
 	}
 }
 
-AFPCBullet* AFPCGun::AcquireBullet() const
+AFPCBullet* AFPCGun::AcquireBullet()
 {
 	AActor* BulletActorFromPool;
 	OwningCharacter->WorldObjectPool->Pull(BulletClass, BulletActorFromPool);
 	if (AFPCBullet* NewBullet = Cast<AFPCBullet>(BulletActorFromPool))
+	{
+		NewBullet->SetOwners(OwningCharacter, this);
 		return NewBullet;
+	}
 
 	return nullptr;
 }

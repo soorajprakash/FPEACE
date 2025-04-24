@@ -186,13 +186,11 @@ void AFPCCharacter::ToggleCameraMode()
 void AFPCCharacter::ActivateADS()
 {
 	FPCCharacterWeaponManagerComp->SwitchADSState(true);
-	FPCCameraManagerComp->SwitchCameraFOV(true);
 }
 
 void AFPCCharacter::DeactivateADS()
 {
 	FPCCharacterWeaponManagerComp->SwitchADSState(false);
-	FPCCameraManagerComp->SwitchCameraFOV(false);
 }
 
 void AFPCCharacter::TriggerWeaponReload(const FInputActionValue& InputActionValue)

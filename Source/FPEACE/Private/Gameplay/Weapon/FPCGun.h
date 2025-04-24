@@ -254,5 +254,5 @@ private:
 	FTimerHandle GunCoolDownHandle;
 	void Fire();
 	void BurstModeFire();
-	AFPCBullet* AcquireBullet() const;
+	AFPCBullet* AcquireBullet();
 };

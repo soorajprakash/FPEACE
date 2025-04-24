@@ -45,7 +45,7 @@ void UObjectPool::OnWorldBeginPlay(UWorld& InWorld)
 		if (!AddActorType(Element.Key, Element.Value))
 		{
 			UE_LOG(LogObjectPool, Error, TEXT("Failed to spawn initial count of actor class \"%s\""),
-			       IsValid(Element.Key) ? *Element.Key->GetDisplayNameText().ToString() : *FString("Unknown class"))
+			       IsValid(Element.Key) ? *Element.Key->GetName() : *FString("Unknown class"))
 		}
 	}
 }
@@ -92,7 +92,7 @@ bool UObjectPool::Push(AActor* Actor)
 				if (!AddActorType(Actor->GetClass(), FPooledActorSettings(0, true)))
 				{
 					UE_LOG(LogObjectPool, Error, TEXT("Pushed actor of type \"%s\" did not already exist in pool and could not be added either"),
-					       *Actor->GetClass()->GetDisplayNameText().ToString())
+					       *Actor->GetClass()->GetName())
 					return false;
 				}
 
@@ -120,7 +120,7 @@ bool UObjectPool::Pull(const TSubclassOf<AActor> Class, AActor*& Actor_Out)
 	{
 		if (!AddActorType(Class, FPooledActorSettings(0, true)))
 		{
-			UE_LOG(LogObjectPool, Error, TEXT("Pulled actor type \"%s\" did not already exist in pool and could not be added either"), *Class->GetDisplayNameText().ToString())
+			UE_LOG(LogObjectPool, Error, TEXT("Pulled actor type \"%s\" did not already exist in pool and could not be added either"), *Class->GetName())
 			return false;
 		}
 
@@ -181,7 +181,7 @@ AActor* UObjectPool::SpawnNewActor(const TSubclassOf<AActor>& Class) const
 		AActor* NewActor = World->SpawnActor<AActor>(Class.Get(), FVector(0, 0, 0), FRotator(0, 0, 0), Params);
 		if (!IsValid(NewActor))
 		{
-			UE_LOG(LogObjectPool, Error, TEXT("Failed to spawn actor of class \"%s\""), *Class->GetDisplayNameText().ToString())
+			UE_LOG(LogObjectPool, Error, TEXT("Failed to spawn actor of class \"%s\""), *Class->GetName())
 			return nullptr;
 		}
 
@@ -196,8 +196,8 @@ bool UObjectPool::AddActorType(TSubclassOf<AActor> Class, FPooledActorSettings A
 	{
 		if (!UKismetSystemLibrary::DoesClassImplementInterface(Class, UObjectPooledActor::StaticClass()))
 		{
-			UE_LOG(LogObjectPool, Error, TEXT("The actor class \"%s\" does not implement the \"%s\" interface"), *Class->GetDisplayNameText().ToString(),
-			       *UObjectPooledActor::StaticClass()->GetDisplayNameText().ToString())
+			UE_LOG(LogObjectPool, Error, TEXT("The actor class \"%s\" does not implement the \"%s\" interface"), *Class->GetName(),
+			       *UObjectPooledActor::StaticClass()->GetName())
 			return false;
 		}
 

@@ -131,6 +131,9 @@ protected:
 	UPROPERTY(BlueprintReadOnly)
 	bool ADSStateChanged;
 
+	UPROPERTY(BlueprintReadOnly)
+	bool RecentlyUsedWeaponStateChanged;
+
 	virtual void InitializeComponent() override;
 
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
@@ -142,6 +145,7 @@ private:
 	FCTweenInstanceFloat* ADSBlendFactorTween;
 
 	bool bLastFrameWantsADSState;
+	bool bLastFrameWeaponRecentlyUsedState;
 
 	FTimerHandle WeaponUseCoolDownTimer;
 

@@ -32,11 +32,16 @@ void UFPCCharacterAnimationManagerComponent::InitializeComponent()
 
 	if (OwningCharacter)
 	{
-		TPSBodyMeshComp = OwningCharacter->GetTPSBodyMeshComp();
-		FPSBodyMeshComp = OwningCharacter->GetFPSArmsMeshComp();
 		FPCCharacterMovementComp = OwningCharacter->GetCharacterMovementComponent();
 		FPCWeaponManagerComp = OwningCharacter->GetFPCCharacterWeaponManager();
 		FPCCharacterData = OwningCharacter->GetCharacterData();
+
+		TPSBodyMeshComp = OwningCharacter->GetTPSBodyMeshComp();
+		FPSBodyMeshComp = OwningCharacter->GetFPSArmsMeshComp();
+		TPSMeshAnimInstance = Cast<UFPCSkeletalAnimInstance>(TPSBodyMeshComp->GetAnimInstance());
+		if (TPSMeshAnimInstance)
+			TPSMeshAnimInstance->isBaseAnimInstance = true;
+		FPSMeshAnimInstance = Cast<UFPCSkeletalAnimInstance>(FPSBodyMeshComp->GetAnimInstance());
 	}
 
 	FPCWeaponManagerComp->OnNewWeaponEquipped.AddDynamic(this, &UFPCCharacterAnimationManagerComponent::OnEquipNewWeapon);
@@ -47,12 +52,7 @@ void UFPCCharacterAnimationManagerComponent::BeginPlay()
 	Super::BeginPlay();
 
 	if (OwningCharacter)
-	{
 		PlayerControllerRef = OwningCharacter->GetFPCPlayerController();
-		TPSMeshAnimInstance = Cast<UFPCSkeletalAnimInstance>(TPSBodyMeshComp->GetAnimInstance());
-		TPSMeshAnimInstance->isBaseAnimInstance = true;
-		FPSMeshAnimInstance = Cast<UFPCSkeletalAnimInstance>(FPSBodyMeshComp->GetAnimInstance());
-	}
 }
 
 // Called every frame
@@ -125,28 +125,30 @@ TSoftClassPtr<UFPCLayerAnimInstance> UFPCCharacterAnimationManagerComponent::Get
 void UFPCCharacterAnimationManagerComponent::OnEquipNewWeapon(AFPCWeapon* SpawnedFPSWeapon, AFPCWeapon* SpawnedTPSWeapon)
 {
 	// Link the animation class to the character
-	if (SpawnedFPSWeapon)
+	if (SpawnedFPSWeapon && SpawnedTPSWeapon)
+	{
 		LinkCombatAnimClassToCharacter(SpawnedFPSWeapon->WeaponAnimLayerClassName);
+
+		// Subscribe to the weapon's animation related events events
+		SpawnedFPSWeapon->OnWeaponSuccessfullyUsed.AddDynamic(this, &UFPCCharacterAnimationManagerComponent::OnCurrentFPSWeaponUsed);
+		SpawnedTPSWeapon->OnWeaponSuccessfullyUsed.AddDynamic(this, &UFPCCharacterAnimationManagerComponent::OnCurrentTPSWeaponUsed);
+
+		if (AFPCGun* SpawnedFPSGun = Cast<AFPCGun>(SpawnedFPSWeapon))
+		{
+			SpawnedFPSGun->OnReloadStarted.AddDynamic(this, &UFPCCharacterAnimationManagerComponent::OnFPSGunReloadStart);
+		}
+
+		if (AFPCGun* SpawnedTPSGun = Cast<AFPCGun>(SpawnedTPSWeapon))
+		{
+			SpawnedTPSGun->OnReloadStarted.AddDynamic(this, &UFPCCharacterAnimationManagerComponent::OnTPSGunReloadStart);
+		}
+	}
 	else
 		LinkCombatAnimClassToCharacter(TEXT("Unarmed"));
 
 	// Notify Layer about new weapon
 	FPSMeshAnimInstance->CurrentLinkedAnimInstance->OnWeaponEquipped(SpawnedFPSWeapon);
 	TPSMeshAnimInstance->CurrentLinkedAnimInstance->OnWeaponEquipped(SpawnedTPSWeapon);
-
-	// Subscribe to the weapon's animation related events events
-	SpawnedFPSWeapon->OnWeaponSuccessfullyUsed.AddDynamic(this, &UFPCCharacterAnimationManagerComponent::OnCurrentFPSWeaponUsed);
-	SpawnedTPSWeapon->OnWeaponSuccessfullyUsed.AddDynamic(this, &UFPCCharacterAnimationManagerComponent::OnCurrentTPSWeaponUsed);
-
-	if (AFPCGun* SpawnedFPSGun = Cast<AFPCGun>(SpawnedFPSWeapon))
-	{
-		SpawnedFPSGun->OnReloadStarted.AddDynamic(this, &UFPCCharacterAnimationManagerComponent::OnFPSGunReloadStart);
-	}
-
-	if (AFPCGun* SpawnedTPSGun = Cast<AFPCGun>(SpawnedTPSWeapon))
-	{
-		SpawnedTPSGun->OnReloadStarted.AddDynamic(this, &UFPCCharacterAnimationManagerComponent::OnTPSGunReloadStart);
-	}
 }
 
 void UFPCCharacterAnimationManagerComponent::OnCurrentFPSWeaponUsed()

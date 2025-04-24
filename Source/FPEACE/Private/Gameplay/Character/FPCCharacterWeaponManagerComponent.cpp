@@ -83,7 +83,7 @@ void UFPCCharacterWeaponManagerComponent::SwitchADSState(bool UseADS)
 		ADSBlendFactorTween->Destroy();
 
 	ADSBlendFactorTween = FCTween::Play(CurrentADSBlendFactor, bWantsToADS, [&](float V) { CurrentADSBlendFactor = V; }, CurrentWeaponAnimSettings.FocusTime);
-
+	FPCCameraManagerComp->SwitchCameraFOV(UseADS);
 	SetCurrentWeaponHandIKOffset();
 }
 
@@ -223,6 +223,9 @@ void UFPCCharacterWeaponManagerComponent::UpdateStateChanges()
 {
 	ADSStateChanged = bWantsToADS != bLastFrameWantsADSState;
 	bLastFrameWantsADSState = bWantsToADS;
+
+	RecentlyUsedWeaponStateChanged = bWasWeaponUsedRecently != bLastFrameWeaponRecentlyUsedState;
+	bLastFrameWeaponRecentlyUsedState = bWasWeaponUsedRecently;
 }
 
 void UFPCCharacterWeaponManagerComponent::CalculateCurrentWeaponLagValues()

@@ -23,7 +23,9 @@ public:
 	// Sets default values for this actor's properties
 	AFPCBullet();
 
-	void PropelBullet(AFPCCharacter& OwnerCharacter, AFPCGun& OwnerGun, const FTransform& FireFromTransform, const float BulletVelocity);
+	void SetOwners(AFPCCharacter* OwnerCharacter, AFPCGun* OwnerGun);
+
+	void PropelBullet(const FTransform& FireFromTransform, const float BulletVelocity);
 
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
@@ -40,27 +42,26 @@ protected:
 	virtual void Tick(float DeltaSeconds) override;
 
 private:
-
 	/*
 	 * Whether the bullet has been fired yet or not
 	 */
 	bool HasbulletBeenFired = false;
-	
+
 	/*
 	 * The time in seconds that has elapsed since the bullet was fired
 	 */
 	float CurrentBulletAge = 0;
-	
+
 	/*
 	 * The time in seconds after which the bullet will be pooled
 	 */
 	const float BulletLifeSpan = 3;
-	
+
 	/*
 	 * Reference to the character that is actively using the gun that fired this bullet
 	 */
 	UPROPERTY()
-	AFPCCharacter* OwningCharacter;
+	TObjectPtr<AFPCCharacter> OwningCharacter;
 
 	/*
 	 * Reference to the gun that fired this bullet
@@ -68,7 +69,7 @@ private:
 	UPROPERTY()
 	AFPCGun* OwningGun;
 
-	void ToggleBulletActivation(const bool bActivate);
+	void ToggleBulletActivation(const bool bActivate) const;
 
 	UFUNCTION()
 	void BulletOverlapedSomething(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
