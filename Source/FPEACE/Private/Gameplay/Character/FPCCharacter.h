@@ -195,12 +195,6 @@ protected:
 private:
 
 	//	--------------------- INPUT BINDING FUNCTIONS ---------------------
-	
-	/**
-	 *Reference to Enhanced Input Component
-	 */
-	UPROPERTY()
-	TObjectPtr<UEnhancedInputComponent> EnhancedInputComp;
 
 	/*
 	 * Look input binding function

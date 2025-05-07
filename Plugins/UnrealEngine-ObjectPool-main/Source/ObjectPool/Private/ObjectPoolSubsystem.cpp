@@ -89,7 +89,8 @@ bool UObjectPool::Push(AActor* Actor)
 		{
 			if (!Pool.Contains(Actor->GetClass()))
 			{
-				if (!AddActorType(Actor->GetClass(), FPooledActorSettings(0, true)))
+				FPooledActorSettings NewPooledActorSettings;
+				if (!AddActorType(Actor->GetClass(), NewPooledActorSettings))
 				{
 					UE_LOG(LogObjectPool, Error, TEXT("Pushed actor of type \"%s\" did not already exist in pool and could not be added either"),
 					       *Actor->GetClass()->GetName())
@@ -118,7 +119,8 @@ bool UObjectPool::Pull(const TSubclassOf<AActor> Class, AActor*& Actor_Out)
 	TTuple<TArray<AActor*>, TArray<AActor*>>* Subpool = Pool.Find(Class);
 	if (!Subpool)
 	{
-		if (!AddActorType(Class, FPooledActorSettings(0, true)))
+		FPooledActorSettings NewPooledActorSettings;
+		if (!AddActorType(Class, NewPooledActorSettings))
 		{
 			UE_LOG(LogObjectPool, Error, TEXT("Pulled actor type \"%s\" did not already exist in pool and could not be added either"), *Class->GetName())
 			return false;
@@ -152,7 +154,8 @@ bool UObjectPool::Pull(const TSubclassOf<AActor> Class, AActor*& Actor_Out)
 		IObjectPooledActor::Execute_OnPulledFromPool(PulledActor);
 		Actor_Out = PulledActor;
 		return true;
-	} else
+	}
+	else
 	{
 		FPooledActorSettings* Settings = ActivePoolSettings.Find(Class);
 		if (Settings && Settings->bCanExpand)
