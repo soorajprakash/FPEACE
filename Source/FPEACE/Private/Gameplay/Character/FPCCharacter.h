@@ -8,12 +8,13 @@
 #include "GameFramework/Character.h"
 #include "FPCCharacter.generated.h"
 
+class AFPCSampleGameplayLevelScriptActor;
 class UObjectPool;
 class UFPCCharacterAnimationManagerComponent;
 class UFPCCharacterCameraManagerComponent;
 class UInputAction;
 class UFPCCharacterWeaponManagerComponent;
-class AFPCPlayerController;
+class AFPCGameplayPlayerController;
 class UFPCSpringArmComponent;
 class UFPCCameraComponent;
 class UFPCCapsuleComponent;
@@ -61,7 +62,7 @@ public:
 
 	TObjectPtr<UFPCSpringArmComponent> GetFPCSpringArmComp() const { return FPCSpringArmComp; }
 
-	TObjectPtr<AFPCPlayerController> GetFPCPlayerController() const { return FPCPlayerControllerInstance; }
+	TObjectPtr<AFPCGameplayPlayerController> GetFPCPlayerController() const { return FPCPlayerControllerInstance; }
 
 	TObjectPtr<UFPCCharacterWeaponManagerComponent> GetFPCCharacterWeaponManager() const { return FPCCharacterWeaponManagerComp; }
 
@@ -109,7 +110,7 @@ protected:
 	 * Reference to the FPC Player Controller instance
 	 */
 	UPROPERTY(BlueprintReadOnly, Category="FPEACE")
-	TObjectPtr<AFPCPlayerController> FPCPlayerControllerInstance;
+	TObjectPtr<AFPCGameplayPlayerController> FPCPlayerControllerInstance;
 
 	/*
 	 * Reference to the character data asset referenced in the game instance
@@ -117,7 +118,7 @@ protected:
 	UPROPERTY(BlueprintReadOnly, Category="FPEACE")
 	TObjectPtr<UFPCCharacterData> FPCCharacterData;
 
-	//	--------------------- INPUT ---------------------
+	//	--------------------- GAMEPLAY INPUT ---------------------
 
 	/*
 	 * Reference to the Look Input Action object
@@ -168,6 +169,18 @@ protected:
 	TSoftObjectPtr<UInputAction> ReloadAction;
 
 	/*
+	 * Reference to the Weapon Cycle Up Input Action object
+	 */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="FPEACE|Inputs")
+	TSoftObjectPtr<UInputAction> WeaponCycleUpAction;
+
+	/*
+	 * Reference to the Weapon Cycle Up Input Action object
+	 */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="FPEACE|Inputs")
+	TSoftObjectPtr<UInputAction> WeaponCycleDownAction;
+
+	/*
 	 * Reference to the Camera Switching Input Action object
 	 */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="FPEACE|Inputs")
@@ -183,6 +196,7 @@ protected:
 	virtual void PossessedBy(AController* NewController) override;
 
 	virtual void OnConstruction(const FTransform& Transform) override;
+
 	/*
 	 * Setup Player Input
 	 */
@@ -193,7 +207,7 @@ protected:
 	virtual void AddControllerYawInput(float Val) override;
 
 private:
-
+	
 	//	--------------------- INPUT BINDING FUNCTIONS ---------------------
 
 	/*
@@ -224,6 +238,10 @@ private:
 	void DeactivateADS();
 
 	void TriggerWeaponReload(const FInputActionValue& InputActionValue);
+
+	void CycleWeaponUp();
+	
+	void CycleWeaponDown();
 
 	void StartUsingWeapon();
 

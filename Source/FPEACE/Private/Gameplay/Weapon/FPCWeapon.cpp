@@ -4,7 +4,7 @@
 #include "FPCWeapon.h"
 #include "CommonEnums.h"
 #include "Gameplay/Character/FPCCharacter.h"
-#include "Gameplay/Character/FPCPlayerController.h"
+#include "Gameplay/Character/FPCGameplayPlayerController.h"
 
 AFPCWeapon::AFPCWeapon(): UsedInCameraMode(ECameraMode::TPS)
 {

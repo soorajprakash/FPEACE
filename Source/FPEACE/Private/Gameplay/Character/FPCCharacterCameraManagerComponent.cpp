@@ -8,7 +8,7 @@
 #include "FPCCameraComponent.h"
 #include "FPCCharacter.h"
 #include "FPCCharacterWeaponManagerComponent.h"
-#include "FPCPlayerController.h"
+#include "FPCGameplayPlayerController.h"
 #include "DataStructures/FPCCharacterData.h"
 #include "Gameplay/FPCSkeletalMeshComponent.h"
 #include "Gameplay/FPCSpringArmComponent.h"
@@ -25,7 +25,7 @@ void UFPCCharacterCameraManagerComponent::SetCameraMode(ECameraMode NewCameraMod
 	// Based on the camera mode, toggle the skeletal meshes
 	// The idea is to basically always have the TPS meshes visible to the world (Since it's needed for multiplayer)
 	// The FPS meshes is only visible to the owner of the character when in FPS mode and never visible to the world
-	TPSBodyMeshComp->SetOwnerNoSee(!IsInTPSCameraMode);
+	TPSBodyMeshComp->FPC_SetOwnerNoSee(!IsInTPSCameraMode);
 	FPSArmsMeshComp->SetHiddenInGame(IsInTPSCameraMode);
 	FPSLowerBodyMeshComp->SetHiddenInGame(IsInTPSCameraMode);
 

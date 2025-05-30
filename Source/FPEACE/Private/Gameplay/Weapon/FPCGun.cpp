@@ -157,7 +157,7 @@ void AFPCGun::TryBeginReload()
 	if (!bIsReloading && RemainingBulletsInMag < GunSettings.MagCapacity)
 	{
 		bIsReloading = true;
-		OnReloadStarted.Broadcast(RemainingBulletsInMag == 0);
+		OnReloadStarted.Broadcast(RemainingBulletsInMag == 0,this);
 	}
 }
 
@@ -166,6 +166,7 @@ void AFPCGun::OnMagReloadFinishedPlaying()
 	RemainingBulletsInMag = GunSettings.MagCapacity;
 	RemainingMagazines--;
 	bIsReloading = false;
+	OnReloadFinished.Broadcast(this);
 }
 
 TArray<TObjectPtr<UMeshComponent>> AFPCGun::GatherWeaponMeshComps()

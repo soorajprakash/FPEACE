@@ -5,7 +5,7 @@
 #include "FPCCharacterAnimationManagerComponent.h"
 #include "FPCCharacter.h"
 #include "FPCCharacterWeaponManagerComponent.h"
-#include "FPCPlayerController.h"
+#include "FPCGameplayPlayerController.h"
 #include "DataStructures/FCameraModeAnimSelectionStruct.h"
 #include "DataStructures/FPCCharacterData.h"
 #include "Gameplay/FPCSkeletalMeshComponent.h"
@@ -130,17 +130,22 @@ void UFPCCharacterAnimationManagerComponent::OnEquipNewWeapon(AFPCWeapon* Spawne
 		LinkCombatAnimClassToCharacter(SpawnedFPSWeapon->WeaponAnimLayerClassName);
 
 		// Subscribe to the weapon's animation related events events
+		SpawnedFPSWeapon->OnWeaponSuccessfullyUsed.RemoveAll(this);
 		SpawnedFPSWeapon->OnWeaponSuccessfullyUsed.AddDynamic(this, &UFPCCharacterAnimationManagerComponent::OnCurrentFPSWeaponUsed);
+
+		SpawnedTPSWeapon->OnWeaponSuccessfullyUsed.RemoveAll(this);
 		SpawnedTPSWeapon->OnWeaponSuccessfullyUsed.AddDynamic(this, &UFPCCharacterAnimationManagerComponent::OnCurrentTPSWeaponUsed);
 
-		if (AFPCGun* SpawnedFPSGun = Cast<AFPCGun>(SpawnedFPSWeapon))
+		if (AFPCGun* SpawnedGun = Cast<AFPCGun>(SpawnedFPSWeapon))
 		{
-			SpawnedFPSGun->OnReloadStarted.AddDynamic(this, &UFPCCharacterAnimationManagerComponent::OnFPSGunReloadStart);
+			SpawnedGun->OnReloadStarted.RemoveAll(this);
+			SpawnedGun->OnReloadStarted.AddDynamic(this, &UFPCCharacterAnimationManagerComponent::OnGunReloadStart);
 		}
 
-		if (AFPCGun* SpawnedTPSGun = Cast<AFPCGun>(SpawnedTPSWeapon))
+		if (AFPCGun* SpawnedGun = Cast<AFPCGun>(SpawnedTPSWeapon))
 		{
-			SpawnedTPSGun->OnReloadStarted.AddDynamic(this, &UFPCCharacterAnimationManagerComponent::OnTPSGunReloadStart);
+			SpawnedGun->OnReloadStarted.RemoveAll(this);
+			SpawnedGun->OnReloadStarted.AddDynamic(this, &UFPCCharacterAnimationManagerComponent::OnGunReloadStart);
 		}
 	}
 	else
@@ -161,12 +166,10 @@ void UFPCCharacterAnimationManagerComponent::OnCurrentTPSWeaponUsed()
 	TPSMeshAnimInstance->CurrentLinkedAnimInstance->OnCurrentWeaponUsed();
 }
 
-void UFPCCharacterAnimationManagerComponent::OnFPSGunReloadStart(bool bEmptyReload)
+void UFPCCharacterAnimationManagerComponent::OnGunReloadStart(bool bEmptyReload, AFPCGun* ReloadingGun)
 {
-	FPSMeshAnimInstance->CurrentLinkedAnimInstance->OnCurrentWeaponReloadStart(bEmptyReload);
-}
-
-void UFPCCharacterAnimationManagerComponent::OnTPSGunReloadStart(bool bEmptyReload)
-{
-	TPSMeshAnimInstance->CurrentLinkedAnimInstance->OnCurrentWeaponReloadStart(bEmptyReload);
+	if (ReloadingGun->UsedInCameraMode == ECameraMode::FPS)
+		FPSMeshAnimInstance->CurrentLinkedAnimInstance->OnCurrentWeaponReloadStart(bEmptyReload);
+	else if (ReloadingGun->UsedInCameraMode == ECameraMode::TPS)
+		TPSMeshAnimInstance->CurrentLinkedAnimInstance->OnCurrentWeaponReloadStart(bEmptyReload);
 }

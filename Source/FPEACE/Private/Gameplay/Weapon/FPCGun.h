@@ -16,7 +16,9 @@ class UNiagaraSystem;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnMagWasEmptied, AFPCGun*, GunRef);
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnReloadStarted, bool, bEmptyReload);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnReloadStarted, bool, bEmptyReload, AFPCGun*, GunRef);
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnReloadFinished, AFPCGun*, GunRef);
 
 UENUM(BlueprintType)
 enum EGunFireMode
@@ -140,9 +142,14 @@ public:
 	FOnMagWasEmptied OnMagWasEmptied;
 
 	/*
-	 * This is triggered the instant the last bullet in the magazine was fired.
+	 * This is triggered the instant the last bullet in the magazine was fired or if the reload button was pressed.
 	 */
 	FOnReloadStarted OnReloadStarted;
+
+	/*
+	 * This is triggered when the reload animation finishes playing
+	 */
+	FOnReloadFinished OnReloadFinished;
 
 	/*
 	 * Spawn the Niagara system for the muzzle flash effect.

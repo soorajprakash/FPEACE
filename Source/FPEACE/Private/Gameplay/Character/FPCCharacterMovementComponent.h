@@ -8,7 +8,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "FPCCharacterMovementComponent.generated.h"
 
-class AFPCPlayerController;
+class AFPCGameplayPlayerController;
 class UFPCCapsuleComponent;
 class UFPCCharacterWeaponManagerComponent;
 class AFPCCharacter;
@@ -198,7 +198,7 @@ protected:
 	TObjectPtr<UFPCCharacterData> FPCCharacterData;
 
 	UPROPERTY()
-	TObjectPtr<AFPCPlayerController> FPCPlayerController;
+	TObjectPtr<AFPCGameplayPlayerController> FPCPlayerController;
 
 	UPROPERTY()
 	TObjectPtr<UFPCCharacterWeaponManagerComponent> FPCCharacterWeaponManager;

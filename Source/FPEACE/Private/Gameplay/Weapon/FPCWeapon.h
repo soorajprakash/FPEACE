@@ -7,7 +7,7 @@
 #include "Gameplay/FPCActor.h"
 #include "FPCWeapon.generated.h"
 
-class AFPCPlayerController;
+class AFPCGameplayPlayerController;
 class UFPCCharacterAnimationManagerComponent;
 class UFPCCharacterCameraManagerComponent;
 class UFPCCharacterWeaponManagerComponent;
@@ -106,6 +106,12 @@ public:
 	FOnWeaponSuccessfullyUsed OnWeaponSuccessfullyUsed;
 
 	/*
+	 * The camera mode for which this particular weapon instance is used for
+	 */
+	UPROPERTY(BlueprintReadOnly, Category="Weapon")
+	ECameraMode UsedInCameraMode;
+
+	/*
 	 * Generic function to be called when the weapon is used.
 	 * Guns can fire bullets, mêlée weapons can be swiped, fists can be used to punch, etc.
 	 */
@@ -136,9 +142,6 @@ public:
 
 protected:
 	AFPCWeapon();
-
-	UPROPERTY(BlueprintReadOnly, Category="Weapon")
-	ECameraMode UsedInCameraMode;
 
 	UPROPERTY(EditDefaultsOnly, Category="Weapon")
 	FWeaponAnimSettings AnimSettings;

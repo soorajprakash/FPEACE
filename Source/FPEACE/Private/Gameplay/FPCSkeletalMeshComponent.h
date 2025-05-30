@@ -7,8 +7,10 @@
 #include "Components/SkeletalMeshComponent.h"
 #include "FPCSkeletalMeshComponent.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnVisibilityStateChanged, bool, bIsVisible);
+
 /**
- * 
+ * An extension of the Skeletal Mesh Component Class
  */
 UCLASS(BlueprintType, Blueprintable, Meta = (BlueprintSpawnableComponent))
 class FPEACE_API UFPCSkeletalMeshComponent : public USkeletalMeshComponent
@@ -17,4 +19,13 @@ class FPEACE_API UFPCSkeletalMeshComponent : public USkeletalMeshComponent
 
 public:
 	UFPCSkeletalMeshComponent();
+
+	UPROPERTY(BlueprintAssignable)
+	FOnVisibilityStateChanged OnOwnerNoSeeStateChanged;
+
+	UPROPERTY(BlueprintAssignable)
+	FOnVisibilityStateChanged OnOnlyOwnerSeeStateChanged;
+
+	virtual void FPC_SetOwnerNoSee(bool bNoSee);
+	virtual void FPC_SetOnlyOwnerSee(bool bSee);
 };

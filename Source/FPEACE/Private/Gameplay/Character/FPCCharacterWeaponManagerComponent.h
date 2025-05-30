@@ -23,6 +23,19 @@ class AFPCWeapon;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FWeaponEquipEvent, AFPCWeapon*, SpawnedFPSWeaponRef, AFPCWeapon*, SpawnedTPSWeaponRef);
 
+USTRUCT(Blueprintable)
+struct FWeaponSatchelItem
+{
+	GENERATED_BODY()
+
+public:
+	UPROPERTY()
+	TObjectPtr<AFPCWeapon> FPSWeaponIns;
+
+	UPROPERTY()
+	TObjectPtr<AFPCWeapon> TPSWeaponIns;
+};
+
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class FPEACE_API UFPCCharacterWeaponManagerComponent : public UFPCActorComponent
 {
@@ -38,9 +51,17 @@ public:
 
 	void SwitchADSState(bool UseADS);
 
+	void ToggleADSBlendFactor(const int targetBlendFactor);
+
 	void ToggleWeaponUse(const bool UseWeapon);
 
-	void TryWeaponReload() const;
+	void TryCurrentGunReload() const;
+
+	/*
+	 * Move to the next/previous weapon in the satchel
+	 * TRUE goes to the next weapon and FALSE goes to the previous
+	 */
+	void CycleWeaponInSatchel(bool bGoNext = true);
 
 	UFUNCTION()
 	void OnADSAnimStateChanged(ENotifyAnimationType AnimType, ENotifyAnimationEventType AnimEventType);
@@ -61,7 +82,7 @@ public:
 	bool GetIsCharacterInADSState() const { return bIsCharacterInADSState; }
 
 	bool GetWantsToUseWeapon() const { return bWantsToUseWeapon; }
-	
+
 	bool GetWasWeaponUsedRecently() const { return bWasWeaponUsedRecently; }
 
 protected:
@@ -94,6 +115,9 @@ protected:
 
 	UPROPERTY(BlueprintReadOnly)
 	TObjectPtr<AFPCGun> CurrentTPSGunRef;
+
+	UPROPERTY(BlueprintReadOnly)
+	TArray<FWeaponSatchelItem> WeaponSatchel;
 
 	/*
 	 * Reference to the weapon animation settings struct from the current weapon that is equipped
@@ -136,9 +160,14 @@ protected:
 
 	virtual void InitializeComponent() override;
 
+	virtual void BeginPlay() override;
+
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 private:
+	int currentWeaponSatchelIndex;
+
+
 	FVectorSpringState LocationLagSpringState;
 	FVectorSpringState RotationLagSpringState;
 
@@ -170,8 +199,23 @@ private:
 	UPROPERTY()
 	TObjectPtr<UFPCCharacterAnimationManagerComponent> FPCAnimationManagerComp;
 
+	UFUNCTION()
+	void OnGunReloadStart(bool bEmptyReload, AFPCGun* ReloadingGun);
+
+	UFUNCTION()
+	void OnGunReloadComplete(AFPCGun* ReloadingGun);
+
+	UFUNCTION()
+	void OnGunMagWasEmptied(AFPCGun* GunRef);
+
 	UFUNCTION(BlueprintCallable)
-	void EquipWeapon(const TSoftClassPtr<AFPCWeapon>& WeaponBP);
+	void EquipWeapon(const FWeaponSatchelItem& SatchelItem);
+
+	UFUNCTION()
+	void GenerateSatchel();
+
+	UFUNCTION()
+	void AddNewWeaponToSatchel(const TSubclassOf<AFPCWeapon> WeaponBP);
 
 	UFUNCTION()
 	void CharacterCameraModeChanged(ECameraMode NewCameraMode);

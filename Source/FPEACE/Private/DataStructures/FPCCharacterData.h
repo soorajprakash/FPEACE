@@ -30,7 +30,7 @@ public:
 	TMap<ECameraMode, FCharacterCameraModeSettings> CameraModeSettings;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	TSoftClassPtr<AFPCWeapon> DefaultWeaponBP;
+	TArray<TSubclassOf<AFPCWeapon>> InitialWeaponsInSatchel;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(ClampMin=45, ClampMax=90))
 	float ControllerRotationPitchClamp = 85.f;

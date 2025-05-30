@@ -11,9 +11,6 @@
 #include "FCTween.h"
 #include "FPCCharacterAnimationManagerComponent.h"
 #include "DataStructures/FPCCharacterData.h"
-#include "Gameplay/AnimInstanceClasses/FPCLayerAnimInstance.h"
-#include "Gameplay/AnimInstanceClasses/FPCSkeletalAnimInstance.h"
-#include "Gameplay/Weapon/RecoilHelper.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
 
@@ -22,8 +19,8 @@ UFPCCharacterWeaponManagerComponent::UFPCCharacterWeaponManagerComponent(): Curr
                                                                             CurrentWeaponRotationLagVector(),
                                                                             CurrentADSBlendFactor(0),
                                                                             CurrentWeaponHandIKLocationOffset(),
-                                                                            CurrentWeaponHandIKRotationOffset(), ADSStateChanged(false),
-                                                                            ADSBlendFactorTween(nullptr), bLastFrameWantsADSState(false)
+                                                                            CurrentWeaponHandIKRotationOffset(), ADSStateChanged(false), RecentlyUsedWeaponStateChanged(false),
+                                                                            ADSBlendFactorTween(nullptr), bLastFrameWantsADSState(false), bLastFrameWeaponRecentlyUsedState(false)
 {
 	// Set this component to be initialized when the game starts, and to be ticked every frame. You can turn these features
 	// off to improve performance if you don't need them.
@@ -58,6 +55,18 @@ void UFPCCharacterWeaponManagerComponent::InitializeComponent()
 	UFPCCharacterAnimationStateChangedNotify::OnAnimationStateChanged.AddDynamic(this, &UFPCCharacterWeaponManagerComponent::OnADSAnimStateChanged);
 }
 
+void UFPCCharacterWeaponManagerComponent::BeginPlay()
+{
+	Super::BeginPlay();
+
+	// Generate the weapon satchel
+	GenerateSatchel();
+
+	// Equip the first weapon in satchel
+	if (WeaponSatchel.Num() > 0)
+		EquipWeapon(WeaponSatchel[0]);
+}
+
 void UFPCCharacterWeaponManagerComponent::TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
@@ -79,12 +88,19 @@ void UFPCCharacterWeaponManagerComponent::SwitchADSState(bool UseADS)
 {
 	bWantsToADS = UseADS && bIsCharacterArmed;
 
+	ToggleADSBlendFactor(bWantsToADS);
+	FPCCameraManagerComp->SwitchCameraFOV(UseADS);
+	SetCurrentWeaponHandIKOffset();
+}
+
+void UFPCCharacterWeaponManagerComponent::ToggleADSBlendFactor(const int targetBlendFactor)
+{
 	if (ADSBlendFactorTween)
 		ADSBlendFactorTween->Destroy();
 
-	ADSBlendFactorTween = FCTween::Play(CurrentADSBlendFactor, bWantsToADS, [&](float V) { CurrentADSBlendFactor = V; }, CurrentWeaponAnimSettings.FocusTime);
-	FPCCameraManagerComp->SwitchCameraFOV(UseADS);
-	SetCurrentWeaponHandIKOffset();
+	UE_LOG(LogTemp, Warning, TEXT("Target Blend Factor: %d"), targetBlendFactor);
+
+	ADSBlendFactorTween = FCTween::Play(CurrentADSBlendFactor, targetBlendFactor, [&](float V) { CurrentADSBlendFactor = V; }, CurrentWeaponAnimSettings.FocusTime);
 }
 
 void UFPCCharacterWeaponManagerComponent::ToggleWeaponUse(const bool UseWeapon)
@@ -110,13 +126,25 @@ void UFPCCharacterWeaponManagerComponent::ToggleWeaponUse(const bool UseWeapon)
 	}
 }
 
-void UFPCCharacterWeaponManagerComponent::TryWeaponReload() const
+void UFPCCharacterWeaponManagerComponent::TryCurrentGunReload() const
 {
 	if (CurrentFPSGunRef && CurrentTPSGunRef)
 	{
 		CurrentFPSGunRef->TryBeginReload();
 		CurrentTPSGunRef->TryBeginReload();
 	}
+}
+
+void UFPCCharacterWeaponManagerComponent::CycleWeaponInSatchel(bool bGoNext)
+{
+	currentWeaponSatchelIndex += bGoNext ? 1 : -1;
+
+	if (currentWeaponSatchelIndex > WeaponSatchel.Num() - 1)
+		currentWeaponSatchelIndex = 0;
+	else if (currentWeaponSatchelIndex < 0)
+		currentWeaponSatchelIndex = WeaponSatchel.Num() - 1;
+
+	EquipWeapon(WeaponSatchel[currentWeaponSatchelIndex]);
 }
 
 void UFPCCharacterWeaponManagerComponent::OnADSAnimStateChanged(ENotifyAnimationType AnimType, ENotifyAnimationEventType AnimEventType)
@@ -128,35 +156,50 @@ void UFPCCharacterWeaponManagerComponent::OnADSAnimStateChanged(ENotifyAnimation
 	}
 }
 
-void UFPCCharacterWeaponManagerComponent::EquipWeapon(const TSoftClassPtr<AFPCWeapon>& WeaponBP)
+void UFPCCharacterWeaponManagerComponent::OnGunReloadStart(bool bEmptyReload, AFPCGun* ReloadingGun)
 {
-	// Destroy current weapon instance and disarm the character
-	if (CurrentFPSWeaponRef)
-	{
-		CurrentFPSWeaponRef->Destroy();
-		CurrentFPSWeaponRef = nullptr;
-	}
+	ToggleADSBlendFactor(0);
+}
 
-	if (CurrentTPSWeaponRef)
-	{
-		CurrentTPSWeaponRef->Destroy();
-		CurrentTPSWeaponRef = nullptr;
-	}
+void UFPCCharacterWeaponManagerComponent::OnGunReloadComplete(AFPCGun* ReloadingGun)
+{
+	ToggleADSBlendFactor(1);
+}
 
-	if (WeaponBP != nullptr)
-	{
-		UClass* WeaponBPRef = WeaponBP.LoadSynchronous();
-		// Spawn one weapon instance for each FPS and TPS mesh
-		CurrentFPSWeaponRef = Cast<AFPCWeapon>(GetWorld()->SpawnActor(WeaponBPRef));
-		CurrentFPSGunRef = Cast<AFPCGun>(CurrentFPSWeaponRef);
-		CurrentTPSWeaponRef = Cast<AFPCWeapon>(GetWorld()->SpawnActor(WeaponBPRef));
-		CurrentTPSGunRef = Cast<AFPCGun>(CurrentTPSWeaponRef);
+void UFPCCharacterWeaponManagerComponent::OnGunMagWasEmptied(AFPCGun* GunRef)
+{
+	TryCurrentGunReload();
+}
 
-		if (CurrentFPSWeaponRef && CurrentTPSWeaponRef)
+void UFPCCharacterWeaponManagerComponent::EquipWeapon(const FWeaponSatchelItem& SatchelItem)
+{
+	if (CurrentFPSWeaponRef && CurrentTPSWeaponRef)
+	{
+		//Toggle the current weapons off
+		CurrentFPSWeaponRef->ToggleActor(false);
+		CurrentTPSWeaponRef->ToggleActor(false);
+
+		// Unbind callbacks from current guns (if the weapon is a gun)
+		if (CurrentFPSGunRef && CurrentTPSGunRef)
 		{
-			CurrentFPSWeaponRef->SetupWeapon(ECameraMode::FPS, FPSBodyMeshComp);
-			CurrentTPSWeaponRef->SetupWeapon(ECameraMode::TPS, TPSBodyMeshComp);
+			CurrentFPSGunRef->OnReloadStarted.RemoveAll(this);
+			CurrentTPSGunRef->OnReloadStarted.RemoveAll(this);
+
+			CurrentFPSGunRef->OnReloadFinished.RemoveAll(this);
+			CurrentTPSGunRef->OnReloadFinished.RemoveAll(this);
+
+			CurrentFPSGunRef->OnMagWasEmptied.RemoveAll(this);
+			CurrentTPSGunRef->OnMagWasEmptied.RemoveAll(this);
 		}
+	}
+
+	if (SatchelItem.FPSWeaponIns && SatchelItem.TPSWeaponIns)
+	{
+		// Spawn one weapon instance for each FPS and TPS mesh
+		CurrentFPSWeaponRef = SatchelItem.FPSWeaponIns;
+		CurrentFPSGunRef = Cast<AFPCGun>(CurrentFPSWeaponRef);
+		CurrentTPSWeaponRef = SatchelItem.TPSWeaponIns;
+		CurrentTPSGunRef = Cast<AFPCGun>(CurrentTPSWeaponRef);
 
 		CurrentWeaponAnimSettings = CurrentFPSWeaponRef->GetAnimSettings();
 		CurrentWeaponLagSettings = CurrentFPSWeaponRef->GetLagSettings();
@@ -171,7 +214,27 @@ void UFPCCharacterWeaponManagerComponent::EquipWeapon(const TSoftClassPtr<AFPCWe
 		CurrentWeaponEmitterSocketOffset = FTransform::Identity;
 	}
 
-	bIsCharacterArmed = WeaponBP != nullptr;
+	if (CurrentFPSWeaponRef && CurrentTPSWeaponRef)
+	{
+		//Toggle the new weapons on
+		CurrentFPSWeaponRef->ToggleActor(true);
+		CurrentTPSWeaponRef->ToggleActor(true);
+
+		// Bind callbacks to current guns (if the weapon is a gun)
+		if (CurrentFPSGunRef && CurrentTPSGunRef)
+		{
+			CurrentFPSGunRef->OnReloadStarted.AddDynamic(this, &UFPCCharacterWeaponManagerComponent::OnGunReloadStart);
+			CurrentTPSGunRef->OnReloadStarted.AddDynamic(this, &UFPCCharacterWeaponManagerComponent::OnGunReloadStart);
+
+			CurrentFPSGunRef->OnReloadFinished.AddDynamic(this, &UFPCCharacterWeaponManagerComponent::OnGunReloadComplete);
+			CurrentTPSGunRef->OnReloadFinished.AddDynamic(this, &UFPCCharacterWeaponManagerComponent::OnGunReloadComplete);
+
+			CurrentFPSGunRef->OnMagWasEmptied.AddDynamic(this, &UFPCCharacterWeaponManagerComponent::OnGunMagWasEmptied);
+			CurrentTPSGunRef->OnMagWasEmptied.AddDynamic(this, &UFPCCharacterWeaponManagerComponent::OnGunMagWasEmptied);
+		}
+	}
+
+	bIsCharacterArmed = CurrentFPSWeaponRef && CurrentTPSWeaponRef;
 
 	SwitchADSState(bWantsToADS);
 
@@ -181,6 +244,31 @@ void UFPCCharacterWeaponManagerComponent::EquipWeapon(const TSoftClassPtr<AFPCWe
 
 	// Can use the name from either FPS or TPS weapon ref since they will be the same
 	OnNewWeaponEquipped.Broadcast(CurrentFPSWeaponRef, CurrentTPSWeaponRef);
+}
+
+void UFPCCharacterWeaponManagerComponent::GenerateSatchel()
+{
+	if (FPCCharacterData)
+		for (TSubclassOf WeaponClass : FPCCharacterData->InitialWeaponsInSatchel)
+			AddNewWeaponToSatchel(WeaponClass);
+}
+
+void UFPCCharacterWeaponManagerComponent::AddNewWeaponToSatchel(const TSubclassOf<AFPCWeapon> WeaponBP)
+{
+	FWeaponSatchelItem NewSatchelItem = FWeaponSatchelItem();
+	if (WeaponBP != nullptr)
+	{
+		NewSatchelItem.FPSWeaponIns = Cast<AFPCWeapon>(GetWorld()->SpawnActor(WeaponBP));
+		NewSatchelItem.FPSWeaponIns->SetupWeapon(ECameraMode::FPS, FPSBodyMeshComp);
+		NewSatchelItem.FPSWeaponIns->ToggleActor(false);
+
+
+		NewSatchelItem.TPSWeaponIns = Cast<AFPCWeapon>(GetWorld()->SpawnActor(WeaponBP));
+		NewSatchelItem.TPSWeaponIns->SetupWeapon(ECameraMode::TPS, TPSBodyMeshComp);
+		NewSatchelItem.TPSWeaponIns->ToggleActor(false);
+	}
+
+	WeaponSatchel.Add(NewSatchelItem);
 }
 
 void UFPCCharacterWeaponManagerComponent::CharacterCameraModeChanged(ECameraMode NewCameraMode)

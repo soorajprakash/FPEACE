@@ -10,7 +10,7 @@
 #include "Gameplay/Weapon/FPCWeapon.h"
 #include "FPCCharacterAnimationManagerComponent.generated.h"
 
-class AFPCPlayerController;
+class AFPCGameplayPlayerController;
 class UFPCLayerAnimInstance;
 class UFPCSkeletalMeshComponent;
 enum class ELocomotionState : uint8;
@@ -69,7 +69,7 @@ private:
 	TObjectPtr<AFPCCharacter> OwningCharacter;
 
 	UPROPERTY()
-	TObjectPtr<AFPCPlayerController> PlayerControllerRef;
+	TObjectPtr<AFPCGameplayPlayerController> PlayerControllerRef;
 
 	UPROPERTY()
 	TObjectPtr<UFPCCharacterData> FPCCharacterData;
@@ -91,10 +91,7 @@ private:
 	TSoftClassPtr<UFPCLayerAnimInstance> GetAnimClassFor(ECameraMode TargetCameraMode, FName AnimStateName, const FString& ReasonForGettingThisAnim) const;
 
 	UFUNCTION()
-	void OnFPSGunReloadStart(bool bEmptyReload);
-
-	UFUNCTION()
-	void OnTPSGunReloadStart(bool bEmptyReload);
+	void OnGunReloadStart(bool bEmptyReload, AFPCGun* ReloadingGun);
 
 	UFUNCTION()
 	void OnEquipNewWeapon(AFPCWeapon* SpawnedFPSWeapon, AFPCWeapon* SpawnedTPSWeapon);

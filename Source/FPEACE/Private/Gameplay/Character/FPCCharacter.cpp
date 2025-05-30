@@ -10,7 +10,7 @@
 #include "FPCCharacterCameraManagerComponent.h"
 #include "FPCCharacterMovementComponent.h"
 #include "FPCCharacterWeaponManagerComponent.h"
-#include "FPCPlayerController.h"
+#include "FPCGameplayPlayerController.h"
 #include "DataStructures/FPCCharacterData.h"
 #include "Gameplay/FPCGameInstance.h"
 #include "Gameplay/FPCSkeletalMeshComponent.h"
@@ -42,7 +42,7 @@ AFPCCharacter::AFPCCharacter(const FObjectInitializer& ObjectInitializer): Super
 		FPSArmsMeshComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		FPSArmsMeshComp->VisibilityBasedAnimTickOption = EVisibilityBasedAnimTickOption::OnlyTickPoseWhenRendered;
 		FPSArmsMeshComp->SetCastShadow(false);
-		FPSArmsMeshComp->SetOnlyOwnerSee(true);
+		FPSArmsMeshComp->FPC_SetOnlyOwnerSee(true);
 	}
 
 	if (!FPSLowerBodyMeshComp)
@@ -88,7 +88,7 @@ void AFPCCharacter::PreInitializeComponents()
 
 void AFPCCharacter::PossessedBy(AController* NewController)
 {
-	FPCPlayerControllerInstance = CastChecked<AFPCPlayerController>(NewController);
+	FPCPlayerControllerInstance = CastChecked<AFPCGameplayPlayerController>(NewController);
 	Super::PossessedBy(NewController);
 }
 
@@ -107,6 +107,7 @@ void AFPCCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 
 	if (UEnhancedInputComponent* EInputComp = Cast<UEnhancedInputComponent>(PlayerInputComponent))
 	{
+		// Bind Gameplay Inputs
 		EInputComp->BindAction(LookAction.LoadSynchronous(), ETriggerEvent::Triggered, this, &AFPCCharacter::LookAround);
 		EInputComp->BindAction(MoveAction.LoadSynchronous(), ETriggerEvent::Triggered, this, &AFPCCharacter::MoveAround);
 		EInputComp->BindAction(RunAction.LoadSynchronous(), ETriggerEvent::Started, this, &AFPCCharacter::ToggleRunSprint);
@@ -117,6 +118,8 @@ void AFPCCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 		EInputComp->BindAction(ADSAction.LoadSynchronous(), ETriggerEvent::Completed, this, &AFPCCharacter::DeactivateADS);
 		EInputComp->BindAction(FireAction.LoadSynchronous(), ETriggerEvent::Started, this, &AFPCCharacter::StartUsingWeapon);
 		EInputComp->BindAction(FireAction.LoadSynchronous(), ETriggerEvent::Completed, this, &AFPCCharacter::StopUsingWeapon);
+		EInputComp->BindAction(WeaponCycleUpAction.LoadSynchronous(),ETriggerEvent::Started,this,&AFPCCharacter::CycleWeaponUp);
+		EInputComp->BindAction(WeaponCycleDownAction.LoadSynchronous(),ETriggerEvent::Started,this,&AFPCCharacter::CycleWeaponDown);
 		EInputComp->BindAction(CameraSwitchAction.LoadSynchronous(), ETriggerEvent::Completed, this, &AFPCCharacter::ToggleCameraMode);
 		EInputComp->BindAction(ReloadAction.LoadSynchronous(), ETriggerEvent::Started, this, &AFPCCharacter::TriggerWeaponReload);
 	}
@@ -195,7 +198,17 @@ void AFPCCharacter::DeactivateADS()
 
 void AFPCCharacter::TriggerWeaponReload(const FInputActionValue& InputActionValue)
 {
-	FPCCharacterWeaponManagerComp->TryWeaponReload();
+	FPCCharacterWeaponManagerComp->TryCurrentGunReload();
+}
+
+void AFPCCharacter::CycleWeaponUp()
+{
+	FPCCharacterWeaponManagerComp->CycleWeaponInSatchel();
+}
+
+void AFPCCharacter::CycleWeaponDown()
+{
+	FPCCharacterWeaponManagerComp->CycleWeaponInSatchel(false);
 }
 
 void AFPCCharacter::StartUsingWeapon()

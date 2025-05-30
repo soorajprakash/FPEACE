@@ -7,6 +7,7 @@
 #include "Engine/GameInstance.h"
 #include "FPCGameInstance.generated.h"
 
+class UFPEACE_CUI_PauseMenuScreenWidget;
 class UFPCCharacterData;
 /**
  * 
@@ -19,8 +20,14 @@ class FPEACE_API UFPCGameInstance : public UGameInstance
 public:
 	virtual ~UFPCGameInstance() override;
 
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, Category="FPEACE")
 	TSoftObjectPtr<UFPCCharacterData> CharacterData;
+
+	UPROPERTY(VisibleAnywhere, Category="FPEACE")
+	TSubclassOf<APawn> SelectedPawnClass;
+
+	UPROPERTY(EditDefaultsOnly, Category="FPEACE")
+	TSubclassOf<UFPEACE_CUI_PauseMenuScreenWidget> PauseMenuScreenWidgetClass;
 
 	static UFPCGameInstance* GetInstance(const UObject* WorldContextObject);
 

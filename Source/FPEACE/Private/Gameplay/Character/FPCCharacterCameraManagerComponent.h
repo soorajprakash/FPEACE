@@ -13,7 +13,7 @@ class FCTweenInstanceFloat;
 class UFPCCharacterWeaponManagerComponent;
 class UFPCSkeletalMeshComponent;
 class UFPCCharacterData;
-class AFPCPlayerController;
+class AFPCGameplayPlayerController;
 class UFPCSpringArmComponent;
 class UFPCCameraComponent;
 class AFPCCharacter;
@@ -79,7 +79,7 @@ private:
 	TObjectPtr<UFPCSpringArmComponent> FPCSpringArmComp;
 
 	UPROPERTY()
-	TObjectPtr<AFPCPlayerController> PlayerControllerRef;
+	TObjectPtr<AFPCGameplayPlayerController> PlayerControllerRef;
 
 	UPROPERTY()
 	TObjectPtr<UFPCCharacterData> FPCCharacterData;

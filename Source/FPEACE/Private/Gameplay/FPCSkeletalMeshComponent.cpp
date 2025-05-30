@@ -8,3 +8,15 @@ UFPCSkeletalMeshComponent::UFPCSkeletalMeshComponent() : Super()
 {
 	VisibilityBasedAnimTickOption = EVisibilityBasedAnimTickOption::OnlyTickPoseWhenRendered;
 }
+
+void UFPCSkeletalMeshComponent::FPC_SetOwnerNoSee(bool bNoSee)
+{
+	SetOwnerNoSee(bNoSee);
+	OnOwnerNoSeeStateChanged.Broadcast(bNoSee);
+}
+
+void UFPCSkeletalMeshComponent::FPC_SetOnlyOwnerSee(bool bSee)
+{
+	SetOnlyOwnerSee(bSee);
+	OnOnlyOwnerSeeStateChanged.Broadcast(bSee);
+}

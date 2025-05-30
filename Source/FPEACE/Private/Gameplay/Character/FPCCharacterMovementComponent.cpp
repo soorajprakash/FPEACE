@@ -7,7 +7,7 @@
 #include "FPCCapsuleComponent.h"
 #include "FPCCharacter.h"
 #include "FPCCharacterWeaponManagerComponent.h"
-#include "FPCPlayerController.h"
+#include "FPCGameplayPlayerController.h"
 #include "KismetAnimationLibrary.h"
 #include "DataStructures/FPCCharacterData.h"
 #include "Gameplay/Weapon/FPCGun.h"
