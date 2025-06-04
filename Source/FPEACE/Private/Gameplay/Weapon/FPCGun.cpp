@@ -256,12 +256,15 @@ void AFPCGun::Fire()
 	// The bullet gets propelled in the direction from the muzzle location to the camera's intended target
 	if (UsedInCameraMode == ECameraMode::FPS)
 	{
-		const FTransform AimSocketTransform = OpticMeshComp->GetSocketTransform(TEXT("SOCKET_Aim"));
-		const FVector RelativeEmitterLocation = AimSocketTransform.InverseTransformPosition(EmitterSocketTransform.GetLocation());
-		const FVector FinalSpawnLocation = AimSocketTransform.TransformPosition(FVector(0, RelativeEmitterLocation.Y, 0));
+		BulletSpawnTransform = EmitterSocketTransform;
 
-		BulletSpawnTransform = AimSocketTransform;
-		BulletSpawnTransform.SetLocation(FinalSpawnLocation);
+		/*
+		 * Uncomment this if the bullet needs to be spawned from the aim socket's height' but at the emitter's distance'
+		 */
+		// const FTransform AimSocketTransform = OpticMeshComp->GetSocketTransform(TEXT("SOCKET_Aim"));
+		// const FVector RelativeEmitterLocation = AimSocketTransform.InverseTransformPosition(EmitterSocketTransform.GetLocation());
+		// const FVector FinalSpawnLocation = AimSocketTransform.TransformPosition(FVector(0, RelativeEmitterLocation.Y, 0));
+		// BulletSpawnTransform.SetLocation(FinalSpawnLocation);
 	}
 	else if (UsedInCameraMode == ECameraMode::TPS)
 	{
