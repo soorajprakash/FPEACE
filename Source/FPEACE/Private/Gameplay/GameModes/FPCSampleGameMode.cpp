@@ -9,7 +9,7 @@ UClass* AFPCSampleGameMode::GetDefaultPawnClassForController_Implementation(ACon
 {
 	// Set the selected operator class as the default pawn class for this game mode
 	if (FPCGameInstance)
-		return FPCGameInstance->SelectedPawnClass;
+		return FPCGameInstance->SelectedOperatorPawnClass;
 
 	return Super::GetDefaultPawnClassForController_Implementation(InController);
 }

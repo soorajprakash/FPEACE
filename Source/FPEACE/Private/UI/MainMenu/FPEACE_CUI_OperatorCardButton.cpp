@@ -27,7 +27,8 @@ void UFPEACE_CUI_OperatorCardButton::NativeOnSelected(bool bBroadcast)
 		MainMenuLevelScriptActor->SetMenu3DCameraPostProcessTint(CardOperatorData.OperatorMenuColorScheme);
 
 		// Set the selected operator class in the Game Instance
-		FPCGameInstance->SelectedPawnClass = SelectedOperatorGameplayClass;
+		FPCGameInstance->SelectedOperatorPawnClass = SelectedOperatorGameplayClass;
+		FPCGameInstance->SelectedOperatorData = CardOperatorData;
 	}
 }
 

@@ -205,9 +205,6 @@ private:
 	UFUNCTION()
 	void OnGunReloadComplete(AFPCGun* ReloadingGun);
 
-	UFUNCTION()
-	void OnGunMagWasEmptied(AFPCGun* GunRef);
-
 	UFUNCTION(BlueprintCallable)
 	void EquipWeapon(const FWeaponSatchelItem& SatchelItem);
 

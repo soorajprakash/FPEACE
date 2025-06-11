@@ -105,6 +105,9 @@ public:
 	 */
 	FOnWeaponSuccessfullyUsed OnWeaponSuccessfullyUsed;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Weapon")
+	TObjectPtr<UTexture2D> WeaponHUDIcon;
+
 	/*
 	 * The camera mode for which this particular weapon instance is used for
 	 */

@@ -4,6 +4,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "DataStructures/FPEACEOperatorsDataMap.h"
 #include "Engine/GameInstance.h"
 #include "FPCGameInstance.generated.h"
 
@@ -24,7 +25,10 @@ public:
 	TSoftObjectPtr<UFPCCharacterData> CharacterData;
 
 	UPROPERTY(VisibleAnywhere, Category="FPEACE")
-	TSubclassOf<APawn> SelectedPawnClass;
+	TSubclassOf<APawn> SelectedOperatorPawnClass;
+
+	UPROPERTY(VisibleAnywhere, Category="FPEACE")
+	FFPEACEOperatorData SelectedOperatorData;
 
 	UPROPERTY(EditDefaultsOnly, Category="FPEACE")
 	TSubclassOf<UFPEACE_CUI_PauseMenuScreenWidget> PauseMenuScreenWidgetClass;

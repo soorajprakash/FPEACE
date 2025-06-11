@@ -20,6 +20,8 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnReloadStarted, bool, bEmptyReloa
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnReloadFinished, AFPCGun*, GunRef);
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnRemainingBulletsChanged, int32, RemainingBullets);
+
 UENUM(BlueprintType)
 enum EGunFireMode
 {
@@ -92,12 +94,12 @@ struct FGunSettings
 	 * Number of bullets in the magazine.
 	 */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	int MagCapacity;
+	int32 MagCapacity;
 
 	/*
 	 * The number of magazines the player holds for this weapon
 	 */
-	int MagCount;
+	int32 MagCount;
 
 	/*
 	 * The angle of the bullet spread cone in degrees of this gun when aiming down sight
@@ -152,6 +154,11 @@ public:
 	FOnReloadFinished OnReloadFinished;
 
 	/*
+	 * This is triggered whenever there's a change in the current number of bullets in the mag
+	 */
+	FOnRemainingBulletsChanged OnRemainingBulletsChanged;
+
+	/*
 	 * Spawn the Niagara system for the muzzle flash effect.
 	 */
 	void InitiateMuzzleFlash();
@@ -187,7 +194,11 @@ public:
 
 	virtual UFPCSkeletalMeshComponent* GetBaseMeshComp() const override { return ReceiverMeshComp; }
 
-	int GetTotalBulletsInUnusedMagazines() const { return GunSettings.MagCount * GunSettings.MagCapacity; }
+	int32 GetCurrentRemainingBullets() const { return RemainingBulletsInMag; }
+
+	FGunSettings GetGunSettings() const { return GunSettings; }
+
+	int32 GetTotalBulletsInUnusedMagazines() const { return GunSettings.MagCount * GunSettings.MagCapacity; }
 
 	bool GetIsGunReloading() const { return bIsReloading; }
 
@@ -245,18 +256,21 @@ private:
 	/*
 	 * The number of bullets currently remaining in the mag
 	 */
-	int RemainingBulletsInMag;
+	int32 RemainingBulletsInMag;
+
+	//	--------------------- SETTERS ---------------------
+	void SetRemainingBulletsInMag(int InRemainingBullets);
 
 	/*
 	 * Total number of spare magazines the player has for this weapon.
 	 */
-	int RemainingMagazines;
+	int32 RemainingMagazines;
 
 	/*
 	 * Used when the gun is in burst fire mode.
 	 * Holds the number of shots remaining in the current single burst.
 	 */
-	int RemainingShotsInBurst;
+	int32 RemainingShotsInBurst;
 	FTimerHandle GunContinuosFireHandle;
 	FTimerHandle GunCoolDownHandle;
 	void Fire();

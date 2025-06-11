@@ -97,9 +97,7 @@ void UFPCCharacterWeaponManagerComponent::ToggleADSBlendFactor(const int targetB
 {
 	if (ADSBlendFactorTween)
 		ADSBlendFactorTween->Destroy();
-
-	UE_LOG(LogTemp, Warning, TEXT("Target Blend Factor: %d"), targetBlendFactor);
-
+	
 	ADSBlendFactorTween = FCTween::Play(CurrentADSBlendFactor, targetBlendFactor, [&](float V) { CurrentADSBlendFactor = V; }, CurrentWeaponAnimSettings.FocusTime);
 }
 
@@ -166,11 +164,6 @@ void UFPCCharacterWeaponManagerComponent::OnGunReloadComplete(AFPCGun* Reloading
 	ToggleADSBlendFactor(1);
 }
 
-void UFPCCharacterWeaponManagerComponent::OnGunMagWasEmptied(AFPCGun* GunRef)
-{
-	TryCurrentGunReload();
-}
-
 void UFPCCharacterWeaponManagerComponent::EquipWeapon(const FWeaponSatchelItem& SatchelItem)
 {
 	if (CurrentFPSWeaponRef && CurrentTPSWeaponRef)
@@ -228,9 +221,6 @@ void UFPCCharacterWeaponManagerComponent::EquipWeapon(const FWeaponSatchelItem& 
 
 			CurrentFPSGunRef->OnReloadFinished.AddDynamic(this, &UFPCCharacterWeaponManagerComponent::OnGunReloadComplete);
 			CurrentTPSGunRef->OnReloadFinished.AddDynamic(this, &UFPCCharacterWeaponManagerComponent::OnGunReloadComplete);
-
-			CurrentFPSGunRef->OnMagWasEmptied.AddDynamic(this, &UFPCCharacterWeaponManagerComponent::OnGunMagWasEmptied);
-			CurrentTPSGunRef->OnMagWasEmptied.AddDynamic(this, &UFPCCharacterWeaponManagerComponent::OnGunMagWasEmptied);
 		}
 	}
 

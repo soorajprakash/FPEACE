@@ -28,6 +28,17 @@ struct FFPEACEOperatorData
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	FLinearColor OperatorMenuColorScheme;
+
+	// '==' operator for this struct
+	bool operator==(const FFPEACEOperatorData& Other) const
+	{
+		return
+			OperatorName.ToString() == Other.OperatorName.ToString() &&
+			PlayableOperatorBP == Other.PlayableOperatorBP &&
+			MenuOperatorBP == Other.MenuOperatorBP &&
+			OperatorCardImage == Other.OperatorCardImage &&
+			OperatorMenuColorScheme == Other.OperatorMenuColorScheme;
+	}
 };
 
 /**

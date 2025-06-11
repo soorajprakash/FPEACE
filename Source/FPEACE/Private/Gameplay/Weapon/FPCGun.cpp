@@ -157,16 +157,27 @@ void AFPCGun::TryBeginReload()
 	if (!bIsReloading && RemainingBulletsInMag < GunSettings.MagCapacity)
 	{
 		bIsReloading = true;
-		OnReloadStarted.Broadcast(RemainingBulletsInMag == 0,this);
+		OnReloadStarted.Broadcast(RemainingBulletsInMag == 0, this);
 	}
 }
 
 void AFPCGun::OnMagReloadFinishedPlaying()
 {
-	RemainingBulletsInMag = GunSettings.MagCapacity;
 	RemainingMagazines--;
 	bIsReloading = false;
 	OnReloadFinished.Broadcast(this);
+	SetRemainingBulletsInMag(GunSettings.MagCapacity);
+}
+
+void AFPCGun::SetRemainingBulletsInMag(int InRemainingBullets)
+{
+	UE_LOG(LogTemp, Warning, TEXT("IsBound : %d"), OnRemainingBulletsChanged.IsBound())
+	RemainingBulletsInMag = InRemainingBullets;
+
+	if (OnRemainingBulletsChanged.IsBound())
+	{
+		OnRemainingBulletsChanged.Broadcast(RemainingBulletsInMag);
+	}
 }
 
 TArray<TObjectPtr<UMeshComponent>> AFPCGun::GatherWeaponMeshComps()
@@ -191,7 +202,7 @@ void AFPCGun::OnConstruction(const FTransform& Transform)
 	EmitterSocketActorSpaceTransform = MuzzleMeshComp->GetSocketTransform(TEXT("SOCKET_Emitter"), RTS_Actor);
 
 	// Initial gun settings
-	RemainingBulletsInMag = GunSettings.MagCapacity;
+	SetRemainingBulletsInMag(GunSettings.MagCapacity);
 
 	// Set up the gun to have no collision
 	// TODO : Collision is probably required. Change this to suit the game's needs
@@ -288,12 +299,12 @@ void AFPCGun::Fire()
 			NewBullet->PropelBullet(BulletSpawnTransform, GunSettings.BulletVelocity);
 	}
 
-	OnWeaponSuccessfullyUsed.Broadcast();
-
 	// Shot count
-	RemainingBulletsInMag--;
+	SetRemainingBulletsInMag(RemainingBulletsInMag - 1);
 	if (RemainingBulletsInMag == 0)
 		OnMagWasEmptied.Broadcast(this);
+
+	OnWeaponSuccessfullyUsed.Broadcast();
 
 	bIsWeaponReadyToBeUsed = false;
 }
