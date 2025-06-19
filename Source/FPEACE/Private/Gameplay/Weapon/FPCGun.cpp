@@ -56,7 +56,7 @@ void AFPCGun::InitiateMuzzleFlash()
 	// Particle effect to be spawned at the emitter socket
 	UNiagaraComponent* SpawnedEffect = UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), MuzzleFlashEffect, EmitterSocketTransform.GetLocation(),
 	                                                                                  EmitterSocketTransform.GetRotation().Rotator());
-	SpawnedEffect->GetOwner()->SetOwner(OwningCharacter);
+	SpawnedEffect->GetOwner()->SetOwner(OwningCharacter.Get());
 	SpawnedEffect->SetOnlyOwnerSee(UsedInCameraMode == ECameraMode::FPS);
 	SpawnedEffect->SetOwnerNoSee(UsedInCameraMode != OwningCharacterCameraManager->GetCurrentCameraMode());
 }
@@ -171,7 +171,6 @@ void AFPCGun::OnMagReloadFinishedPlaying()
 
 void AFPCGun::SetRemainingBulletsInMag(int InRemainingBullets)
 {
-	UE_LOG(LogTemp, Warning, TEXT("IsBound : %d"), OnRemainingBulletsChanged.IsBound())
 	RemainingBulletsInMag = InRemainingBullets;
 
 	if (OnRemainingBulletsChanged.IsBound())
@@ -339,7 +338,7 @@ AFPCBullet* AFPCGun::AcquireBullet()
 	OwningCharacter->WorldObjectPool->Pull(BulletClass, BulletActorFromPool);
 	if (AFPCBullet* NewBullet = Cast<AFPCBullet>(BulletActorFromPool))
 	{
-		NewBullet->SetOwners(OwningCharacter, this);
+		NewBullet->SetOwners(OwningCharacter.Get(), this);
 		return NewBullet;
 	}
 

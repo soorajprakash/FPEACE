@@ -48,10 +48,6 @@
 			"Enabled": false
 		},
 		{
-			"Name": "ResonanceAudio",
-			"Enabled": false
-		},
-		{
 			"Name": "OnlineSubsystemGooglePlay",
 			"Enabled": false,
 			"SupportedTargetPlatforms": [
@@ -345,6 +341,22 @@
 		{
 			"Name": "ModelViewViewModel",
 			"Enabled": true
+		},
+		{
+			"Name": "Spatialization",
+			"Enabled": true
+		},
+		{
+			"Name": "MetasoundBranches",
+			"Enabled": true,
+			"SupportedTargetPlatforms": [
+				"Win64",
+				"Mac"
+			]
+		},
+		{
+			"Name": "ResonanceAudio",
+			"Enabled": false
 		}
 	],
 	"TargetPlatforms": [

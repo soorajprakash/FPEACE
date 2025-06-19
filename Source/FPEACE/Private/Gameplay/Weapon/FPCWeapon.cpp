@@ -4,9 +4,9 @@
 #include "FPCWeapon.h"
 #include "CommonEnums.h"
 #include "Gameplay/Character/FPCCharacter.h"
-#include "Gameplay/Character/FPCGameplayPlayerController.h"
+#include "Gameplay/Character/FPCCharacterCameraManagerComponent.h"
 
-AFPCWeapon::AFPCWeapon(): UsedInCameraMode(ECameraMode::TPS)
+AFPCWeapon::AFPCWeapon(): UsedInCameraMode(ECameraMode::TPS), bIsWeaponInUse(false)
 {
 	PrimaryActorTick.bCanEverTick = true;
 }
@@ -32,6 +32,11 @@ TArray<TObjectPtr<UMeshComponent>> AFPCWeapon::GatherWeaponMeshComps()
 	return TArray<TObjectPtr<UMeshComponent>>();
 }
 
+void AFPCWeapon::OnCameraModeChanged(ECameraMode NewCameraMode)
+{
+	bCameraModeMatchesWeapon = UsedInCameraMode == NewCameraMode;
+}
+
 void AFPCWeapon::UseWeapon()
 {
 	/*
@@ -46,24 +51,25 @@ void AFPCWeapon::SetupWeapon(const ECameraMode TargetCameraMode, USceneComponent
 	if (OwningCharacter == nullptr)
 		OwningCharacter = Cast<AFPCCharacter>(AttachCharacterMesh->GetOwner());
 
-	if (OwningCharacter)
+	if (OwningCharacter.IsValid())
 	{
-		SetOwner(OwningCharacter);
+		SetOwner(OwningCharacter.Get());
 
-		if (!OwningCharacterMovementComponent)
+		if (!OwningCharacterMovementComponent.IsValid())
 			OwningCharacterMovementComponent = OwningCharacter->GetCharacterMovementComponent();
 
-		if (!OwningCharacterCameraManager)
+		if (!OwningCharacterCameraManager.IsValid())
 			OwningCharacterCameraManager = OwningCharacter->GetFPCCharacterCameraManager();
 
-		if (!OwningCharacterWeaponManager)
+		if (!OwningCharacterWeaponManager.IsValid())
 			OwningCharacterWeaponManager = OwningCharacter->GetFPCCharacterWeaponManager();
 
-		if (!OwningCharacterAnimationManager)
+		if (!OwningCharacterAnimationManager.IsValid())
 			OwningCharacterAnimationManager = OwningCharacter->GetFPCCharacterAnimationManager();
 	}
 
 	UsedInCameraMode = TargetCameraMode;
+	bCameraModeMatchesWeapon = UsedInCameraMode == OwningCharacterCameraManager->GetCurrentCameraMode();
 
 	// Attach this weapon instance to the character's mesh
 	AttachToComponent(AttachCharacterMesh, FAttachmentTransformRules::SnapToTargetNotIncludingScale, TEXT("SOCKET_Weapon"));
@@ -76,6 +82,16 @@ void AFPCWeapon::SetupWeapon(const ECameraMode TargetCameraMode, USceneComponent
 			WeaponComp->SetCastShadow(UsedInCameraMode == ECameraMode::TPS);
 			WeaponComp->SetCastHiddenShadow(UsedInCameraMode == ECameraMode::TPS);
 			WeaponComp->FirstPersonPrimitiveType = TargetCameraMode == ECameraMode::FPS ? EFirstPersonPrimitiveType::FirstPerson : EFirstPersonPrimitiveType::None;
+		}
+	}
+
+	// Register events
+	if (OwningCharacterCameraManager.IsValid())
+	{
+		if (UFPCCharacterCameraManagerComponent* CManager = OwningCharacterCameraManager.Get())
+		{
+			CManager->OnCameraModeChanged.RemoveAll(this);
+			CManager->OnCameraModeChanged.AddDynamic(this, &AFPCWeapon::OnCameraModeChanged);
 		}
 	}
 }

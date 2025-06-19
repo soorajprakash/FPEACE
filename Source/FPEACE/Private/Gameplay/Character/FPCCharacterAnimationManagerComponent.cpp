@@ -30,7 +30,7 @@ void UFPCCharacterAnimationManagerComponent::InitializeComponent()
 	if (OwningCharacter == nullptr)
 		OwningCharacter = Cast<AFPCCharacter>(GetOwner());
 
-	if (OwningCharacter)
+	if (OwningCharacter.IsValid())
 	{
 		FPCCharacterMovementComp = OwningCharacter->GetCharacterMovementComponent();
 		FPCWeaponManagerComp = OwningCharacter->GetFPCCharacterWeaponManager();
@@ -51,7 +51,7 @@ void UFPCCharacterAnimationManagerComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if (OwningCharacter)
+	if (OwningCharacter.IsValid())
 		PlayerControllerRef = OwningCharacter->GetFPCPlayerController();
 }
 

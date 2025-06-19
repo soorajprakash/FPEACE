@@ -152,6 +152,13 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category="Weapon")
 	FWeaponLagSettings LagSettings;
 
+	/*
+	 * Holds the state of whether or not the current camera mode matches this weapon's UsedInCameraMode value
+	 * Used to know if this weapon instance is thought of by the user as their current weapon
+	 */
+	UPROPERTY(BlueprintReadOnly)
+	bool bCameraModeMatchesWeapon;
+
 	UPROPERTY(BlueprintReadOnly)
 	FTransform AimSocketActorSpaceTransform;
 
@@ -171,37 +178,37 @@ protected:
 	 * Reference to the character that is actively using this weapon
 	 */
 	UPROPERTY(BlueprintReadOnly)
-	TObjectPtr<AFPCCharacter> OwningCharacter;
+	TWeakObjectPtr<AFPCCharacter> OwningCharacter;
 
 	/*
 	 * Reference to the skeletal mesh that is actively using this weapon
 	 */
 	UPROPERTY(BlueprintReadOnly)
-	TObjectPtr<UFPCSkeletalMeshComponent> OwningMesh;
+	TWeakObjectPtr<UFPCSkeletalMeshComponent> OwningMesh;
 
 	/*
 	 * Reference to the movement component in the character that is actively using this weapon
 	 */
 	UPROPERTY(BlueprintReadOnly)
-	TObjectPtr<UFPCCharacterMovementComponent> OwningCharacterMovementComponent;
+	TWeakObjectPtr<UFPCCharacterMovementComponent> OwningCharacterMovementComponent;
 
 	/*
 	 * Reference to the weapon manager component in the owning character
 	 */
 	UPROPERTY(BlueprintReadOnly)
-	TObjectPtr<UFPCCharacterWeaponManagerComponent> OwningCharacterWeaponManager;
+	TWeakObjectPtr<UFPCCharacterWeaponManagerComponent> OwningCharacterWeaponManager;
 
 	/*
 	 * Reference to the camera manager component in the owning character
 	 */
 	UPROPERTY(BlueprintReadOnly)
-	TObjectPtr<UFPCCharacterCameraManagerComponent> OwningCharacterCameraManager;
+	TWeakObjectPtr<UFPCCharacterCameraManagerComponent> OwningCharacterCameraManager;
 
 	/*
 	 * Reference to the animation manager component in the owning character
 	 */
 	UPROPERTY(BlueprintReadOnly)
-	TObjectPtr<UFPCCharacterAnimationManagerComponent> OwningCharacterAnimationManager;
+	TWeakObjectPtr<UFPCCharacterAnimationManagerComponent> OwningCharacterAnimationManager;
 
 
 	/*
@@ -219,4 +226,7 @@ protected:
 
 	// --------------------- OTHER FUNCTIONS ---------------------
 	virtual TArray<TObjectPtr<UMeshComponent>> GatherWeaponMeshComps();
+
+	UFUNCTION()
+	virtual void OnCameraModeChanged(ECameraMode NewCameraMode);
 };

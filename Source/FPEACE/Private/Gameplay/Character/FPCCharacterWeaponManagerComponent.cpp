@@ -35,7 +35,7 @@ void UFPCCharacterWeaponManagerComponent::InitializeComponent()
 	if (OwningCharacter == nullptr)
 		OwningCharacter = Cast<AFPCCharacter>(GetOwner());
 
-	if (OwningCharacter)
+	if (OwningCharacter.IsValid())
 	{
 		OwningCharacterMovementComp = OwningCharacter->GetCharacterMovementComponent();
 		FPCCharacterData = OwningCharacter->GetCharacterData();
@@ -45,10 +45,10 @@ void UFPCCharacterWeaponManagerComponent::InitializeComponent()
 		FPCAnimationManagerComp = OwningCharacter->GetFPCCharacterAnimationManager();
 	}
 
-	if (FPCCameraManagerComp)
+	if (FPCCameraManagerComp.IsValid())
 		FPCCameraManagerComp->OnCameraModeChanged.AddDynamic(this, &UFPCCharacterWeaponManagerComponent::CharacterCameraModeChanged);
 
-	if (OwningCharacterMovementComp)
+	if (OwningCharacterMovementComp.IsValid())
 		OwningCharacterMovementComp->OnCurrentLocomotionStateChanged.AddDynamic(this, &UFPCCharacterWeaponManagerComponent::CharacterCurrentLocomotionStateChanged);
 
 	// Register to the ADS Anim Notify callback
@@ -238,7 +238,7 @@ void UFPCCharacterWeaponManagerComponent::EquipWeapon(const FWeaponSatchelItem& 
 
 void UFPCCharacterWeaponManagerComponent::GenerateSatchel()
 {
-	if (FPCCharacterData)
+	if (FPCCharacterData.IsValid())
 		for (TSubclassOf WeaponClass : FPCCharacterData->InitialWeaponsInSatchel)
 			AddNewWeaponToSatchel(WeaponClass);
 }
@@ -249,12 +249,12 @@ void UFPCCharacterWeaponManagerComponent::AddNewWeaponToSatchel(const TSubclassO
 	if (WeaponBP != nullptr)
 	{
 		NewSatchelItem.FPSWeaponIns = Cast<AFPCWeapon>(GetWorld()->SpawnActor(WeaponBP));
-		NewSatchelItem.FPSWeaponIns->SetupWeapon(ECameraMode::FPS, FPSBodyMeshComp);
+		NewSatchelItem.FPSWeaponIns->SetupWeapon(ECameraMode::FPS, FPSBodyMeshComp.Get());
 		NewSatchelItem.FPSWeaponIns->ToggleActor(false);
 
 
 		NewSatchelItem.TPSWeaponIns = Cast<AFPCWeapon>(GetWorld()->SpawnActor(WeaponBP));
-		NewSatchelItem.TPSWeaponIns->SetupWeapon(ECameraMode::TPS, TPSBodyMeshComp);
+		NewSatchelItem.TPSWeaponIns->SetupWeapon(ECameraMode::TPS, TPSBodyMeshComp.Get());
 		NewSatchelItem.TPSWeaponIns->ToggleActor(false);
 	}
 

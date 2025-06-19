@@ -40,10 +40,10 @@ void UFPCCharacterMovementComponent::InitializeComponent()
 {
 	Super::InitializeComponent();
 
-	if (!OwningCharacter)
+	if (!OwningCharacter.IsValid())
 		OwningCharacter = Cast<AFPCCharacter>(GetOwner());
 
-	if (OwningCharacter)
+	if (OwningCharacter.IsValid())
 	{
 		FPCCharacterData = OwningCharacter->GetCharacterData();
 		FPCPlayerController = OwningCharacter->GetFPCPlayerController();
@@ -52,7 +52,7 @@ void UFPCCharacterMovementComponent::InitializeComponent()
 	}
 
 	// Store required Character data
-	if (FPCCharacterData)
+	if (FPCCharacterData.IsValid())
 	{
 		ForwardLimits = FPCCharacterData->CharacterDirectionLimits.ForwardLimits;
 		BackwardLimits = FPCCharacterData->CharacterDirectionLimits.BackwardLimits;
@@ -62,7 +62,7 @@ void UFPCCharacterMovementComponent::InitializeComponent()
 
 void UFPCCharacterMovementComponent::AddControllerPitchAndYawInput(float Pitch, float Yaw)
 {
-	if (FPCPlayerController)
+	if (FPCPlayerController.IsValid())
 	{
 		FPCPlayerController->AddPitchInput(Pitch);
 		FPCPlayerController->AddYawInput(Yaw);

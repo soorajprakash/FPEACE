@@ -189,19 +189,19 @@ protected:
 	bool bIsCharacterInProneState = false;
 
 	UPROPERTY()
-	TObjectPtr<AFPCCharacter> OwningCharacter;
+	TWeakObjectPtr<AFPCCharacter> OwningCharacter;
 
 	UPROPERTY()
-	TObjectPtr<UFPCCapsuleComponent> OwningCharacterCapsule;
+	TWeakObjectPtr<UFPCCapsuleComponent> OwningCharacterCapsule;
 
 	UPROPERTY()
-	TObjectPtr<UFPCCharacterData> FPCCharacterData;
+	TWeakObjectPtr<UFPCCharacterData> FPCCharacterData;
 
 	UPROPERTY()
-	TObjectPtr<AFPCGameplayPlayerController> FPCPlayerController;
+	TWeakObjectPtr<AFPCGameplayPlayerController> FPCPlayerController;
 
 	UPROPERTY()
-	TObjectPtr<UFPCCharacterWeaponManagerComponent> FPCCharacterWeaponManager;
+	TWeakObjectPtr<UFPCCharacterWeaponManagerComponent> FPCCharacterWeaponManager;
 
 private:
 	// Character direction limit values referenced from the Owning character data asset for ease of use

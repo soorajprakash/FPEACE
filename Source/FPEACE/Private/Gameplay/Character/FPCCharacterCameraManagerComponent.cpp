@@ -33,13 +33,13 @@ void UFPCCharacterCameraManagerComponent::SetCameraMode(ECameraMode NewCameraMod
 	switch (CurrentCameraMode)
 	{
 	case ECameraMode::FPS:
-		FPCSpringArmComp->AttachToComponent(FPSArmsMeshComp, FAttachmentTransformRules::SnapToTargetNotIncludingScale, TEXT("SOCKET_Camera"));
+		FPCSpringArmComp->AttachToComponent(FPSArmsMeshComp.Get(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, TEXT("SOCKET_Camera"));
 		FPCSpringArmComp->TargetArmLength = FPCCharacterData->CameraModeSettings[ECameraMode::FPS].MaxSpringArmLength;
 		break;
 
 	case ECameraMode::TPS:
 
-		FPCSpringArmComp->AttachToComponent(TPSBodyMeshComp, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
+		FPCSpringArmComp->AttachToComponent(TPSBodyMeshComp.Get(), FAttachmentTransformRules::SnapToTargetNotIncludingScale);
 		FPCSpringArmComp->SetArmLengthFromPitch(FPCCharacterData->CameraModeSettings[ECameraMode::TPS].PitchToArmLengthCurve, OwningCharacter->GetFPCPlayerController()->GetControlRotation());
 		break;
 	}
@@ -83,7 +83,7 @@ void UFPCCharacterCameraManagerComponent::InitializeComponent()
 	if (OwningCharacter == nullptr)
 		OwningCharacter = Cast<AFPCCharacter>(GetOwner());
 
-	if (OwningCharacter)
+	if (OwningCharacter.IsValid())
 	{
 		FPCWeaponManagerComp = OwningCharacter->GetFPCCharacterWeaponManager();
 		FPCSpringArmComp = OwningCharacter->GetFPCSpringArmComp();
@@ -95,7 +95,7 @@ void UFPCCharacterCameraManagerComponent::InitializeComponent()
 	}
 
 	// Setup Values
-	if (FPCCharacterData)
+	if (FPCCharacterData.IsValid())
 	{
 		DefaultTPSCameraFieldOfView = FPCCharacterData->CameraModeSettings[ECameraMode::TPS].DefaultCameraFOV;
 		DefaultFPSCameraFieldOfView = FPCCharacterData->CameraModeSettings[ECameraMode::FPS].DefaultCameraFOV;
@@ -106,7 +106,7 @@ void UFPCCharacterCameraManagerComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if (OwningCharacter)
+	if (OwningCharacter.IsValid())
 	{
 		PlayerControllerRef = OwningCharacter->GetFPCPlayerController();
 	}

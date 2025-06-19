@@ -66,25 +66,25 @@ protected:
 
 private:
 	UPROPERTY()
-	TObjectPtr<AFPCCharacter> OwningCharacter;
+	TWeakObjectPtr<AFPCCharacter> OwningCharacter;
 
 	UPROPERTY()
-	TObjectPtr<AFPCGameplayPlayerController> PlayerControllerRef;
+	TWeakObjectPtr<AFPCGameplayPlayerController> PlayerControllerRef;
 
 	UPROPERTY()
-	TObjectPtr<UFPCCharacterData> FPCCharacterData;
+	TWeakObjectPtr<UFPCCharacterData> FPCCharacterData;
 
 	UPROPERTY()
-	TObjectPtr<UFPCSkeletalMeshComponent> TPSBodyMeshComp;
+	TWeakObjectPtr<UFPCSkeletalMeshComponent> TPSBodyMeshComp;
 
 	UPROPERTY()
-	TObjectPtr<UFPCSkeletalMeshComponent> FPSBodyMeshComp;
+	TWeakObjectPtr<UFPCSkeletalMeshComponent> FPSBodyMeshComp;
 
 	UPROPERTY()
-	TObjectPtr<UFPCCharacterMovementComponent> FPCCharacterMovementComp;
+	TWeakObjectPtr<UFPCCharacterMovementComponent> FPCCharacterMovementComp;
 
 	UPROPERTY()
-	TObjectPtr<UFPCCharacterWeaponManagerComponent> FPCWeaponManagerComp;
+	TWeakObjectPtr<UFPCCharacterWeaponManagerComponent> FPCWeaponManagerComp;
 
 	void LinkCombatAnimClassToCharacter(FName AnimClassNameToLink) const;
 

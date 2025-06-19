@@ -118,8 +118,8 @@ void AFPCCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputCompon
 		EInputComp->BindAction(ADSAction.LoadSynchronous(), ETriggerEvent::Completed, this, &AFPCCharacter::DeactivateADS);
 		EInputComp->BindAction(FireAction.LoadSynchronous(), ETriggerEvent::Started, this, &AFPCCharacter::StartUsingWeapon);
 		EInputComp->BindAction(FireAction.LoadSynchronous(), ETriggerEvent::Completed, this, &AFPCCharacter::StopUsingWeapon);
-		EInputComp->BindAction(WeaponCycleUpAction.LoadSynchronous(),ETriggerEvent::Started,this,&AFPCCharacter::CycleWeaponUp);
-		EInputComp->BindAction(WeaponCycleDownAction.LoadSynchronous(),ETriggerEvent::Started,this,&AFPCCharacter::CycleWeaponDown);
+		EInputComp->BindAction(WeaponCycleUpAction.LoadSynchronous(), ETriggerEvent::Started, this, &AFPCCharacter::CycleWeaponUp);
+		EInputComp->BindAction(WeaponCycleDownAction.LoadSynchronous(), ETriggerEvent::Started, this, &AFPCCharacter::CycleWeaponDown);
 		EInputComp->BindAction(CameraSwitchAction.LoadSynchronous(), ETriggerEvent::Completed, this, &AFPCCharacter::ToggleCameraMode);
 		EInputComp->BindAction(ReloadAction.LoadSynchronous(), ETriggerEvent::Started, this, &AFPCCharacter::TriggerWeaponReload);
 	}
@@ -231,7 +231,9 @@ void AFPCCharacter::JumpEnded(const FInputActionValue& InputActionValue)
 	StopJumping();
 }
 
-UFPCCharacterData* AFPCCharacter::GetCharacterData()
+//	--------------------- GETTER FUNCTIONS ---------------------
+
+TWeakObjectPtr<UFPCCharacterData> AFPCCharacter::GetCharacterData()
 {
 	// Get the Character Data asset reference
 	if (FPCCharacterData == nullptr)
@@ -239,4 +241,64 @@ UFPCCharacterData* AFPCCharacter::GetCharacterData()
 			FPCCharacterData = FPCGameInstance->CharacterData.LoadSynchronous();
 
 	return FPCCharacterData;
+}
+
+TWeakObjectPtr<UFPCCharacterMovementComponent> AFPCCharacter::GetCharacterMovementComponent() const
+{
+	return FPCMovementComp;
+}
+
+TWeakObjectPtr<UFPCSkeletalMeshComponent> AFPCCharacter::GetTPSBodyMeshComp() const
+{
+	return TPSBodyMeshComp;
+}
+
+TWeakObjectPtr<UFPCSkeletalMeshComponent> AFPCCharacter::GetFPSArmsMeshComp() const
+{
+	return FPSArmsMeshComp;
+}
+
+TWeakObjectPtr<UFPCSkeletalMeshComponent> AFPCCharacter::GetFPSLowerBodyMeshComp() const
+{
+	return FPSLowerBodyMeshComp;
+}
+
+TWeakObjectPtr<UFPCCapsuleComponent> AFPCCharacter::GetFPCCapsuleComp() const
+{
+	return FPCCapsuleComp;
+}
+
+TWeakObjectPtr<UFPCCharacterMovementComponent> AFPCCharacter::GetFPCMovementComp() const
+{
+	return FPCMovementComp;
+}
+
+TWeakObjectPtr<UFPCCameraComponent> AFPCCharacter::GetCharacterCameraComp() const
+{
+	return CharacterCameraComp;
+}
+
+TWeakObjectPtr<UFPCSpringArmComponent> AFPCCharacter::GetFPCSpringArmComp() const
+{
+	return FPCSpringArmComp;
+}
+
+TWeakObjectPtr<AFPCGameplayPlayerController> AFPCCharacter::GetFPCPlayerController() const
+{
+	return FPCPlayerControllerInstance;
+}
+
+TWeakObjectPtr<UFPCCharacterWeaponManagerComponent> AFPCCharacter::GetFPCCharacterWeaponManager() const
+{
+	return FPCCharacterWeaponManagerComp;
+}
+
+TWeakObjectPtr<UFPCCharacterCameraManagerComponent> AFPCCharacter::GetFPCCharacterCameraManager() const
+{
+	return FPCCameraManagerComp;
+}
+
+TWeakObjectPtr<UFPCCharacterAnimationManagerComponent> AFPCCharacter::GetFPCCharacterAnimationManager() const
+{
+	return FPCCharacterAnimationManagerComp;
 }

@@ -67,31 +67,31 @@ protected:
 
 private:
 	UPROPERTY()
-	TObjectPtr<AFPCCharacter> OwningCharacter;
+	TWeakObjectPtr<AFPCCharacter> OwningCharacter;
 
 	UPROPERTY()
-	TObjectPtr<UFPCCameraComponent> FPCCameraComp;
+	TWeakObjectPtr<UFPCCameraComponent> FPCCameraComp;
 
 	UPROPERTY()
-	TObjectPtr<UFPCCharacterWeaponManagerComponent> FPCWeaponManagerComp;
+	TWeakObjectPtr<UFPCCharacterWeaponManagerComponent> FPCWeaponManagerComp;
 
 	UPROPERTY()
-	TObjectPtr<UFPCSpringArmComponent> FPCSpringArmComp;
+	TWeakObjectPtr<UFPCSpringArmComponent> FPCSpringArmComp;
 
 	UPROPERTY()
-	TObjectPtr<AFPCGameplayPlayerController> PlayerControllerRef;
+	TWeakObjectPtr<AFPCGameplayPlayerController> PlayerControllerRef;
 
 	UPROPERTY()
-	TObjectPtr<UFPCCharacterData> FPCCharacterData;
+	TWeakObjectPtr<UFPCCharacterData> FPCCharacterData;
 
 	UPROPERTY()
-	TObjectPtr<UFPCSkeletalMeshComponent> TPSBodyMeshComp;
+	TWeakObjectPtr<UFPCSkeletalMeshComponent> TPSBodyMeshComp;
 
 	UPROPERTY()
-	TObjectPtr<UFPCSkeletalMeshComponent> FPSArmsMeshComp;
+	TWeakObjectPtr<UFPCSkeletalMeshComponent> FPSArmsMeshComp;
 
 	UPROPERTY()
-	TObjectPtr<UFPCSkeletalMeshComponent> FPSLowerBodyMeshComp;
+	TWeakObjectPtr<UFPCSkeletalMeshComponent> FPSLowerBodyMeshComp;
 
 	FRotator PrevCameraRotation;
 

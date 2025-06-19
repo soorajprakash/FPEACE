@@ -26,37 +26,37 @@ public:
 	 * Reference to the character that is actively using this anim instance
 	 */
 	UPROPERTY(BlueprintReadOnly)
-	TObjectPtr<AFPCCharacter> OwningCharacter;
+	TWeakObjectPtr<AFPCCharacter> OwningCharacter;
 
 	/*
 	 * Reference to the skeletal mesh that is actively using this anim instance
 	 */
 	UPROPERTY(BlueprintReadOnly)
-	TObjectPtr<UFPCSkeletalMeshComponent> OwningMesh;
+	TWeakObjectPtr<UFPCSkeletalMeshComponent> OwningMesh;
 
 	/*
 	 * Reference to the movement component in the character that is actively using this anim instance
 	 */
 	UPROPERTY(BlueprintReadOnly)
-	TObjectPtr<UFPCCharacterMovementComponent> OwningCharacterMovementComponent;
+	TWeakObjectPtr<UFPCCharacterMovementComponent> OwningCharacterMovementComponent;
 
 	/*
 	 * Reference to the weapon manager component in the owning character
 	 */
 	UPROPERTY(BlueprintReadOnly)
-	TObjectPtr<UFPCCharacterWeaponManagerComponent> OwningCharacterWeaponManager;
+	TWeakObjectPtr<UFPCCharacterWeaponManagerComponent> OwningCharacterWeaponManager;
 
 	/*
 	 * Reference to the camera manager component in the owning character
 	 */
 	UPROPERTY(BlueprintReadOnly)
-	TObjectPtr<UFPCCharacterCameraManagerComponent> OwningCharacterCameraManager;
+	TWeakObjectPtr<UFPCCharacterCameraManagerComponent> OwningCharacterCameraManager;
 
 	/*
 	 * Reference to the animation manager component in the owning character
 	 */
 	UPROPERTY(BlueprintReadOnly)
-	TObjectPtr<UFPCCharacterAnimationManagerComponent> OwningCharacterAnimationManager;
+	TWeakObjectPtr<UFPCCharacterAnimationManagerComponent> OwningCharacterAnimationManager;
 
 protected:
 	virtual void NativeInitializeAnimation() override;

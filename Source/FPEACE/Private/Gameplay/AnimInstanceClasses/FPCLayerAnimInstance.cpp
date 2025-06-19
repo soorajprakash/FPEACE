@@ -10,6 +10,6 @@ void UFPCLayerAnimInstance::NativeInitializeAnimation()
 {
 	Super::NativeInitializeAnimation();
 
-	if (OwningMesh && OwningAnimInstance == nullptr)
+	if (OwningMesh.IsValid() && OwningAnimInstance == nullptr)
 		OwningAnimInstance = Cast<UFPCSkeletalAnimInstance>(OwningMesh->GetAnimInstance());
 }

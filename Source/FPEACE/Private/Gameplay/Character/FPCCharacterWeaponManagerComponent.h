@@ -179,25 +179,25 @@ private:
 	FTimerHandle WeaponUseCoolDownTimer;
 
 	UPROPERTY()
-	TObjectPtr<AFPCCharacter> OwningCharacter;
+	TWeakObjectPtr<AFPCCharacter> OwningCharacter;
 
 	UPROPERTY()
-	TObjectPtr<UFPCCharacterMovementComponent> OwningCharacterMovementComp;
+	TWeakObjectPtr<UFPCCharacterMovementComponent> OwningCharacterMovementComp;
 
 	UPROPERTY()
-	TObjectPtr<UFPCCharacterData> FPCCharacterData;
+	TWeakObjectPtr<UFPCCharacterData> FPCCharacterData;
 
 	UPROPERTY()
-	TObjectPtr<UFPCSkeletalMeshComponent> TPSBodyMeshComp;
+	TWeakObjectPtr<UFPCSkeletalMeshComponent> TPSBodyMeshComp;
 
 	UPROPERTY()
-	TObjectPtr<UFPCSkeletalMeshComponent> FPSBodyMeshComp;
+	TWeakObjectPtr<UFPCSkeletalMeshComponent> FPSBodyMeshComp;
 
 	UPROPERTY()
-	TObjectPtr<UFPCCharacterCameraManagerComponent> FPCCameraManagerComp;
+	TWeakObjectPtr<UFPCCharacterCameraManagerComponent> FPCCameraManagerComp;
 
 	UPROPERTY()
-	TObjectPtr<UFPCCharacterAnimationManagerComponent> FPCAnimationManagerComp;
+	TWeakObjectPtr<UFPCCharacterAnimationManagerComponent> FPCAnimationManagerComp;
 
 	UFUNCTION()
 	void OnGunReloadStart(bool bEmptyReload, AFPCGun* ReloadingGun);

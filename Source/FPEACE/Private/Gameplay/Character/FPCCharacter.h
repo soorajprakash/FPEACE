@@ -35,40 +35,39 @@ public:
 	UPROPERTY()
 	TObjectPtr<UObjectPool> WorldObjectPool;
 
-	//	--------------------- PUBLIC FUNCTIONS ---------------------
-
-	/*
-	 * Get the Movement component of this character
-	 */
-	TObjectPtr<UFPCCharacterMovementComponent> GetCharacterMovementComponent() const { return FPCMovementComp; }
 
 	//	--------------------- GETTER FUNCTIONS ---------------------
 	/*
 	 * Get reference to the character data asset
 	 */
-	UFPCCharacterData* GetCharacterData();
+	TWeakObjectPtr<UFPCCharacterData> GetCharacterData();
 
-	TObjectPtr<UFPCSkeletalMeshComponent> GetTPSBodyMeshComp() const { return TPSBodyMeshComp; }
+	/*
+	 * Get the Movement component of this character
+	 */
+	TWeakObjectPtr<UFPCCharacterMovementComponent> GetCharacterMovementComponent() const;
 
-	TObjectPtr<UFPCSkeletalMeshComponent> GetFPSArmsMeshComp() const { return FPSArmsMeshComp; }
+	TWeakObjectPtr<UFPCSkeletalMeshComponent> GetTPSBodyMeshComp() const;
 
-	TObjectPtr<UFPCSkeletalMeshComponent> GetFPSLowerBodyMeshComp() const { return FPSLowerBodyMeshComp; }
+	TWeakObjectPtr<UFPCSkeletalMeshComponent> GetFPSArmsMeshComp() const;
 
-	TObjectPtr<UFPCCapsuleComponent> GetFPCCapsuleComp() const { return FPCCapsuleComp; }
+	TWeakObjectPtr<UFPCSkeletalMeshComponent> GetFPSLowerBodyMeshComp() const ;
 
-	TObjectPtr<UFPCCharacterMovementComponent> GetFPCMovementComp() const { return FPCMovementComp; }
+	TWeakObjectPtr<UFPCCapsuleComponent> GetFPCCapsuleComp() const ;
 
-	TObjectPtr<UFPCCameraComponent> GetCharacterCameraComp() const { return CharacterCameraComp; }
+	TWeakObjectPtr<UFPCCharacterMovementComponent> GetFPCMovementComp() const ;
 
-	TObjectPtr<UFPCSpringArmComponent> GetFPCSpringArmComp() const { return FPCSpringArmComp; }
+	TWeakObjectPtr<UFPCCameraComponent> GetCharacterCameraComp() const ;
 
-	TObjectPtr<AFPCGameplayPlayerController> GetFPCPlayerController() const { return FPCPlayerControllerInstance; }
+	TWeakObjectPtr<UFPCSpringArmComponent> GetFPCSpringArmComp() const ;
 
-	TObjectPtr<UFPCCharacterWeaponManagerComponent> GetFPCCharacterWeaponManager() const { return FPCCharacterWeaponManagerComp; }
+	TWeakObjectPtr<AFPCGameplayPlayerController> GetFPCPlayerController() const ;
 
-	TObjectPtr<UFPCCharacterCameraManagerComponent> GetFPCCharacterCameraManager() const { return FPCCameraManagerComp; }
+	TWeakObjectPtr<UFPCCharacterWeaponManagerComponent> GetFPCCharacterWeaponManager() const ;
 
-	TObjectPtr<UFPCCharacterAnimationManagerComponent> GetFPCCharacterAnimationManager() const { return FPCCharacterAnimationManagerComp; }
+	TWeakObjectPtr<UFPCCharacterCameraManagerComponent> GetFPCCharacterCameraManager() const ;
+
+	TWeakObjectPtr<UFPCCharacterAnimationManagerComponent> GetFPCCharacterAnimationManager() const ;
 
 protected:
 	//	--------------------- COMPONENTS ---------------------
@@ -207,7 +206,6 @@ protected:
 	virtual void AddControllerYawInput(float Val) override;
 
 private:
-	
 	//	--------------------- INPUT BINDING FUNCTIONS ---------------------
 
 	/*
@@ -240,7 +238,7 @@ private:
 	void TriggerWeaponReload(const FInputActionValue& InputActionValue);
 
 	void CycleWeaponUp();
-	
+
 	void CycleWeaponDown();
 
 	void StartUsingWeapon();

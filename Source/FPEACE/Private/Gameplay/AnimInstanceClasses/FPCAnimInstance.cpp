@@ -31,18 +31,18 @@ void UFPCAnimInstance::InitializeReferences()
 	if (OwningMesh == nullptr)
 		OwningMesh = Cast<UFPCSkeletalMeshComponent>(GetOwningComponent());
 
-	if (OwningCharacter)
+	if (OwningCharacter.IsValid())
 	{
-		if (!OwningCharacterMovementComponent)
+		if (!OwningCharacterMovementComponent.IsValid())
 			OwningCharacterMovementComponent = OwningCharacter->GetCharacterMovementComponent();
 
-		if (!OwningCharacterCameraManager)
+		if (!OwningCharacterCameraManager.IsValid())
 			OwningCharacterCameraManager = OwningCharacter->GetFPCCharacterCameraManager();
 
-		if (!OwningCharacterWeaponManager)
+		if (!OwningCharacterWeaponManager.IsValid())
 			OwningCharacterWeaponManager = OwningCharacter->GetFPCCharacterWeaponManager();
 
-		if (!OwningCharacterAnimationManager)
+		if (!OwningCharacterAnimationManager.IsValid())
 			OwningCharacterAnimationManager = OwningCharacter->GetFPCCharacterAnimationManager();
 	}
 }
