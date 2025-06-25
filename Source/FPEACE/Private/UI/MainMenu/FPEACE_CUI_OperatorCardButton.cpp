@@ -19,6 +19,7 @@ void UFPEACE_CUI_OperatorCardButton::NativeOnSelected(bool bBroadcast)
 
 	if (MainMenuLevelScriptActor && FPCGameInstance)
 	{
+		SCOPED_NAMED_EVENT(HOLA, FColor::Green);
 		TSubclassOf<AActor> SelectedOperatorMenuClass = CardOperatorData.MenuOperatorBP.LoadSynchronous();
 		TSubclassOf<APawn> SelectedOperatorGameplayClass = CardOperatorData.PlayableOperatorBP.LoadSynchronous();
 
@@ -29,6 +30,8 @@ void UFPEACE_CUI_OperatorCardButton::NativeOnSelected(bool bBroadcast)
 		// Set the selected operator class in the Game Instance
 		FPCGameInstance->SelectedOperatorPawnClass = SelectedOperatorGameplayClass;
 		FPCGameInstance->SelectedOperatorData = CardOperatorData;
+
+		TRACE_BOOKMARK(TEXT("Selected Operator : %s"), *CardOperatorData.OperatorName.ToString())
 	}
 }
 

@@ -6,5 +6,5 @@
 void UFPEACE_CUI_HomeScreenWidget::StartPlay()
 {
 	// Open the sample level
-	UGameplayStatics::OpenLevel(GetWorld(), TEXT("MainLevel"));
+	UGameplayStatics::OpenLevel(GetWorld(), TEXT("PrototypeLevel"));
 }
