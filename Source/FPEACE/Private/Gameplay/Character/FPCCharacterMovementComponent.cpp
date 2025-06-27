@@ -5,9 +5,9 @@
 #include "FPCCharacterMovementComponent.h"
 
 #include "FPCCapsuleComponent.h"
-#include "FPCCharacter.h"
 #include "FPCCharacterWeaponManagerComponent.h"
 #include "FPCGameplayPlayerController.h"
+#include "FPCOperator.h"
 #include "KismetAnimationLibrary.h"
 #include "DataStructures/FPCCharacterData.h"
 #include "Gameplay/Weapon/FPCGun.h"
@@ -53,15 +53,15 @@ void UFPCCharacterMovementComponent::InitializeComponent()
 {
 	Super::InitializeComponent();
 
-	if (!OwningCharacter.IsValid())
-		OwningCharacter = Cast<AFPCCharacter>(GetOwner());
+	if (!OwningOperator.IsValid())
+		OwningOperator = Cast<AFPCOperator>(GetOwner());
 
-	if (OwningCharacter.IsValid())
+	if (OwningOperator.IsValid())
 	{
-		FPCCharacterData = OwningCharacter->GetCharacterData();
-		FPCPlayerController = OwningCharacter->GetFPCPlayerController();
-		OwningCharacterCapsule = OwningCharacter->GetFPCCapsuleComp();
-		FPCCharacterWeaponManager = OwningCharacter->GetFPCCharacterWeaponManager();
+		FPCCharacterData = OwningOperator->GetCharacterData();
+		FPCPlayerController = OwningOperator->GetFPCPlayerController();
+		OwningCharacterCapsule = OwningOperator->GetFPCCapsuleComp();
+		FPCCharacterWeaponManager = OwningOperator->GetFPCCharacterWeaponManager();
 	}
 
 	// Store required Character data
@@ -107,7 +107,7 @@ void UFPCCharacterMovementComponent::TickComponent(float DeltaTime, enum ELevelT
 	//Calculate the directions
 	if (IsCharacterAccelerating)
 	{
-		AccelerationDirectionAngle = UKismetAnimationLibrary::CalculateDirection(CharacterAcceleration2D, OwningCharacter->GetActorRotation());
+		AccelerationDirectionAngle = UKismetAnimationLibrary::CalculateDirection(CharacterAcceleration2D, OwningOperator->GetActorRotation());
 		SetCurrentAccelerationDirection(CalculateLocomotionDirection(AccelerationDirectionAngle, CurrentAccelerationDirection));
 	}
 	else
@@ -118,7 +118,7 @@ void UFPCCharacterMovementComponent::TickComponent(float DeltaTime, enum ELevelT
 
 	if (!FMath::IsNearlyZero(CharacterVelocity2D.Size()))
 	{
-		VelocityDirectionAngle = UKismetAnimationLibrary::CalculateDirection(CharacterVelocity2D, OwningCharacter->GetActorRotation());
+		VelocityDirectionAngle = UKismetAnimationLibrary::CalculateDirection(CharacterVelocity2D, OwningOperator->GetActorRotation());
 		SetCurrentVelocityDirection(CalculateLocomotionDirection(VelocityDirectionAngle, CurrentVelocityDirection));
 
 		// if (currentLocomotionState != ELocomotionState::Stationary)
@@ -144,7 +144,7 @@ void UFPCCharacterMovementComponent::TickComponent(float DeltaTime, enum ELevelT
 	CurrentVelocityAccelerationDot = FVector::DotProduct(NormalizedVelocity, NormalizedAcceleration);
 
 	// Calculate Yaw Angular Velocity
-	FRotator CurrentRotation = OwningCharacter->GetActorRotation();
+	FRotator CurrentRotation = OwningOperator->GetActorRotation();
 	CharacterYawDelta = CurrentRotation.Yaw - PrevRotation.Yaw;
 	YawAngularVelocity = CharacterYawDelta / DeltaTime;
 	PrevRotation = CurrentRotation;
@@ -152,7 +152,7 @@ void UFPCCharacterMovementComponent::TickComponent(float DeltaTime, enum ELevelT
 	// Calculate the character's distance to ground if in falling state
 	if (IsFalling())
 	{
-		FVector TraceStart = OwningCharacter->GetActorLocation() - OwningCharacterCapsule->GetScaledCapsuleHalfHeight();
+		FVector TraceStart = OwningOperator->GetActorLocation() - OwningCharacterCapsule->GetScaledCapsuleHalfHeight();
 		FVector TraceEnd = TraceStart - FVector(0, 0, 10000);
 		FHitResult HitResult;
 		if (UKismetSystemLibrary::SphereTraceSingle(GetWorld(), TraceStart, TraceEnd, OwningCharacterCapsule->GetScaledCapsuleRadius(),
@@ -175,7 +175,7 @@ void UFPCCharacterMovementComponent::TickComponent(float DeltaTime, enum ELevelT
 	//	--------------------- CHECK FOR TURNING-IN-PLACE ---------------------
 
 	if (!IsCharacterTurningInPlace)
-		TurnInPlaceStartingYaw = OwningCharacter->GetActorRotation().Yaw;
+		TurnInPlaceStartingYaw = OwningOperator->GetActorRotation().Yaw;
 	IsCharacterTurningInPlace = !IsCharacterMoving && FMath::Abs(CharacterYawDelta) > 0.5f;
 
 	// Update the Lean angle of the character

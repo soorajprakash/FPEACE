@@ -1,8 +1,8 @@
 ﻿// Copyright © 2024 Sooraj Prakash. All rights reserved.Unauthorized distribution or sharing of this code is prohibited.
 
 #include "FPEACE_HUD_WeaponStatsWidget.h"
-#include "Gameplay/Character/FPCCharacter.h"
 #include "Gameplay/Character/FPCCharacterWeaponManagerComponent.h"
+#include "Gameplay/Character/FPCOperator.h"
 #include "Gameplay/Weapon/FPCGun.h"
 #include "Kismet/GameplayStatics.h"
 #include "UI/MVVMs/MVVM_HUD_WeaponStats.h"
@@ -12,11 +12,11 @@ void UFPEACE_HUD_WeaponStatsWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
 
-	if (!OwningCharacter.IsValid())
-		OwningCharacter = Cast<AFPCCharacter>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
+	if (!OwningOperator.IsValid())
+		OwningOperator = Cast<AFPCOperator>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
 
-	if (!OwningCharacterWeaponManagerComp.IsValid() && OwningCharacter.IsValid())
-		OwningCharacterWeaponManagerComp = OwningCharacter->GetFPCCharacterWeaponManager();
+	if (!OwningCharacterWeaponManagerComp.IsValid() && OwningOperator.IsValid())
+		OwningCharacterWeaponManagerComp = OwningOperator->GetFPCCharacterWeaponManager();
 
 	// Get the generated view model instance for this widget
 	// The View model added in the WBP is of "Create Instance" type

@@ -8,10 +8,10 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "FPCCharacterMovementComponent.generated.h"
 
+class AFPCOperator;
 class AFPCGameplayPlayerController;
 class UFPCCapsuleComponent;
 class UFPCCharacterWeaponManagerComponent;
-class AFPCCharacter;
 class UFPCCharacterData;
 enum class ELocomotionDirection : uint8;
 enum class ELocomotionState : uint8;
@@ -189,7 +189,7 @@ protected:
 	bool bIsCharacterInProneState = false;
 
 	UPROPERTY()
-	TWeakObjectPtr<AFPCCharacter> OwningCharacter;
+	TWeakObjectPtr<AFPCOperator> OwningOperator;
 
 	UPROPERTY()
 	TWeakObjectPtr<UFPCCapsuleComponent> OwningCharacterCapsule;

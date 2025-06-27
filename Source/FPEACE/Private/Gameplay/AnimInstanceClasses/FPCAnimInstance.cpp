@@ -3,9 +3,8 @@
 
 
 #include "FPCAnimInstance.h"
-
 #include "Gameplay/FPCSkeletalMeshComponent.h"
-#include "Gameplay/Character/FPCCharacter.h"
+#include "Gameplay/Character/FPCOperator.h"
 
 
 void UFPCAnimInstance::NativeInitializeAnimation()
@@ -25,24 +24,24 @@ void UFPCAnimInstance::RenameAnimInstanceObject(const FString& NewName)
 
 void UFPCAnimInstance::InitializeReferences()
 {
-	if (OwningCharacter == nullptr)
-		OwningCharacter = Cast<AFPCCharacter>(TryGetPawnOwner());
+	if (OwningOperator == nullptr)
+		OwningOperator = Cast<AFPCOperator>(TryGetPawnOwner());
 
 	if (OwningMesh == nullptr)
 		OwningMesh = Cast<UFPCSkeletalMeshComponent>(GetOwningComponent());
 
-	if (OwningCharacter.IsValid())
+	if (OwningOperator.IsValid())
 	{
 		if (!OwningCharacterMovementComponent.IsValid())
-			OwningCharacterMovementComponent = OwningCharacter->GetCharacterMovementComponent();
+			OwningCharacterMovementComponent = OwningOperator->GetCharacterMovementComponent();
 
 		if (!OwningCharacterCameraManager.IsValid())
-			OwningCharacterCameraManager = OwningCharacter->GetFPCCharacterCameraManager();
+			OwningCharacterCameraManager = OwningOperator->GetFPCCharacterCameraManager();
 
 		if (!OwningCharacterWeaponManager.IsValid())
-			OwningCharacterWeaponManager = OwningCharacter->GetFPCCharacterWeaponManager();
+			OwningCharacterWeaponManager = OwningOperator->GetFPCCharacterWeaponManager();
 
 		if (!OwningCharacterAnimationManager.IsValid())
-			OwningCharacterAnimationManager = OwningCharacter->GetFPCCharacterAnimationManager();
+			OwningCharacterAnimationManager = OwningOperator->GetFPCCharacterAnimationManager();
 	}
 }

@@ -9,6 +9,7 @@
 #include "FPCCharacterCameraManagerComponent.generated.h"
 
 
+class AFPCOperator;
 class FCTweenInstanceFloat;
 class UFPCCharacterWeaponManagerComponent;
 class UFPCSkeletalMeshComponent;
@@ -16,7 +17,6 @@ class UFPCCharacterData;
 class AFPCGameplayPlayerController;
 class UFPCSpringArmComponent;
 class UFPCCameraComponent;
-class AFPCCharacter;
 enum class ECameraMode : uint8;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FCameraModeChanged, ECameraMode, NewCameraMode);
@@ -67,7 +67,7 @@ protected:
 
 private:
 	UPROPERTY()
-	TWeakObjectPtr<AFPCCharacter> OwningCharacter;
+	TWeakObjectPtr<AFPCOperator> OwningOperator;
 
 	UPROPERTY()
 	TWeakObjectPtr<UFPCCameraComponent> FPCCameraComp;

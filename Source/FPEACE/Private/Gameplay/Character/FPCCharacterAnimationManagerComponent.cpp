@@ -3,9 +3,10 @@
 
 
 #include "FPCCharacterAnimationManagerComponent.h"
-#include "FPCCharacter.h"
+#include "FPCCharacterMovementComponent.h"
 #include "FPCCharacterWeaponManagerComponent.h"
 #include "FPCGameplayPlayerController.h"
+#include "FPCOperator.h"
 #include "DataStructures/FCameraModeAnimSelectionStruct.h"
 #include "DataStructures/FPCCharacterData.h"
 #include "Gameplay/FPCSkeletalMeshComponent.h"
@@ -27,17 +28,17 @@ void UFPCCharacterAnimationManagerComponent::InitializeComponent()
 {
 	Super::InitializeComponent();
 
-	if (OwningCharacter == nullptr)
-		OwningCharacter = Cast<AFPCCharacter>(GetOwner());
+	if (OwningOperator == nullptr)
+		OwningOperator = Cast<AFPCOperator>(GetOwner());
 
-	if (OwningCharacter.IsValid())
+	if (OwningOperator.IsValid())
 	{
-		FPCCharacterMovementComp = OwningCharacter->GetCharacterMovementComponent();
-		FPCWeaponManagerComp = OwningCharacter->GetFPCCharacterWeaponManager();
-		FPCCharacterData = OwningCharacter->GetCharacterData();
+		FPCCharacterMovementComp = OwningOperator->GetCharacterMovementComponent();
+		FPCWeaponManagerComp = OwningOperator->GetFPCCharacterWeaponManager();
+		FPCCharacterData = OwningOperator->GetCharacterData();
 
-		TPSBodyMeshComp = OwningCharacter->GetTPSBodyMeshComp();
-		FPSBodyMeshComp = OwningCharacter->GetFPSArmsMeshComp();
+		TPSBodyMeshComp = OwningOperator->GetTPSBodyMeshComp();
+		FPSBodyMeshComp = OwningOperator->GetFPSArmsMeshComp();
 		TPSMeshAnimInstance = Cast<UFPCSkeletalAnimInstance>(TPSBodyMeshComp->GetAnimInstance());
 		if (TPSMeshAnimInstance)
 			TPSMeshAnimInstance->isBaseAnimInstance = true;
@@ -51,8 +52,8 @@ void UFPCCharacterAnimationManagerComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if (OwningCharacter.IsValid())
-		PlayerControllerRef = OwningCharacter->GetFPCPlayerController();
+	if (OwningOperator.IsValid())
+		PlayerControllerRef = OwningOperator->GetFPCPlayerController();
 }
 
 // Called every frame

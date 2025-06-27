@@ -6,9 +6,9 @@
 #include "CommonStructs.h"
 #include "FCTween.h"
 #include "FPCCameraComponent.h"
-#include "FPCCharacter.h"
 #include "FPCCharacterWeaponManagerComponent.h"
 #include "FPCGameplayPlayerController.h"
+#include "FPCOperator.h"
 #include "DataStructures/FPCCharacterData.h"
 #include "Gameplay/FPCSkeletalMeshComponent.h"
 #include "Gameplay/FPCSpringArmComponent.h"
@@ -40,7 +40,7 @@ void UFPCCharacterCameraManagerComponent::SetCameraMode(ECameraMode NewCameraMod
 	case ECameraMode::TPS:
 
 		FPCSpringArmComp->AttachToComponent(TPSBodyMeshComp.Get(), FAttachmentTransformRules::SnapToTargetNotIncludingScale);
-		FPCSpringArmComp->SetArmLengthFromPitch(FPCCharacterData->CameraModeSettings[ECameraMode::TPS].PitchToArmLengthCurve, OwningCharacter->GetFPCPlayerController()->GetControlRotation());
+		FPCSpringArmComp->SetArmLengthFromPitch(FPCCharacterData->CameraModeSettings[ECameraMode::TPS].PitchToArmLengthCurve, OwningOperator->GetFPCPlayerController()->GetControlRotation());
 		break;
 	}
 
@@ -80,18 +80,18 @@ void UFPCCharacterCameraManagerComponent::InitializeComponent()
 {
 	Super::InitializeComponent();
 
-	if (OwningCharacter == nullptr)
-		OwningCharacter = Cast<AFPCCharacter>(GetOwner());
+	if (OwningOperator == nullptr)
+		OwningOperator = Cast<AFPCOperator>(GetOwner());
 
-	if (OwningCharacter.IsValid())
+	if (OwningOperator.IsValid())
 	{
-		FPCWeaponManagerComp = OwningCharacter->GetFPCCharacterWeaponManager();
-		FPCSpringArmComp = OwningCharacter->GetFPCSpringArmComp();
-		FPCCameraComp = OwningCharacter->GetCharacterCameraComp();
-		FPCCharacterData = OwningCharacter->GetCharacterData();
-		TPSBodyMeshComp = OwningCharacter->GetTPSBodyMeshComp();
-		FPSArmsMeshComp = OwningCharacter->GetFPSArmsMeshComp();
-		FPSLowerBodyMeshComp = OwningCharacter->GetFPSLowerBodyMeshComp();
+		FPCWeaponManagerComp = OwningOperator->GetFPCCharacterWeaponManager();
+		FPCSpringArmComp = OwningOperator->GetFPCSpringArmComp();
+		FPCCameraComp = OwningOperator->GetCharacterCameraComp();
+		FPCCharacterData = OwningOperator->GetCharacterData();
+		TPSBodyMeshComp = OwningOperator->GetTPSBodyMeshComp();
+		FPSArmsMeshComp = OwningOperator->GetFPSArmsMeshComp();
+		FPSLowerBodyMeshComp = OwningOperator->GetFPSLowerBodyMeshComp();
 	}
 
 	// Setup Values
@@ -106,9 +106,9 @@ void UFPCCharacterCameraManagerComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if (OwningCharacter.IsValid())
+	if (OwningOperator.IsValid())
 	{
-		PlayerControllerRef = OwningCharacter->GetFPCPlayerController();
+		PlayerControllerRef = OwningOperator->GetFPCPlayerController();
 	}
 
 	// Set Initial camera mode

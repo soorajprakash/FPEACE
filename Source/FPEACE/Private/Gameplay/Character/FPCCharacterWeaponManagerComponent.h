@@ -18,7 +18,6 @@ class UFPCCharacterMovementComponent;
 class UFPCCharacterCameraManagerComponent;
 class UFPCCharacterData;
 class UFPCSkeletalMeshComponent;
-class AFPCCharacter;
 class AFPCWeapon;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FWeaponEquipEvent, AFPCWeapon*, SpawnedFPSWeaponRef, AFPCWeapon*, SpawnedTPSWeaponRef);
@@ -179,7 +178,7 @@ private:
 	FTimerHandle WeaponUseCoolDownTimer;
 
 	UPROPERTY()
-	TWeakObjectPtr<AFPCCharacter> OwningCharacter;
+	TWeakObjectPtr<AFPCOperator> OwningOperator;
 
 	UPROPERTY()
 	TWeakObjectPtr<UFPCCharacterMovementComponent> OwningCharacterMovementComp;

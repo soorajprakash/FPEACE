@@ -7,6 +7,7 @@
 #include "Gameplay/FPCActor.h"
 #include "FPCWeapon.generated.h"
 
+class AFPCOperator;
 class AFPCGameplayPlayerController;
 class UFPCCharacterAnimationManagerComponent;
 class UFPCCharacterCameraManagerComponent;
@@ -14,7 +15,6 @@ class UFPCCharacterWeaponManagerComponent;
 class UFPCCharacterMovementComponent;
 class UFPCSkeletalMeshComponent;
 enum class ELocomotionState : uint8;
-class AFPCCharacter;
 class UFPCAnimInstance;
 enum class ECameraMode : uint8;
 
@@ -178,7 +178,7 @@ protected:
 	 * Reference to the character that is actively using this weapon
 	 */
 	UPROPERTY(BlueprintReadOnly)
-	TWeakObjectPtr<AFPCCharacter> OwningCharacter;
+	TWeakObjectPtr<AFPCOperator> OwningOperator;
 
 	/*
 	 * Reference to the skeletal mesh that is actively using this weapon

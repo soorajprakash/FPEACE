@@ -3,14 +3,15 @@
 
 #include "FPCCharacterWeaponManagerComponent.h"
 #include "CommonEnums.h"
-#include "FPCCharacter.h"
 #include "FPCCharacterCameraManagerComponent.h"
 #include "FPCCharacterMovementComponent.h"
 #include "Gameplay/FPCSkeletalMeshComponent.h"
 #include "Gameplay/Weapon/FPCWeapon.h"
 #include "FCTween.h"
-#include "FPCCharacterAnimationManagerComponent.h"
+#include "FPCOperator.h"
+#include "AnimNotifies/FPCCharacterAnimationStateChangedNotify.h"
 #include "DataStructures/FPCCharacterData.h"
+#include "Gameplay/Weapon/FPCGun.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
 
@@ -33,17 +34,17 @@ void UFPCCharacterWeaponManagerComponent::InitializeComponent()
 {
 	Super::InitializeComponent();
 
-	if (OwningCharacter == nullptr)
-		OwningCharacter = Cast<AFPCCharacter>(GetOwner());
+	if (OwningOperator == nullptr)
+		OwningOperator = Cast<AFPCOperator>(GetOwner());
 
-	if (OwningCharacter.IsValid())
+	if (OwningOperator.IsValid())
 	{
-		OwningCharacterMovementComp = OwningCharacter->GetCharacterMovementComponent();
-		FPCCharacterData = OwningCharacter->GetCharacterData();
-		TPSBodyMeshComp = OwningCharacter->GetTPSBodyMeshComp();
-		FPSBodyMeshComp = OwningCharacter->GetFPSArmsMeshComp();
-		FPCCameraManagerComp = OwningCharacter->GetFPCCharacterCameraManager();
-		FPCAnimationManagerComp = OwningCharacter->GetFPCCharacterAnimationManager();
+		OwningCharacterMovementComp = OwningOperator->GetCharacterMovementComponent();
+		FPCCharacterData = OwningOperator->GetCharacterData();
+		TPSBodyMeshComp = OwningOperator->GetTPSBodyMeshComp();
+		FPSBodyMeshComp = OwningOperator->GetFPSArmsMeshComp();
+		FPCCameraManagerComp = OwningOperator->GetFPCCharacterCameraManager();
+		FPCAnimationManagerComp = OwningOperator->GetFPCCharacterAnimationManager();
 	}
 
 	if (FPCCameraManagerComp.IsValid())

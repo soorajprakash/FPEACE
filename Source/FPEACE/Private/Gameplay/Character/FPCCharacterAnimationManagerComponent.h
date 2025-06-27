@@ -4,12 +4,15 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "FPCCharacterMovementComponent.h"
 #include "Gameplay/FPCActorComponent.h"
-#include "Gameplay/Weapon/FPCGun.h"
-#include "Gameplay/Weapon/FPCWeapon.h"
 #include "FPCCharacterAnimationManagerComponent.generated.h"
 
+enum class ECameraMode : uint8;
+class AFPCWeapon;
+class UFPCCharacterWeaponManagerComponent;
+class UFPCCharacterMovementComponent;
+class UFPCCharacterData;
+class AFPCOperator;
 class AFPCGameplayPlayerController;
 class UFPCLayerAnimInstance;
 class UFPCSkeletalMeshComponent;
@@ -66,7 +69,7 @@ protected:
 
 private:
 	UPROPERTY()
-	TWeakObjectPtr<AFPCCharacter> OwningCharacter;
+	TWeakObjectPtr<AFPCOperator> OwningOperator;
 
 	UPROPERTY()
 	TWeakObjectPtr<AFPCGameplayPlayerController> PlayerControllerRef;

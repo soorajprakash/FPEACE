@@ -3,13 +3,13 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Gameplay/Weapon/FPCWeapon.h"
 #include "UI/Common/FPCUserWidget.h"
 #include "FPEACE_HUD_WeaponStatsWidget.generated.h"
 
+class AFPCOperator;
+class AFPCWeapon;
 class AFPCGun;
 class UMVVM_HUD_WeaponStats;
-class AFPCCharacter;
 class UFPCCharacterWeaponManagerComponent;
 
 /**
@@ -40,7 +40,7 @@ private:
 	void OnNewWeaponEquipped(AFPCWeapon* SpawnedFPSWeaponRef, AFPCWeapon* SpawnedTPSWeaponRef);
 	
 	UPROPERTY()
-	TWeakObjectPtr<AFPCCharacter> OwningCharacter;
+	TWeakObjectPtr<AFPCOperator> OwningOperator;
 	
 	UPROPERTY()
 	TWeakObjectPtr<UFPCCharacterWeaponManagerComponent> OwningCharacterWeaponManagerComp;

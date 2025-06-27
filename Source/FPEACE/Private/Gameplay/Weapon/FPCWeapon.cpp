@@ -3,8 +3,8 @@
 
 #include "FPCWeapon.h"
 #include "CommonEnums.h"
-#include "Gameplay/Character/FPCCharacter.h"
 #include "Gameplay/Character/FPCCharacterCameraManagerComponent.h"
+#include "Gameplay/Character/FPCOperator.h"
 
 AFPCWeapon::AFPCWeapon(): UsedInCameraMode(ECameraMode::TPS), bIsWeaponInUse(false)
 {
@@ -48,24 +48,24 @@ void AFPCWeapon::UseWeapon()
 void AFPCWeapon::SetupWeapon(const ECameraMode TargetCameraMode, USceneComponent* AttachCharacterMesh)
 {
 	//Get References from Owning Character
-	if (OwningCharacter == nullptr)
-		OwningCharacter = Cast<AFPCCharacter>(AttachCharacterMesh->GetOwner());
+	if (OwningOperator == nullptr)
+		OwningOperator = Cast<AFPCOperator>(AttachCharacterMesh->GetOwner());
 
-	if (OwningCharacter.IsValid())
+	if (OwningOperator.IsValid())
 	{
-		SetOwner(OwningCharacter.Get());
+		SetOwner(OwningOperator.Get());
 
 		if (!OwningCharacterMovementComponent.IsValid())
-			OwningCharacterMovementComponent = OwningCharacter->GetCharacterMovementComponent();
+			OwningCharacterMovementComponent = OwningOperator->GetCharacterMovementComponent();
 
 		if (!OwningCharacterCameraManager.IsValid())
-			OwningCharacterCameraManager = OwningCharacter->GetFPCCharacterCameraManager();
+			OwningCharacterCameraManager = OwningOperator->GetFPCCharacterCameraManager();
 
 		if (!OwningCharacterWeaponManager.IsValid())
-			OwningCharacterWeaponManager = OwningCharacter->GetFPCCharacterWeaponManager();
+			OwningCharacterWeaponManager = OwningOperator->GetFPCCharacterWeaponManager();
 
 		if (!OwningCharacterAnimationManager.IsValid())
-			OwningCharacterAnimationManager = OwningCharacter->GetFPCCharacterAnimationManager();
+			OwningCharacterAnimationManager = OwningOperator->GetFPCCharacterAnimationManager();
 	}
 
 	UsedInCameraMode = TargetCameraMode;

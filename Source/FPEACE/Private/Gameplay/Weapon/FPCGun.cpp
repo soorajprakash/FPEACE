@@ -12,6 +12,7 @@
 #include "RecoilHelper.h"
 #include "Gameplay/Character/FPCCharacter.h"
 #include "Gameplay/Character/FPCCharacterWeaponManagerComponent.h"
+#include "Gameplay/Character/FPCOperator.h"
 
 AFPCGun::AFPCGun()
 {
@@ -56,7 +57,7 @@ void AFPCGun::InitiateMuzzleFlash()
 	// Particle effect to be spawned at the emitter socket
 	UNiagaraComponent* SpawnedEffect = UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), MuzzleFlashEffect, EmitterSocketTransform.GetLocation(),
 	                                                                                  EmitterSocketTransform.GetRotation().Rotator());
-	SpawnedEffect->GetOwner()->SetOwner(OwningCharacter.Get());
+	SpawnedEffect->GetOwner()->SetOwner(OwningOperator.Get());
 	SpawnedEffect->SetOnlyOwnerSee(UsedInCameraMode == ECameraMode::FPS);
 	SpawnedEffect->SetOwnerNoSee(UsedInCameraMode != OwningCharacterCameraManager->GetCurrentCameraMode());
 }
@@ -248,12 +249,12 @@ void AFPCGun::SetupWeapon(const ECameraMode TargetCameraMode, USceneComponent* A
 	Super::SetupWeapon(TargetCameraMode, AttachCharacterMesh);
 
 	// Pool the bullets
-	if (BulletClass && OwningCharacter->WorldObjectPool)
+	if (BulletClass && OwningOperator->WorldObjectPool)
 	{
 		FPooledActorSettings BulletPoolSettings;
 		BulletPoolSettings.bCanExpand = false;
 		BulletPoolSettings.InitialSpawnCount = GunSettings.MagCapacity;
-		OwningCharacter->WorldObjectPool->AddActorType(BulletClass, BulletPoolSettings);
+		OwningOperator->WorldObjectPool->AddActorType(BulletClass, BulletPoolSettings);
 	}
 }
 
@@ -335,10 +336,10 @@ void AFPCGun::BurstModeFire()
 AFPCBullet* AFPCGun::AcquireBullet()
 {
 	AActor* BulletActorFromPool;
-	OwningCharacter->WorldObjectPool->Pull(BulletClass, BulletActorFromPool);
+	OwningOperator->WorldObjectPool->Pull(BulletClass, BulletActorFromPool);
 	if (AFPCBullet* NewBullet = Cast<AFPCBullet>(BulletActorFromPool))
 	{
-		NewBullet->SetOwners(OwningCharacter.Get(), this);
+		NewBullet->SetOwners(OwningOperator.Get(), this);
 		return NewBullet;
 	}
 

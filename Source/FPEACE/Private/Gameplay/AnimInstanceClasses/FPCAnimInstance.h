@@ -7,12 +7,12 @@
 #include "Animation/AnimInstance.h"
 #include "FPCAnimInstance.generated.h"
 
+class AFPCOperator;
 class UFPCCharacterAnimationManagerComponent;
 class UFPCCharacterCameraManagerComponent;
 class UFPCCharacterWeaponManagerComponent;
 class UFPCCharacterMovementComponent;
 class UFPCSkeletalMeshComponent;
-class AFPCCharacter;
 /**
  * 
  */
@@ -26,7 +26,7 @@ public:
 	 * Reference to the character that is actively using this anim instance
 	 */
 	UPROPERTY(BlueprintReadOnly)
-	TWeakObjectPtr<AFPCCharacter> OwningCharacter;
+	TWeakObjectPtr<AFPCOperator> OwningOperator;
 
 	/*
 	 * Reference to the skeletal mesh that is actively using this anim instance
