@@ -16,12 +16,24 @@
 
 struct FLocomotionStateSetting;
 
-UFPCCharacterMovementComponent::UFPCCharacterMovementComponent()
+UFPCCharacterMovementComponent::UFPCCharacterMovementComponent(): CurrentVelocityDirection(), CurrentAccelerationDirection(), currentLocomotionState(), currentLocomotionStance(),
+                                                                  PrevLocomotionState(), PrevLocomotionStance(),
+                                                                  PrevTargetLocomotionState(),
+                                                                  PrevVelocityDirection(),
+                                                                  PrevAccelerationDirection(),
+                                                                  PrevRotation(),
+                                                                  LastFrameMaxSpeed(0),
+                                                                  LastFrameAccelerationDirection(),
+                                                                  LastFrameVelocityDirection(),
+                                                                  LastFrameLocomotionStance(),
+                                                                  LastFrameLocomotionState(),
+                                                                  LastFrameTargetLocomotionState(),
+                                                                  WasMovingLastFrame(false),
+                                                                  WasAcceleratingLastFrame(false)
 {
 	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = true;
-	PrimaryComponentTick.bRunOnAnyThread = true;
 	bWantsInitializeComponent = true;
 }
 

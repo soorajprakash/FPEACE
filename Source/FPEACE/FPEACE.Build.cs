@@ -13,7 +13,8 @@ public class FPEACE : ModuleRules
 		PublicDependencyModuleNames.AddRange(new string[]
 		{
 			"Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput", "AnimGraphRuntime",
-			"AnimationLocomotionLibraryRuntime", "Niagara", "UMG", "SlateCore", "Slate", "CommonUI", "CinematicCamera", "ModelViewViewModel"
+			"AnimationLocomotionLibraryRuntime", "Niagara", "UMG", "SlateCore", "Slate", "CommonUI", "CinematicCamera",
+			"ModelViewViewModel", "SignificanceManager"
 		});
 	}
 }

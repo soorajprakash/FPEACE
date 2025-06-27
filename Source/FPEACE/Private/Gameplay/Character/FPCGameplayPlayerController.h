@@ -19,8 +19,14 @@ UCLASS()
 class FPEACE_API AFPCGameplayPlayerController : public APlayerController
 {
 	GENERATED_BODY()
-	
+
 protected:
+	/*
+	 * Holds the state of whether the game is currently paused
+	 */
+	UPROPERTY(BlueprintReadOnly)
+	bool bIsGamePaused = false;
+
 	/**
 	 * Reference to the Input mapping context object
 	 */
@@ -47,11 +53,12 @@ protected:
 	void TogglePauseMenu();
 
 private:
-	bool bIsGamePaused = false;
-
 	UPROPERTY()
 	TObjectPtr<AFPCSampleGameplayLevelScriptActor> SampleGameplayLevelScriptActorRef;
 
+	UFUNCTION()
+	void WorkAroundThirdPartyTemporalUpscalerCrashOnGamePause();
+	
 	virtual void SetupInputComponent() override;
 
 	virtual void BeginPlay() override;
