@@ -2,16 +2,14 @@
 // Unauthorized distribution of this file, or any part of it, is prohibited.
 
 #include "FPCCharacterCameraManagerComponent.h"
-#include "CommonEnums.h"
-#include "CommonStructs.h"
 #include "FCTween.h"
-#include "FPCCameraComponent.h"
 #include "FPCCharacterWeaponManagerComponent.h"
-#include "FPCGameplayPlayerController.h"
-#include "FPCOperator.h"
 #include "DataStructures/FPCCharacterData.h"
-#include "Gameplay/FPCSkeletalMeshComponent.h"
-#include "Gameplay/FPCSpringArmComponent.h"
+#include "Gameplay/Actor/FPCGameplayPlayerController.h"
+#include "Gameplay/Actor/Operator/FPCOperator.h"
+#include "Gameplay/ExtendedClasses/Components/FPCCameraComponent.h"
+#include "Gameplay/ExtendedClasses/Components/FPCSkeletalMeshComponent.h"
+#include "Gameplay/ExtendedClasses/Components/FPCSpringArmComponent.h"
 #include "Kismet/KismetSystemLibrary.h"
 
 
@@ -26,14 +24,14 @@ void UFPCCharacterCameraManagerComponent::SetCameraMode(ECameraMode NewCameraMod
 	// The idea is to basically always have the TPS meshes visible to the world (Since it's needed for multiplayer)
 	// The FPS meshes is only visible to the owner of the character when in FPS mode and never visible to the world
 	TPSBodyMeshComp->FPC_SetOwnerNoSee(!IsInTPSCameraMode);
-	FPSArmsMeshComp->SetHiddenInGame(IsInTPSCameraMode);
+	FPSBodyMeshComp->SetHiddenInGame(IsInTPSCameraMode);
 	FPSLowerBodyMeshComp->SetHiddenInGame(IsInTPSCameraMode);
 
 	// Set up the spring Arm and Camera components according to current camera mode
 	switch (CurrentCameraMode)
 	{
 	case ECameraMode::FPS:
-		FPCSpringArmComp->AttachToComponent(FPSArmsMeshComp.Get(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, TEXT("SOCKET_Camera"));
+		FPCSpringArmComp->AttachToComponent(FPSBodyMeshComp.Get(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, TEXT("SOCKET_Camera"));
 		FPCSpringArmComp->TargetArmLength = FPCCharacterData->CameraModeSettings[ECameraMode::FPS].MaxSpringArmLength;
 		break;
 
@@ -80,18 +78,9 @@ void UFPCCharacterCameraManagerComponent::InitializeComponent()
 {
 	Super::InitializeComponent();
 
-	if (OwningOperator == nullptr)
-		OwningOperator = Cast<AFPCOperator>(GetOwner());
-
 	if (OwningOperator.IsValid())
 	{
-		FPCWeaponManagerComp = OwningOperator->GetFPCCharacterWeaponManager();
-		FPCSpringArmComp = OwningOperator->GetFPCSpringArmComp();
 		FPCCameraComp = OwningOperator->GetCharacterCameraComp();
-		FPCCharacterData = OwningOperator->GetCharacterData();
-		TPSBodyMeshComp = OwningOperator->GetTPSBodyMeshComp();
-		FPSArmsMeshComp = OwningOperator->GetFPSArmsMeshComp();
-		FPSLowerBodyMeshComp = OwningOperator->GetFPSLowerBodyMeshComp();
 	}
 
 	// Setup Values
@@ -106,11 +95,6 @@ void UFPCCharacterCameraManagerComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if (OwningOperator.IsValid())
-	{
-		PlayerControllerRef = OwningOperator->GetFPCPlayerController();
-	}
-
 	// Set Initial camera mode
 	SetCameraMode(FPCCharacterData->StartingCameraMode);
 }
@@ -122,7 +106,7 @@ void UFPCCharacterCameraManagerComponent::TickComponent(float DeltaTime, ELevelT
 	FRotator CurrentCameraRotation = FPCCameraComp->GetComponentRotation();
 	CameraPitchDelta = CurrentCameraRotation.Pitch - PrevCameraRotation.Pitch;
 	PrevCameraRotation = CurrentCameraRotation;
-	
+
 	FHitResult HitResult;
 	FVector CameraLocation = FPCCameraComp->GetComponentLocation();
 	FVector EndLocation = CameraLocation + FPCCameraComp->GetForwardVector() * 10000;

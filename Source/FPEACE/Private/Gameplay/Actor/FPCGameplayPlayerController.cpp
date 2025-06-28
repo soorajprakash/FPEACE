@@ -5,7 +5,7 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "InputMappingContext.h"
-#include "Gameplay/FPCGameInstance.h"
+#include "Gameplay/ExtendedClasses/FPCGameInstance.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "UI/FPEACE_CUI_PauseMenuScreenWidget.h"

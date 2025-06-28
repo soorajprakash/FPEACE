@@ -3,7 +3,7 @@
 
 
 #include "FPCGameModeBase.h"
-#include "Gameplay/FPCGameInstance.h"
+#include "Gameplay/ExtendedClasses/FPCGameInstance.h"
 
 
 AFPCGameModeBase::AFPCGameModeBase()

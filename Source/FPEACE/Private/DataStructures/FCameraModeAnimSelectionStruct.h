@@ -8,7 +8,7 @@
 #include "FCameraModeAnimSelectionStruct.generated.h"
 
 enum class ECameraMode : uint8;
-class UFPCLayerAnimInstance;
+class UFPCOperatorLayerAnimInstance;
 
 USTRUCT(BlueprintType)
 struct FPEACE_API FCameraModeAnimSelectionStruct : public FTableRowBase
@@ -16,8 +16,8 @@ struct FPEACE_API FCameraModeAnimSelectionStruct : public FTableRowBase
 	GENERATED_BODY()
 
 	UPROPERTY(EditDefaultsOnly)
-	TSoftClassPtr<UFPCLayerAnimInstance> FPSAnimationClass;
+	TSoftClassPtr<UFPCOperatorLayerAnimInstance> FPSAnimationClass;
 
 	UPROPERTY(EditDefaultsOnly)
-	TSoftClassPtr<UFPCLayerAnimInstance> TPSAnimationClass;
+	TSoftClassPtr<UFPCOperatorLayerAnimInstance> TPSAnimationClass;
 };

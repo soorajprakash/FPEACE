@@ -4,12 +4,12 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "CommonStructs.h"
 #include "Engine/DataAsset.h"
+#include "Gameplay/Common/CommonStructs.h"
 #include "FPCCharacterData.generated.h"
 
 enum class ELocomotionStance : uint8;
-class UFPCAnimInstance;
+class UFPCOperatorAnimInstance;
 class AFPCWeapon;
 enum class ELocomotionState : uint8;
 enum class ECameraMode : uint8;

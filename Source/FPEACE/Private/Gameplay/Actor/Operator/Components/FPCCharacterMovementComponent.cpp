@@ -3,13 +3,12 @@
 
 
 #include "FPCCharacterMovementComponent.h"
-
-#include "FPCCapsuleComponent.h"
 #include "FPCCharacterWeaponManagerComponent.h"
-#include "FPCGameplayPlayerController.h"
-#include "FPCOperator.h"
 #include "KismetAnimationLibrary.h"
 #include "DataStructures/FPCCharacterData.h"
+#include "Gameplay/Actor/FPCGameplayPlayerController.h"
+#include "Gameplay/Actor/Operator/FPCOperator.h"
+#include "Gameplay/ExtendedClasses/Components/FPCCapsuleComponent.h"
 #include "Gameplay/Weapon/FPCGun.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Kismet/KismetSystemLibrary.h"
@@ -120,8 +119,7 @@ void UFPCCharacterMovementComponent::TickComponent(float DeltaTime, enum ELevelT
 	{
 		VelocityDirectionAngle = UKismetAnimationLibrary::CalculateDirection(CharacterVelocity2D, OwningOperator->GetActorRotation());
 		SetCurrentVelocityDirection(CalculateLocomotionDirection(VelocityDirectionAngle, CurrentVelocityDirection));
-
-		// if (currentLocomotionState != ELocomotionState::Stationary)
+		
 		UpdateDirectionalMaxWalkSpeed(CurrentVelocityDirection);
 	}
 	else

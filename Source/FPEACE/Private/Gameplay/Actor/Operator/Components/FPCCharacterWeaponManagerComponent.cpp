@@ -2,15 +2,13 @@
 // Unauthorized distribution of this file, or any part of it, is prohibited.
 
 #include "FPCCharacterWeaponManagerComponent.h"
-#include "CommonEnums.h"
 #include "FPCCharacterCameraManagerComponent.h"
 #include "FPCCharacterMovementComponent.h"
-#include "Gameplay/FPCSkeletalMeshComponent.h"
 #include "Gameplay/Weapon/FPCWeapon.h"
 #include "FCTween.h"
-#include "FPCOperator.h"
 #include "AnimNotifies/FPCCharacterAnimationStateChangedNotify.h"
 #include "DataStructures/FPCCharacterData.h"
+#include "Gameplay/ExtendedClasses/Components/FPCSkeletalMeshComponent.h"
 #include "Gameplay/Weapon/FPCGun.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
@@ -34,24 +32,11 @@ void UFPCCharacterWeaponManagerComponent::InitializeComponent()
 {
 	Super::InitializeComponent();
 
-	if (OwningOperator == nullptr)
-		OwningOperator = Cast<AFPCOperator>(GetOwner());
-
-	if (OwningOperator.IsValid())
-	{
-		OwningCharacterMovementComp = OwningOperator->GetCharacterMovementComponent();
-		FPCCharacterData = OwningOperator->GetCharacterData();
-		TPSBodyMeshComp = OwningOperator->GetTPSBodyMeshComp();
-		FPSBodyMeshComp = OwningOperator->GetFPSArmsMeshComp();
-		FPCCameraManagerComp = OwningOperator->GetFPCCharacterCameraManager();
-		FPCAnimationManagerComp = OwningOperator->GetFPCCharacterAnimationManager();
-	}
-
 	if (FPCCameraManagerComp.IsValid())
 		FPCCameraManagerComp->OnCameraModeChanged.AddDynamic(this, &UFPCCharacterWeaponManagerComponent::CharacterCameraModeChanged);
 
-	if (OwningCharacterMovementComp.IsValid())
-		OwningCharacterMovementComp->OnCurrentLocomotionStateChanged.AddDynamic(this, &UFPCCharacterWeaponManagerComponent::CharacterCurrentLocomotionStateChanged);
+	if (FPCCharacterMovementComp.IsValid())
+		FPCCharacterMovementComp->OnCurrentLocomotionStateChanged.AddDynamic(this, &UFPCCharacterWeaponManagerComponent::CharacterCurrentLocomotionStateChanged);
 
 	// Register to the ADS Anim Notify callback
 	UFPCCharacterAnimationStateChangedNotify::OnAnimationStateChanged.AddDynamic(this, &UFPCCharacterWeaponManagerComponent::OnADSAnimStateChanged);
@@ -283,18 +268,18 @@ void UFPCCharacterWeaponManagerComponent::SetCurrentWeaponHandIKOffset()
 
 	if (bWantsToADS)
 	{
-		FCTween::Play(StartLocationValue, CurrentWeaponAnimSettings.ADSLocomotionStateOffsets[OwningCharacterMovementComp->GetCurrentLocomotionState()].GetLocation(),
+		FCTween::Play(StartLocationValue, CurrentWeaponAnimSettings.ADSLocomotionStateOffsets[FPCCharacterMovementComp->GetCurrentLocomotionState()].GetLocation(),
 		              [&](FVector V) { CurrentWeaponHandIKLocationOffset = V; }, 0.25f, EFCEase::Smoothstep);
 
-		FCTween::Play(StartRotationValue, CurrentWeaponAnimSettings.ADSLocomotionStateOffsets[OwningCharacterMovementComp->GetCurrentLocomotionState()].Rotator().Quaternion(),
+		FCTween::Play(StartRotationValue, CurrentWeaponAnimSettings.ADSLocomotionStateOffsets[FPCCharacterMovementComp->GetCurrentLocomotionState()].Rotator().Quaternion(),
 		              [&](FQuat Q) { CurrentWeaponHandIKRotationOffset = Q.Rotator(); }, 0.25f, EFCEase::Smoothstep);
 	}
 	else
 	{
-		FCTween::Play(StartLocationValue, CurrentWeaponAnimSettings.DefaultLocomotionStateOffsets[OwningCharacterMovementComp->GetCurrentLocomotionState()].GetLocation(),
+		FCTween::Play(StartLocationValue, CurrentWeaponAnimSettings.DefaultLocomotionStateOffsets[FPCCharacterMovementComp->GetCurrentLocomotionState()].GetLocation(),
 		              [&](FVector V) { CurrentWeaponHandIKLocationOffset = V; }, 0.25f, EFCEase::Smoothstep);
 
-		FCTween::Play(StartRotationValue, CurrentWeaponAnimSettings.DefaultLocomotionStateOffsets[OwningCharacterMovementComp->GetCurrentLocomotionState()].Rotator().Quaternion(),
+		FCTween::Play(StartRotationValue, CurrentWeaponAnimSettings.DefaultLocomotionStateOffsets[FPCCharacterMovementComp->GetCurrentLocomotionState()].Rotator().Quaternion(),
 		              [&](FQuat Q) { CurrentWeaponHandIKRotationOffset = Q.Rotator(); }, 0.25f, EFCEase::Smoothstep);
 	}
 }
@@ -311,7 +296,7 @@ void UFPCCharacterWeaponManagerComponent::UpdateStateChanges()
 void UFPCCharacterWeaponManagerComponent::CalculateCurrentWeaponLagValues()
 {
 	float ClampedPitchDelta = FMath::Clamp(FPCCameraManagerComp->GetCameraPitchDelta(), -1, 1);
-	float ClampedYawDelta = FMath::Clamp(OwningCharacterMovementComp->GetCharacterYawDelta(), -1, 1);
+	float ClampedYawDelta = FMath::Clamp(FPCCharacterMovementComp->GetCharacterYawDelta(), -1, 1);
 	FWeaponLagSettingSection CurrentLagSection = bWantsToADS ? CurrentWeaponLagSettings.ADSWeaponLag : CurrentWeaponLagSettings.DefaultWeaponLag;
 
 	FVector TargetWeaponLocationLag = ClampedPitchDelta * CurrentLagSection.VerticalLocationLag + ClampedYawDelta * CurrentLagSection.HorizontalLocationLag;

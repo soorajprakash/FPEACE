@@ -1,19 +1,18 @@
 ﻿// Copyright © 2025 Sooraj Prakash. All rights reserved.Unauthorized distribution or sharing of this code is prohibited.
 
-
 #include "FPCOperator.h"
 #include "EnhancedInputComponent.h"
-#include "FPCCameraComponent.h"
-#include "FPCCapsuleComponent.h"
-#include "FPCCharacterAnimationManagerComponent.h"
-#include "FPCCharacterCameraManagerComponent.h"
-#include "FPCCharacterMovementComponent.h"
-#include "FPCCharacterWeaponManagerComponent.h"
-#include "FPCGameplayPlayerController.h"
+#include "Components/FPCCharacterAnimationManagerComponent.h"
+#include "Components/FPCCharacterCameraManagerComponent.h"
+#include "Components/FPCCharacterMovementComponent.h"
+#include "Components/FPCCharacterWeaponManagerComponent.h"
 #include "DataStructures/FPCCharacterData.h"
-#include "Gameplay/FPCGameInstance.h"
-#include "Gameplay/FPCSkeletalMeshComponent.h"
-#include "Gameplay/FPCSpringArmComponent.h"
+#include "Gameplay/Actor/FPCGameplayPlayerController.h"
+#include "Gameplay/ExtendedClasses/FPCGameInstance.h"
+#include "Gameplay/ExtendedClasses/Components/FPCCameraComponent.h"
+#include "Gameplay/ExtendedClasses/Components/FPCCapsuleComponent.h"
+#include "Gameplay/ExtendedClasses/Components/FPCSkeletalMeshComponent.h"
+#include "Gameplay/ExtendedClasses/Components/FPCSpringArmComponent.h"
 
 
 // Sets default values

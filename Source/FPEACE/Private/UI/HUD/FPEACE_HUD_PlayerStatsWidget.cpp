@@ -1,10 +1,8 @@
 ﻿// Copyright © 2024 Sooraj Prakash. All rights reserved.Unauthorized distribution or sharing of this code is prohibited.
 
 #include "FPEACE_HUD_PlayerStatsWidget.h"
-#include "Gameplay/FPCGameInstance.h"
-#include "Gameplay/Character/FPCCharacter.h"
+#include "Gameplay/ExtendedClasses/FPCGameInstance.h"
 #include "ModelViewViewModel/Public/View/MVVMView.h"
-#include "Kismet/GameplayStatics.h"
 #include "UI/MVVMs/MVVM_HUD_PlayerStats.h"
 
 void UFPEACE_HUD_PlayerStatsWidget::NativeConstruct()

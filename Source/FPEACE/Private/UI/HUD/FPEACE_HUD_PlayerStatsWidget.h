@@ -3,17 +3,15 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Gameplay/FPCGameInstance.h"
 #include "UI/Common/FPCUserWidget.h"
 #include "FPEACE_HUD_PlayerStatsWidget.generated.h"
-
-
-DECLARE_DYNAMIC_DELEGATE(FOnOperatorDataChanged);
-
 
 class UMVVM_HUD_PlayerStats;
 class UFPCCharacterWeaponManagerComponent;
 class AFPCCharacter;
+class UFPCGameInstance;
+DECLARE_DYNAMIC_DELEGATE(FOnOperatorDataChanged);
+
 /**
  * The base class for the player stats widget
  * Mostly used in the HUD

@@ -4,7 +4,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Gameplay/FPCActor.h"
+#include "Gameplay/ExtendedClasses/FPCActor.h"
 #include "FPCWeapon.generated.h"
 
 class AFPCOperator;
@@ -15,7 +15,7 @@ class UFPCCharacterWeaponManagerComponent;
 class UFPCCharacterMovementComponent;
 class UFPCSkeletalMeshComponent;
 enum class ELocomotionState : uint8;
-class UFPCAnimInstance;
+class UFPCOperatorAnimInstance;
 enum class ECameraMode : uint8;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnWeaponSuccessfullyUsed);

@@ -3,11 +3,11 @@
 
 
 #include "FPCCharacter.h"
-#include "FPCCapsuleComponent.h"
-#include "FPCCharacterMovementComponent.h"
 #include "FPCGameplayPlayerController.h"
-#include "Gameplay/FPCSkeletalMeshComponent.h"
 #include "ObjectPoolSubsystem.h"
+#include "Gameplay/ExtendedClasses/Components/FPCSkeletalMeshComponent.h"
+#include "Gameplay/ExtendedClasses/Components/FPCCapsuleComponent.h"
+#include "Operator/Components/FPCCharacterMovementComponent.h"
 
 // Sets default values
 AFPCCharacter::AFPCCharacter(const FObjectInitializer& ObjectInitializer): Super(

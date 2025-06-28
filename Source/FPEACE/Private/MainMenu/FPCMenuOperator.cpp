@@ -2,8 +2,7 @@
 
 
 #include "FPCMenuOperator.h"
-
-#include "Gameplay/FPCSkeletalMeshComponent.h"
+#include "Gameplay/ExtendedClasses/Components/FPCSkeletalMeshComponent.h"
 
 
 // Sets default values

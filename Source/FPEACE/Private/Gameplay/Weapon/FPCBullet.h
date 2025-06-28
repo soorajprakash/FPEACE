@@ -4,8 +4,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Gameplay/FPCPooledActor.h"
-#include "Gameplay/Character/FPCCharacter.h"
+#include "Gameplay/Actor/FPCCharacter.h"
+#include "Gameplay/ExtendedClasses/FPCPooledActor.h"
 #include "FPCBullet.generated.h"
 
 class AFPCGun;

@@ -3,12 +3,10 @@
 
 
 #include "FPCBullet.h"
-
-#include "FPCGun.h"
 #include "ObjectPoolSubsystem.h"
 #include "Components/BoxComponent.h"
-#include "Gameplay/FPCProjectileMovementComponent.h"
-#include "Gameplay/FPCStaticMeshComponent.h"
+#include "Gameplay/ExtendedClasses/Components/FPCProjectileMovementComponent.h"
+#include "Gameplay/ExtendedClasses/Components/FPCStaticMeshComponent.h"
 
 
 // Sets default values

@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameplayTagContainer.h"
-#include "Gameplay/FPCActorComponent.h"
+#include "Gameplay/ExtendedClasses/Components/FPCActorComponent.h"
 #include "FPCGameplayTagManagerComponent.generated.h"
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))

@@ -4,17 +4,17 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "CommonEnums.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Gameplay/Common/CommonEnums.h"
 #include "FPCCharacterMovementComponent.generated.h"
 
+class UFPCSkeletalMeshComponent;
+class UFPCOperatorSkeletalAnimInstance;
 class AFPCOperator;
 class AFPCGameplayPlayerController;
 class UFPCCapsuleComponent;
 class UFPCCharacterWeaponManagerComponent;
 class UFPCCharacterData;
-enum class ELocomotionDirection : uint8;
-enum class ELocomotionState : uint8;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FLocomotionStateChangeDelegate, ELocomotionState, NewLocomotionState);
 
@@ -51,6 +51,41 @@ public:
 
 protected:
 	UFPCCharacterMovementComponent();
+
+
+	UPROPERTY()
+	TWeakObjectPtr<AFPCOperator> OwningOperator;
+
+	UPROPERTY()
+	TWeakObjectPtr<UFPCCharacterData> FPCCharacterData;
+
+	UPROPERTY()
+	TWeakObjectPtr<UFPCSkeletalMeshComponent> TPSBodyMeshComp;
+
+	UPROPERTY()
+	TWeakObjectPtr<UFPCSkeletalMeshComponent> FPSBodyMeshComp;
+
+	UPROPERTY()
+	TWeakObjectPtr<UFPCCapsuleComponent> OwningCharacterCapsule;
+
+	UPROPERTY()
+	TWeakObjectPtr<AFPCGameplayPlayerController> FPCPlayerController;
+
+	UPROPERTY()
+	TWeakObjectPtr<UFPCCharacterWeaponManagerComponent> FPCCharacterWeaponManager;
+
+	/*
+	 * Reference to the anim instance running on the base skeletal mesh component
+	 */
+	UPROPERTY(BlueprintReadOnly)
+	TObjectPtr<UFPCOperatorSkeletalAnimInstance> TPSMeshAnimInstance;
+
+	/*
+	 * Reference to the anim instance running on the FPS skeletal mesh component
+	 */
+	UPROPERTY(BlueprintReadOnly)
+	TObjectPtr<UFPCOperatorSkeletalAnimInstance> FPSMeshAnimInstance;
+	
 
 	UPROPERTY(BlueprintReadOnly)
 	FVector CharacterAcceleration2D = FVector::ZeroVector;
@@ -188,21 +223,6 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	bool bIsCharacterInProneState = false;
 
-	UPROPERTY()
-	TWeakObjectPtr<AFPCOperator> OwningOperator;
-
-	UPROPERTY()
-	TWeakObjectPtr<UFPCCapsuleComponent> OwningCharacterCapsule;
-
-	UPROPERTY()
-	TWeakObjectPtr<UFPCCharacterData> FPCCharacterData;
-
-	UPROPERTY()
-	TWeakObjectPtr<AFPCGameplayPlayerController> FPCPlayerController;
-
-	UPROPERTY()
-	TWeakObjectPtr<UFPCCharacterWeaponManagerComponent> FPCCharacterWeaponManager;
-
 private:
 	// Character direction limit values referenced from the Owning character data asset for ease of use
 	FVector2D ForwardLimits = FVector2D::ZeroVector;
@@ -221,7 +241,7 @@ private:
 	ELocomotionState LastFrameTargetLocomotionState;
 	bool WasMovingLastFrame;
 	bool WasAcceleratingLastFrame;
-
+	
 	virtual void InitializeComponent() override;
 	virtual void TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 

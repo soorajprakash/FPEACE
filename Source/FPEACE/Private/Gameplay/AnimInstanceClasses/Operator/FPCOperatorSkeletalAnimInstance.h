@@ -4,17 +4,17 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "FPCAnimInstance.h"
-#include "FPCSkeletalAnimInstance.generated.h"
+#include "FPCOperatorAnimInstance.h"
+#include "FPCOperatorSkeletalAnimInstance.generated.h"
 
-class UFPCLayerAnimInstance;
+class UFPCOperatorLayerAnimInstance;
 
 
 /*
  * Used to record the states of every sequence player or evaluators currently active in the anim instance
  */
 USTRUCT(BlueprintType)
-struct FSkeletalAnimInstanceSequenceState
+struct FFPCSequenceState
 {
 	GENERATED_BODY()
 
@@ -32,7 +32,7 @@ struct FSkeletalAnimInstanceSequenceState
  * The type of anim instance class used to go on a skeletal mesh component directly
  */
 UCLASS()
-class FPEACE_API UFPCSkeletalAnimInstance : public UFPCAnimInstance
+class FPEACE_API UFPCOperatorSkeletalAnimInstance : public UFPCOperatorAnimInstance
 {
 	GENERATED_BODY()
 
@@ -47,7 +47,7 @@ public:
 	 * Reference to the layer anim instance that is currently linked to this skeletal anim instance
 	 */
 	UPROPERTY(BlueprintReadOnly)
-	TObjectPtr<UFPCLayerAnimInstance> CurrentLinkedAnimInstance;
+	TObjectPtr<UFPCOperatorLayerAnimInstance> CurrentLinkedAnimInstance;
 
 	/*
 	 * Used to hold the active weapon grip pose on the owning mesh
@@ -61,31 +61,31 @@ public:
 	 * If a ID doesn't exist, new one is created. If it does, the state is updated
 	 */
 	UFUNCTION(BlueprintCallable)
-	void RecordSequenceState(const FString& Key, UPARAM(ref) FSkeletalAnimInstanceSequenceState& CurrentSequenceState);
+	void RecordSequenceState(const FString& Key, UPARAM(ref) FFPCSequenceState& CurrentSequenceState);
 
 	/*
 	 * Gets the sequence state of a player with a given ID
 	 * Returns false if the ID doesn't exist
 	 */
 	UFUNCTION(BlueprintCallable, BlueprintPure, meta=(BlueprintThreadSafe))
-	bool GetSequenceState(const FString& MediaplayerID, FSkeletalAnimInstanceSequenceState& OutState) const;
+	bool GetSequenceState(const FString& MediaplayerID, FFPCSequenceState& OutState) const;
 
 	/*
 	 * Get the sequence state of the most recently updated player. According to its own time stamp
 	 */
 	UFUNCTION(BlueprintCallable, BlueprintPure, meta=(BlueprintThreadSafe))
-	void GetMostRecentSequenceState(FSkeletalAnimInstanceSequenceState& OutState) const;
+	void GetMostRecentSequenceState(FFPCSequenceState& OutState) const;
 
 	/*
 	 * Get the sequence state of the most recently updated player according to its own time stamp,
 	 * but which has an ID that contains the given substrings
 	 */
 	UFUNCTION(BlueprintCallable, BlueprintPure, meta=(BlueprintThreadSafe))
-	void GetMostRecentSequenceStateWithID(const TArray<FString>& IDSubstrings, FSkeletalAnimInstanceSequenceState& OutState);
+	void GetMostRecentSequenceStateWithID(const TArray<FString>& IDSubstrings, FFPCSequenceState& OutState);
 	
 private:
 	/*
 	 * Holds the states of all registered sequence players or evaluators currently active in the anim instance
 	 */
-	TMap<FString, FSkeletalAnimInstanceSequenceState> SequenceStates;
+	TMap<FString, FFPCSequenceState> SequenceStates;
 };

@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "FPCCharacter.h"
+#include "Gameplay/Actor/FPCCharacter.h"
 #include "FPCOperator.generated.h"
 
 struct FInputActionValue;

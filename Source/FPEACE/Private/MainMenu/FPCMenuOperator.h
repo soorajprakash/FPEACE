@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Gameplay/FPCActor.h"
+#include "Gameplay/ExtendedClasses/FPCActor.h"
 #include "FPCMenuOperator.generated.h"
 
 class UFPCSkeletalMeshComponent;

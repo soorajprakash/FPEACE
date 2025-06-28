@@ -2,8 +2,7 @@
 
 
 #include "FPCSampleGameMode.h"
-#include "Gameplay/FPCGameInstance.h"
-#include "Gameplay/Character/FPCCharacter.h"
+#include "Gameplay/ExtendedClasses/FPCGameInstance.h"
 
 UClass* AFPCSampleGameMode::GetDefaultPawnClassForController_Implementation(AController* InController)
 {

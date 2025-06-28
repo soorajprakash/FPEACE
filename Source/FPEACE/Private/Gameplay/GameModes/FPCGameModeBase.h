@@ -8,7 +8,7 @@
 #include "FPCGameModeBase.generated.h"
 
 class UFPCGameInstance;
-class UFPCAnimInstance;
+class UFPCOperatorAnimInstance;
 
 UCLASS()
 class FPEACE_API AFPCGameModeBase : public AGameModeBase

@@ -2,19 +2,19 @@
 // Unauthorized distribution of this file, or any part of it, is prohibited.
 
 
-#include "FPCAnimInstance.h"
-#include "Gameplay/FPCSkeletalMeshComponent.h"
-#include "Gameplay/Character/FPCOperator.h"
+#include "FPCOperatorAnimInstance.h"
+#include "Gameplay/Actor/Operator/FPCOperator.h"
+#include "Gameplay/ExtendedClasses/Components/FPCSkeletalMeshComponent.h"
 
 
-void UFPCAnimInstance::NativeInitializeAnimation()
+void UFPCOperatorAnimInstance::NativeInitializeAnimation()
 {
 	Super::NativeInitializeAnimation();
 
 	InitializeReferences();
 }
 
-void UFPCAnimInstance::RenameAnimInstanceObject(const FString& NewName)
+void UFPCOperatorAnimInstance::RenameAnimInstanceObject(const FString& NewName)
 {
 #if WITH_EDITOR
 	FName UniqueName = MakeUniqueObjectName(GetOuter(), GetClass(), FName(*NewName), EUniqueObjectNameOptions::None);
@@ -22,7 +22,7 @@ void UFPCAnimInstance::RenameAnimInstanceObject(const FString& NewName)
 #endif
 }
 
-void UFPCAnimInstance::InitializeReferences()
+void UFPCOperatorAnimInstance::InitializeReferences()
 {
 	if (OwningOperator == nullptr)
 		OwningOperator = Cast<AFPCOperator>(TryGetPawnOwner());

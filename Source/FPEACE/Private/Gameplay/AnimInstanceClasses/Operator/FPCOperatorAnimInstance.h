@@ -5,7 +5,7 @@
 
 #include "CoreMinimal.h"
 #include "Animation/AnimInstance.h"
-#include "FPCAnimInstance.generated.h"
+#include "FPCOperatorAnimInstance.generated.h"
 
 class AFPCOperator;
 class UFPCCharacterAnimationManagerComponent;
@@ -17,7 +17,7 @@ class UFPCSkeletalMeshComponent;
  * 
  */
 UCLASS()
-class FPEACE_API UFPCAnimInstance : public UAnimInstance
+class FPEACE_API UFPCOperatorAnimInstance : public UAnimInstance
 {
 	GENERATED_BODY()
 

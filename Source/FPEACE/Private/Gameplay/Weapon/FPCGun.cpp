@@ -2,17 +2,16 @@
 // Unauthorized distribution of this file, or any part of it, is prohibited.
 
 #include "FPCGun.h"
-#include "Gameplay/FPCSkeletalMeshComponent.h"
-#include "Gameplay/FPCStaticMeshComponent.h"
 #include "NiagaraFunctionLibrary.h"
 #include "NiagaraComponent.h"
-#include "Gameplay/Character/FPCCharacterCameraManagerComponent.h"
 #include "FPCBullet.h"
 #include "ObjectPoolSubsystem.h"
 #include "RecoilHelper.h"
-#include "Gameplay/Character/FPCCharacter.h"
-#include "Gameplay/Character/FPCCharacterWeaponManagerComponent.h"
-#include "Gameplay/Character/FPCOperator.h"
+#include "Gameplay/Actor/Operator/FPCOperator.h"
+#include "Gameplay/Actor/Operator/Components/FPCCharacterCameraManagerComponent.h"
+#include "Gameplay/Actor/Operator/Components/FPCCharacterWeaponManagerComponent.h"
+#include "Gameplay/ExtendedClasses/Components/FPCSkeletalMeshComponent.h"
+#include "Gameplay/ExtendedClasses/Components/FPCStaticMeshComponent.h"
 
 AFPCGun::AFPCGun()
 {

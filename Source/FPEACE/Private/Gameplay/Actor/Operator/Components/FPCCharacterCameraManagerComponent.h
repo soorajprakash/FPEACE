@@ -4,25 +4,17 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "CommonEnums.h"
-#include "Gameplay/FPCActorComponent.h"
+#include "FPCOperatorComponentBase.h"
+#include "Gameplay/Common/CommonEnums.h"
 #include "FPCCharacterCameraManagerComponent.generated.h"
 
 
-class AFPCOperator;
 class FCTweenInstanceFloat;
-class UFPCCharacterWeaponManagerComponent;
-class UFPCSkeletalMeshComponent;
-class UFPCCharacterData;
-class AFPCGameplayPlayerController;
-class UFPCSpringArmComponent;
 class UFPCCameraComponent;
-enum class ECameraMode : uint8;
-
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FCameraModeChanged, ECameraMode, NewCameraMode);
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
-class FPEACE_API UFPCCharacterCameraManagerComponent : public UFPCActorComponent
+class FPEACE_API UFPCCharacterCameraManagerComponent : public UFPCOperatorComponentBase
 {
 	GENERATED_BODY()
 
@@ -50,6 +42,9 @@ public:
 	float GetCameraPitchDelta() const { return CameraPitchDelta; }
 
 protected:
+
+	TWeakObjectPtr<UFPCCameraComponent> FPCCameraComp;
+	
 	UPROPERTY(BlueprintReadOnly)
 	ECameraMode CurrentCameraMode = ECameraMode::TPS;
 
@@ -66,32 +61,6 @@ protected:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 private:
-	UPROPERTY()
-	TWeakObjectPtr<AFPCOperator> OwningOperator;
-
-	UPROPERTY()
-	TWeakObjectPtr<UFPCCameraComponent> FPCCameraComp;
-
-	UPROPERTY()
-	TWeakObjectPtr<UFPCCharacterWeaponManagerComponent> FPCWeaponManagerComp;
-
-	UPROPERTY()
-	TWeakObjectPtr<UFPCSpringArmComponent> FPCSpringArmComp;
-
-	UPROPERTY()
-	TWeakObjectPtr<AFPCGameplayPlayerController> PlayerControllerRef;
-
-	UPROPERTY()
-	TWeakObjectPtr<UFPCCharacterData> FPCCharacterData;
-
-	UPROPERTY()
-	TWeakObjectPtr<UFPCSkeletalMeshComponent> TPSBodyMeshComp;
-
-	UPROPERTY()
-	TWeakObjectPtr<UFPCSkeletalMeshComponent> FPSArmsMeshComp;
-
-	UPROPERTY()
-	TWeakObjectPtr<UFPCSkeletalMeshComponent> FPSLowerBodyMeshComp;
 
 	FRotator PrevCameraRotation;
 

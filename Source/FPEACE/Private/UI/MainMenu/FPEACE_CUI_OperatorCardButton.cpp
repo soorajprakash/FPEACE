@@ -3,10 +3,10 @@
 
 #include "FPEACE_CUI_OperatorCardButton.h"
 #include "DataStructures/FPEACEOperatorsDataMap.h"
-#include "Gameplay/FPCGameInstance.h"
 #include "MainMenu/MenuOperatorLevelStage.h"
 #include "Worlds/FPCMainMenuLevelScriptActor.h"
-#include  "FPEACE/Private/Gameplay/Character/FPCCharacter.h"
+#include  "FPEACE/Private/Gameplay/Actor/FPCCharacter.h"
+#include "Gameplay/ExtendedClasses/FPCGameInstance.h"
 
 void UFPEACE_CUI_OperatorCardButton::SetupCard_Implementation(const FFPEACEOperatorData& OperatorData)
 {

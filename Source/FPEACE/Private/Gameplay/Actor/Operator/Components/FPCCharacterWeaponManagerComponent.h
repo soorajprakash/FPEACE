@@ -4,21 +4,14 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "CommonEnums.h"
+#include "FPCOperatorComponentBase.h"
 #include "AnimNotifies/FPCCharacterAnimationStateChangedNotify.h"
-#include "Gameplay/FPCActorComponent.h"
 #include "Gameplay/Weapon/FPCWeapon.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "FPCCharacterWeaponManagerComponent.generated.h"
 
-class AFPCGun;
-class UFPCCharacterAnimationManagerComponent;
 class FCTweenInstanceFloat;
-class UFPCCharacterMovementComponent;
-class UFPCCharacterCameraManagerComponent;
-class UFPCCharacterData;
-class UFPCSkeletalMeshComponent;
-class AFPCWeapon;
+class AFPCGun;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FWeaponEquipEvent, AFPCWeapon*, SpawnedFPSWeaponRef, AFPCWeapon*, SpawnedTPSWeaponRef);
 
@@ -36,7 +29,7 @@ public:
 };
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
-class FPEACE_API UFPCCharacterWeaponManagerComponent : public UFPCActorComponent
+class FPEACE_API UFPCCharacterWeaponManagerComponent : public UFPCOperatorComponentBase
 {
 	GENERATED_BODY()
 
@@ -176,27 +169,6 @@ private:
 	bool bLastFrameWeaponRecentlyUsedState;
 
 	FTimerHandle WeaponUseCoolDownTimer;
-
-	UPROPERTY()
-	TWeakObjectPtr<AFPCOperator> OwningOperator;
-
-	UPROPERTY()
-	TWeakObjectPtr<UFPCCharacterMovementComponent> OwningCharacterMovementComp;
-
-	UPROPERTY()
-	TWeakObjectPtr<UFPCCharacterData> FPCCharacterData;
-
-	UPROPERTY()
-	TWeakObjectPtr<UFPCSkeletalMeshComponent> TPSBodyMeshComp;
-
-	UPROPERTY()
-	TWeakObjectPtr<UFPCSkeletalMeshComponent> FPSBodyMeshComp;
-
-	UPROPERTY()
-	TWeakObjectPtr<UFPCCharacterCameraManagerComponent> FPCCameraManagerComp;
-
-	UPROPERTY()
-	TWeakObjectPtr<UFPCCharacterAnimationManagerComponent> FPCAnimationManagerComp;
 
 	UFUNCTION()
 	void OnGunReloadStart(bool bEmptyReload, AFPCGun* ReloadingGun);

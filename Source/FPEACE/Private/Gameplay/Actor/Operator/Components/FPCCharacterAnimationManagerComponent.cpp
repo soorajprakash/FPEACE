@@ -5,13 +5,12 @@
 #include "FPCCharacterAnimationManagerComponent.h"
 #include "FPCCharacterMovementComponent.h"
 #include "FPCCharacterWeaponManagerComponent.h"
-#include "FPCGameplayPlayerController.h"
-#include "FPCOperator.h"
 #include "DataStructures/FCameraModeAnimSelectionStruct.h"
 #include "DataStructures/FPCCharacterData.h"
-#include "Gameplay/FPCSkeletalMeshComponent.h"
-#include "Gameplay/AnimInstanceClasses/FPCLayerAnimInstance.h"
-#include "Gameplay/AnimInstanceClasses/FPCSkeletalAnimInstance.h"
+#include "Gameplay/AnimInstanceClasses/Operator/FPCOperatorLayerAnimInstance.h"
+#include "Gameplay/AnimInstanceClasses/Operator/FPCOperatorSkeletalAnimInstance.h"
+#include "Gameplay/Actor/FPCGameplayPlayerController.h"
+#include "Gameplay/ExtendedClasses/Components/FPCSkeletalMeshComponent.h"
 #include "Gameplay/Weapon/FPCGun.h"
 
 
@@ -28,32 +27,12 @@ void UFPCCharacterAnimationManagerComponent::InitializeComponent()
 {
 	Super::InitializeComponent();
 
-	if (OwningOperator == nullptr)
-		OwningOperator = Cast<AFPCOperator>(GetOwner());
-
-	if (OwningOperator.IsValid())
-	{
-		FPCCharacterMovementComp = OwningOperator->GetCharacterMovementComponent();
-		FPCWeaponManagerComp = OwningOperator->GetFPCCharacterWeaponManager();
-		FPCCharacterData = OwningOperator->GetCharacterData();
-
-		TPSBodyMeshComp = OwningOperator->GetTPSBodyMeshComp();
-		FPSBodyMeshComp = OwningOperator->GetFPSArmsMeshComp();
-		TPSMeshAnimInstance = Cast<UFPCSkeletalAnimInstance>(TPSBodyMeshComp->GetAnimInstance());
-		if (TPSMeshAnimInstance)
-			TPSMeshAnimInstance->isBaseAnimInstance = true;
-		FPSMeshAnimInstance = Cast<UFPCSkeletalAnimInstance>(FPSBodyMeshComp->GetAnimInstance());
-	}
-
 	FPCWeaponManagerComp->OnNewWeaponEquipped.AddDynamic(this, &UFPCCharacterAnimationManagerComponent::OnEquipNewWeapon);
 }
 
 void UFPCCharacterAnimationManagerComponent::BeginPlay()
 {
 	Super::BeginPlay();
-
-	if (OwningOperator.IsValid())
-		PlayerControllerRef = OwningOperator->GetFPCPlayerController();
 }
 
 // Called every frame
@@ -83,7 +62,7 @@ void UFPCCharacterAnimationManagerComponent::LinkCombatAnimClassToCharacter(FNam
 
 	UClass* TPSCombatAnimClass = GetAnimClassFor(ECameraMode::TPS, AnimClassNameToLink, FString(TEXT("Linking Anim Class To Character"))).LoadSynchronous();
 	TPSBodyMeshComp->LinkAnimClassLayers(TPSCombatAnimClass);
-	TPSMeshAnimInstance->CurrentLinkedAnimInstance = Cast<UFPCLayerAnimInstance>(TPSBodyMeshComp->GetLinkedAnimLayerInstanceByClass(TPSCombatAnimClass));
+	TPSMeshAnimInstance->CurrentLinkedAnimInstance = Cast<UFPCOperatorLayerAnimInstance>(TPSBodyMeshComp->GetLinkedAnimLayerInstanceByClass(TPSCombatAnimClass));
 	TPSCombatAnimClass = nullptr;
 
 	if (FPSMeshAnimInstance->CurrentLinkedAnimInstance)
@@ -96,13 +75,13 @@ void UFPCCharacterAnimationManagerComponent::LinkCombatAnimClassToCharacter(FNam
 
 	UClass* FPSCombatAnimClass = GetAnimClassFor(ECameraMode::FPS, AnimClassNameToLink, FString(TEXT("Linking Anim Class To Character"))).LoadSynchronous();
 	FPSBodyMeshComp->LinkAnimClassLayers(FPSCombatAnimClass);
-	FPSMeshAnimInstance->CurrentLinkedAnimInstance = Cast<UFPCLayerAnimInstance>(FPSBodyMeshComp->GetLinkedAnimLayerInstanceByClass(FPSCombatAnimClass));
+	FPSMeshAnimInstance->CurrentLinkedAnimInstance = Cast<UFPCOperatorLayerAnimInstance>(FPSBodyMeshComp->GetLinkedAnimLayerInstanceByClass(FPSCombatAnimClass));
 	FPSCombatAnimClass = nullptr;
 }
 
-TSoftClassPtr<UFPCLayerAnimInstance> UFPCCharacterAnimationManagerComponent::GetAnimClassFor(ECameraMode TargetCameraMode, FName AnimStateName, const FString& ReasonForGettingThisAnim) const
+TSoftClassPtr<UFPCOperatorLayerAnimInstance> UFPCCharacterAnimationManagerComponent::GetAnimClassFor(ECameraMode TargetCameraMode, FName AnimStateName, const FString& ReasonForGettingThisAnim) const
 {
-	TSoftClassPtr<UFPCLayerAnimInstance> ReturnValue;
+	TSoftClassPtr<UFPCOperatorLayerAnimInstance> ReturnValue;
 	if (const UDataTable* AnimClassTable = FPCCharacterData->AnimClassTable.Get())
 	{
 		if (const FCameraModeAnimSelectionStruct* SelectedItem = AnimClassTable->FindRow<FCameraModeAnimSelectionStruct>(AnimStateName, ReasonForGettingThisAnim))

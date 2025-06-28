@@ -2,9 +2,9 @@
 // Unauthorized distribution of this file, or any part of it, is prohibited.
 
 #include "FPCWeapon.h"
-#include "CommonEnums.h"
-#include "Gameplay/Character/FPCCharacterCameraManagerComponent.h"
-#include "Gameplay/Character/FPCOperator.h"
+#include "Gameplay/Actor/Operator/FPCOperator.h"
+#include "Gameplay/Actor/Operator/Components/FPCCharacterCameraManagerComponent.h"
+#include "Gameplay/Common/CommonEnums.h"
 
 AFPCWeapon::AFPCWeapon(): UsedInCameraMode(ECameraMode::TPS), bIsWeaponInUse(false)
 {

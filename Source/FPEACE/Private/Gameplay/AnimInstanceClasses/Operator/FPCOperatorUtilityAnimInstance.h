@@ -4,15 +4,15 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "FPCAnimInstance.h"
-#include "FPCUtilityAnimInstance.generated.h"
+#include "FPCOperatorAnimInstance.h"
+#include "FPCOperatorUtilityAnimInstance.generated.h"
 
-class UFPCSkeletalAnimInstance;
+class UFPCOperatorSkeletalAnimInstance;
 /**
  * The type of anim instance used as linked anim graph instances in other anim instances
  */
 UCLASS()
-class FPEACE_API UFPCUtilityAnimInstance : public UFPCAnimInstance
+class FPEACE_API UFPCOperatorUtilityAnimInstance : public UFPCOperatorAnimInstance
 {
 	GENERATED_BODY()
 
@@ -21,7 +21,7 @@ public:
 	 * For anim blueprints that are layered on top of the base anim instance, this value will be something other than self
 	 */
 	UPROPERTY(BlueprintReadOnly)
-	TObjectPtr<UFPCSkeletalAnimInstance> OwningAnimInstance;
+	TObjectPtr<UFPCOperatorSkeletalAnimInstance> OwningAnimInstance;
 
 	/*
 	 * Used to hold the active weapon grip pose on the owning mesh
