@@ -188,30 +188,55 @@ void AFPCOperator::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 		// Bind Gameplay Inputs
 		EInputComp->BindAction(LookAction.LoadSynchronous(), ETriggerEvent::Triggered, this, &AFPCOperator::LookAround);
 		EInputComp->BindAction(MoveAction.LoadSynchronous(), ETriggerEvent::Triggered, this, &AFPCOperator::MoveAround);
-		EInputComp->BindAction(RunAction.LoadSynchronous(), ETriggerEvent::Started, this, &AFPCOperator::ToggleRunSprint);
-		// EInputComp->BindActionInstanceLambda(RunAction.LoadSynchronous(), ETriggerEvent::Started, this, [this] { FPCMovementComp->ToggleRunSprint(); });
-		EInputComp->BindAction(CrouchAction.LoadSynchronous(), ETriggerEvent::Started, this, &AFPCOperator::ToggleCrouch);
-		EInputComp->BindAction(JumpAction.LoadSynchronous(), ETriggerEvent::Started, this, &AFPCOperator::JumpStarted);
-		EInputComp->BindAction(JumpAction.LoadSynchronous(), ETriggerEvent::Completed, this, &AFPCOperator::JumpEnded);
-		EInputComp->BindAction(ADSAction.LoadSynchronous(), ETriggerEvent::Started, this, &AFPCOperator::ActivateADS);
-		EInputComp->BindAction(ADSAction.LoadSynchronous(), ETriggerEvent::Completed, this, &AFPCOperator::DeactivateADS);
-		EInputComp->BindAction(FireAction.LoadSynchronous(), ETriggerEvent::Started, this, &AFPCOperator::StartUsingWeapon);
-		EInputComp->BindAction(FireAction.LoadSynchronous(), ETriggerEvent::Completed, this, &AFPCOperator::StopUsingWeapon);
-		EInputComp->BindAction(WeaponCycleUpAction.LoadSynchronous(), ETriggerEvent::Started, this, &AFPCOperator::CycleWeaponUp);
-		EInputComp->BindAction(WeaponCycleDownAction.LoadSynchronous(), ETriggerEvent::Started, this, &AFPCOperator::CycleWeaponDown);
-		EInputComp->BindAction(CameraSwitchAction.LoadSynchronous(), ETriggerEvent::Completed, this, &AFPCOperator::ToggleCameraMode);
-		EInputComp->BindAction(ReloadAction.LoadSynchronous(), ETriggerEvent::Started, this, &AFPCOperator::TriggerWeaponReload);
+		EInputComp->BindActionInstanceLambda(RunAction.LoadSynchronous(), ETriggerEvent::Started, [this](const FInputActionInstance&)
+		{
+			FPCMovementComp->ToggleRunSprint();
+		});
+		EInputComp->BindActionInstanceLambda(CrouchAction.LoadSynchronous(), ETriggerEvent::Started, [this](const FInputActionInstance&)
+		{
+			FPCMovementComp->ToggleCrouch();
+		});
+		EInputComp->BindActionInstanceLambda(JumpAction.LoadSynchronous(), ETriggerEvent::Started, [this](const FInputActionInstance&)
+		{
+			Jump();
+		});
+		EInputComp->BindActionInstanceLambda(JumpAction.LoadSynchronous(), ETriggerEvent::Completed, [this](const FInputActionInstance&)
+		{
+			StopJumping();
+		});
+		EInputComp->BindActionInstanceLambda(ADSAction.LoadSynchronous(), ETriggerEvent::Started, [this](const FInputActionInstance&)
+		{
+			FPCCharacterWeaponManagerComp->SwitchADSState(true);
+		});
+		EInputComp->BindActionInstanceLambda(ADSAction.LoadSynchronous(), ETriggerEvent::Completed, [this](const FInputActionInstance&)
+		{
+			FPCCharacterWeaponManagerComp->SwitchADSState(false);
+		});
+		EInputComp->BindActionInstanceLambda(FireAction.LoadSynchronous(), ETriggerEvent::Started, [this](const FInputActionInstance&)
+		{
+			FPCCharacterWeaponManagerComp->ToggleWeaponUse(true);
+		});
+		EInputComp->BindActionInstanceLambda(FireAction.LoadSynchronous(), ETriggerEvent::Completed, [this](const FInputActionInstance&)
+		{
+			FPCCharacterWeaponManagerComp->ToggleWeaponUse(false);
+		});
+		EInputComp->BindActionInstanceLambda(WeaponCycleUpAction.LoadSynchronous(), ETriggerEvent::Started, [this](const FInputActionInstance&)
+		{
+			FPCCharacterWeaponManagerComp->CycleWeaponInSatchel();
+		});
+		EInputComp->BindActionInstanceLambda(WeaponCycleDownAction.LoadSynchronous(), ETriggerEvent::Started, [this](const FInputActionInstance&)
+		{
+			FPCCharacterWeaponManagerComp->CycleWeaponInSatchel(false);
+		});
+		EInputComp->BindActionInstanceLambda(CameraSwitchAction.LoadSynchronous(), ETriggerEvent::Completed, [this](const FInputActionInstance&)
+		{
+			FPCCameraManagerComp->ToggleCameraMode();
+		});
+		EInputComp->BindActionInstanceLambda(ReloadAction.LoadSynchronous(), ETriggerEvent::Started, [this](const FInputActionInstance&)
+		{
+			FPCCharacterWeaponManagerComp->TryCurrentGunReload();
+		});
 	}
-}
-
-void AFPCOperator::JumpStarted(const FInputActionValue& InputActionValue)
-{
-	Jump();
-}
-
-void AFPCOperator::JumpEnded(const FInputActionValue& InputActionValue)
-{
-	StopJumping();
 }
 
 void AFPCOperator::LookAround(const FInputActionValue& InputActionValue)
@@ -229,53 +254,4 @@ void AFPCOperator::MoveAround(const FInputActionValue& InputActionValue)
 	Input = Input.GetRotated(-GetControlRotation().Yaw); // Rotate the input to face the character's direction
 	FVector Input3D = FVector(Input.Y, Input.X, 0);
 	AddMovementInput(Input3D);
-}
-
-void AFPCOperator::ToggleRunSprint()
-{
-}
-
-void AFPCOperator::ToggleCrouch()
-{
-	FPCMovementComp->ToggleCrouch();
-}
-
-void AFPCOperator::ToggleCameraMode()
-{
-	FPCCameraManagerComp->ToggleCameraMode();
-}
-
-void AFPCOperator::ActivateADS()
-{
-	FPCCharacterWeaponManagerComp->SwitchADSState(true);
-}
-
-void AFPCOperator::DeactivateADS()
-{
-	FPCCharacterWeaponManagerComp->SwitchADSState(false);
-}
-
-void AFPCOperator::TriggerWeaponReload(const FInputActionValue& InputActionValue)
-{
-	FPCCharacterWeaponManagerComp->TryCurrentGunReload();
-}
-
-void AFPCOperator::CycleWeaponUp()
-{
-	FPCCharacterWeaponManagerComp->CycleWeaponInSatchel();
-}
-
-void AFPCOperator::CycleWeaponDown()
-{
-	FPCCharacterWeaponManagerComp->CycleWeaponInSatchel(false);
-}
-
-void AFPCOperator::StartUsingWeapon()
-{
-	FPCCharacterWeaponManagerComp->ToggleWeaponUse(true);
-}
-
-void AFPCOperator::StopUsingWeapon()
-{
-	FPCCharacterWeaponManagerComp->ToggleWeaponUse(false);
 }

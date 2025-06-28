@@ -7,6 +7,7 @@
 #include "GameFramework/Character.h"
 #include "FPCCharacter.generated.h"
 
+class UFPCGameplayTagManagerComponent;
 class AFPCGameplayPlayerController;
 class UFPCSkeletalMeshComponent;
 class UObjectPool;
@@ -28,22 +29,24 @@ public:
 	//	--------------------- GETTER FUNCTIONS ---------------------
 
 	TWeakObjectPtr<UFPCSkeletalMeshComponent> GetTPSBodyMeshComp() const;
-	TWeakObjectPtr<AFPCGameplayPlayerController> GetFPCPlayerController() const ;
+	TWeakObjectPtr<AFPCGameplayPlayerController> GetFPCPlayerController() const;
 
 protected:
-	
 	//	--------------------- COMPONENTS ---------------------
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="FPEACE|Components")
 	TObjectPtr<UFPCSkeletalMeshComponent> MainBodyMeshComp;
-	
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="FPEACE|Components")
+	TObjectPtr<UFPCGameplayTagManagerComponent> FPCGameplayTagManager;
+
 	/*
 	 * Reference to the FPC Player Controller instance
 	 */
 	UPROPERTY(BlueprintReadOnly, Category="FPEACE")
 	TObjectPtr<AFPCGameplayPlayerController> FPCPlayerControllerInstance;
 
-	
+
 	//	--------------------- OVERRIDES ---------------------
 
 	/*

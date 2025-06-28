@@ -180,10 +180,6 @@ virtual void PreInitializeComponents() override;
 	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
 
 private:
-
-	void JumpStarted(const FInputActionValue& InputActionValue);
-
-	void JumpEnded(const FInputActionValue& InputActionValue);
 	
 	//	--------------------- INPUT BINDING FUNCTIONS ---------------------
 
@@ -196,31 +192,4 @@ private:
 	 * Move input binding function
 	 */
 	void MoveAround(const FInputActionValue& InputActionValue);
-
-
-	/*
-	 * Walk/Run toggle input action binding
-	 */
-	void ToggleRunSprint();
-
-	/*
-	 * Input binding for toggling between crouching and standing
-	 */
-	void ToggleCrouch();
-
-	void ToggleCameraMode();
-
-	void ActivateADS();
-
-	void DeactivateADS();
-
-	void TriggerWeaponReload(const FInputActionValue& InputActionValue);
-
-	void CycleWeaponUp();
-
-	void CycleWeaponDown();
-
-	void StartUsingWeapon();
-
-	void StopUsingWeapon();
 };
