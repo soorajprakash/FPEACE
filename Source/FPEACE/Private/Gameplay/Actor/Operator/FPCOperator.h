@@ -1,4 +1,4 @@
-﻿// Copyright © 2025 Sooraj Prakash. All rights reserved.Unauthorized distribution or sharing of this code is prohibited.
+﻿// Copyright © Sooraj Prakash. All rights reserved.Unauthorized distribution or sharing of this code is prohibited.
 
 #pragma once
 
@@ -8,13 +8,13 @@
 
 struct FInputActionValue;
 class UInputAction;
-class UFPCCharacterAnimationManagerComponent;
-class UFPCCharacterCameraManagerComponent;
-class UFPCCharacterWeaponManagerComponent;
+class UFPCOperatorAnimationManagerComponent;
+class UFPCOperatorCameraManagerComponent;
+class UFPCOperatorWeaponManagerComponent;
 class UFPCSpringArmComponent;
 class UFPCCameraComponent;
 class UFPCCapsuleComponent;
-class UFPCCharacterMovementComponent;
+class UFPCOperatorMovementComponent;
 class UFPCCharacterData;
 
 UCLASS()
@@ -36,7 +36,7 @@ public:
 	/*
 	 * Get the Movement component of this character
 	 */
-	TWeakObjectPtr<UFPCCharacterMovementComponent> GetCharacterMovementComponent() const;
+	TWeakObjectPtr<UFPCOperatorMovementComponent> GetCharacterMovementComponent() const;
 
 	TWeakObjectPtr<UFPCSkeletalMeshComponent> GetFPSArmsMeshComp() const;
 
@@ -44,17 +44,17 @@ public:
 
 	TWeakObjectPtr<UFPCCapsuleComponent> GetFPCCapsuleComp() const ;
 
-	TWeakObjectPtr<UFPCCharacterMovementComponent> GetFPCMovementComp() const ;
+	TWeakObjectPtr<UFPCOperatorMovementComponent> GetFPCMovementComp() const ;
 
 	TWeakObjectPtr<UFPCCameraComponent> GetCharacterCameraComp() const ;
 
 	TWeakObjectPtr<UFPCSpringArmComponent> GetFPCSpringArmComp() const ;
 
-	TWeakObjectPtr<UFPCCharacterWeaponManagerComponent> GetFPCCharacterWeaponManager() const ;
+	TWeakObjectPtr<UFPCOperatorWeaponManagerComponent> GetFPCCharacterWeaponManager() const ;
 
-	TWeakObjectPtr<UFPCCharacterCameraManagerComponent> GetFPCCharacterCameraManager() const ;
+	TWeakObjectPtr<UFPCOperatorCameraManagerComponent> GetFPCCharacterCameraManager() const ;
 
-	TWeakObjectPtr<UFPCCharacterAnimationManagerComponent> GetFPCCharacterAnimationManager() const ;
+	TWeakObjectPtr<UFPCOperatorAnimationManagerComponent> GetFPCCharacterAnimationManager() const ;
 
 protected:
 	// Called when the game starts or when spawned
@@ -78,7 +78,7 @@ protected:
 	TObjectPtr<UFPCCapsuleComponent> FPCCapsuleComp;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="FPEACE|Components")
-	TObjectPtr<UFPCCharacterMovementComponent> FPCMovementComp;
+	TObjectPtr<UFPCOperatorMovementComponent> FPCMovementComp;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="FPEACE|Components")
 	TObjectPtr<UFPCCameraComponent> CharacterCameraComp;
@@ -90,13 +90,13 @@ protected:
 	 * Reference to the Character's weapon manager component
 	 */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="FPEACE|Components")
-	TObjectPtr<UFPCCharacterWeaponManagerComponent> FPCCharacterWeaponManagerComp;
+	TObjectPtr<UFPCOperatorWeaponManagerComponent> FPCCharacterWeaponManagerComp;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="FPEACE|Components")
-	TObjectPtr<UFPCCharacterCameraManagerComponent> FPCCameraManagerComp;
+	TObjectPtr<UFPCOperatorCameraManagerComponent> FPCCameraManagerComp;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="FPEACE|Components")
-	TObjectPtr<UFPCCharacterAnimationManagerComponent> FPCCharacterAnimationManagerComp;
+	TObjectPtr<UFPCOperatorAnimationManagerComponent> FPCCharacterAnimationManagerComp;
 
 	//	--------------------- GAMEPLAY INPUT ---------------------
 

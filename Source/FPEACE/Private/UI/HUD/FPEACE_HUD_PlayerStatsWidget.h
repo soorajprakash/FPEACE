@@ -1,4 +1,4 @@
-﻿// Copyright © 2024 Sooraj Prakash. All rights reserved.Unauthorized distribution or sharing of this code is prohibited.
+﻿// Copyright © Sooraj Prakash. All rights reserved.Unauthorized distribution or sharing of this code is prohibited.
 
 #pragma once
 
@@ -7,7 +7,7 @@
 #include "FPEACE_HUD_PlayerStatsWidget.generated.h"
 
 class UMVVM_HUD_PlayerStats;
-class UFPCCharacterWeaponManagerComponent;
+class UFPCOperatorWeaponManagerComponent;
 class AFPCCharacter;
 class UFPCGameInstance;
 DECLARE_DYNAMIC_DELEGATE(FOnOperatorDataChanged);

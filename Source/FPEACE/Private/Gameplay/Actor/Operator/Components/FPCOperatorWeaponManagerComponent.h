@@ -1,4 +1,4 @@
-﻿// Copyright © 2024 Sooraj Prakash. All rights reserved.
+﻿// Copyright © Sooraj Prakash. All rights reserved.
 // Unauthorized distribution of this file, or any part of it, is prohibited.
 
 #pragma once
@@ -8,7 +8,7 @@
 #include "AnimNotifies/FPCCharacterAnimationStateChangedNotify.h"
 #include "Gameplay/Weapon/FPCWeapon.h"
 #include "Kismet/KismetMathLibrary.h"
-#include "FPCCharacterWeaponManagerComponent.generated.h"
+#include "FPCOperatorWeaponManagerComponent.generated.h"
 
 class FCTweenInstanceFloat;
 class AFPCGun;
@@ -29,13 +29,13 @@ public:
 };
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
-class FPEACE_API UFPCCharacterWeaponManagerComponent : public UFPCOperatorComponentBase
+class FPEACE_API UFPCOperatorWeaponManagerComponent : public UFPCOperatorComponentBase
 {
 	GENERATED_BODY()
 
 public:
 	// Sets default values for this component's properties
-	UFPCCharacterWeaponManagerComponent();
+	UFPCOperatorWeaponManagerComponent();
 
 	FWeaponEquipEvent OnNewWeaponEquipped;
 

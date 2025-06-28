@@ -1,24 +1,24 @@
-﻿// Copyright © 2024 Sooraj Prakash. All rights reserved.
+﻿// Copyright © Sooraj Prakash. All rights reserved.
 // Unauthorized distribution of this file, or any part of it, is prohibited.
 
 #pragma once
 
 #include "CoreMinimal.h"
 #include "FPCOperatorComponentBase.h"
-#include "FPCCharacterAnimationManagerComponent.generated.h"
+#include "FPCOperatorAnimationManagerComponent.generated.h"
 
 class UFPCOperatorLayerAnimInstance;
 class AFPCWeapon;
 enum class ECameraMode : uint8;
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
-class FPEACE_API UFPCCharacterAnimationManagerComponent : public UFPCOperatorComponentBase
+class FPEACE_API UFPCOperatorAnimationManagerComponent : public UFPCOperatorComponentBase
 {
 	GENERATED_BODY()
 
 public:
 	// Sets default values for this component's properties
-	UFPCCharacterAnimationManagerComponent();
+	UFPCOperatorAnimationManagerComponent();
 
 	UFPCOperatorSkeletalAnimInstance* GetTPSMeshAnimInstance() const { return TPSMeshAnimInstance; }
 	UFPCOperatorSkeletalAnimInstance* GetFPSMeshAnimInstance() const { return FPSMeshAnimInstance; }

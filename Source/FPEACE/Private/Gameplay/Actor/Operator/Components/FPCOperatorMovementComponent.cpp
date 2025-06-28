@@ -1,9 +1,9 @@
-// Copyright © 2024 Sooraj Prakash. All rights reserved.
+// Copyright © Sooraj Prakash. All rights reserved.
 // Unauthorized distribution of this file, or any part of it, is prohibited.
 
 
-#include "FPCCharacterMovementComponent.h"
-#include "FPCCharacterWeaponManagerComponent.h"
+#include "FPCOperatorMovementComponent.h"
+#include "FPCOperatorWeaponManagerComponent.h"
 #include "KismetAnimationLibrary.h"
 #include "DataStructures/FPCCharacterData.h"
 #include "Gameplay/Actor/FPCGameplayPlayerController.h"
@@ -15,7 +15,7 @@
 
 struct FLocomotionStateSetting;
 
-UFPCCharacterMovementComponent::UFPCCharacterMovementComponent(): CurrentVelocityDirection(), CurrentAccelerationDirection(), currentLocomotionState(), currentLocomotionStance(),
+UFPCOperatorMovementComponent::UFPCOperatorMovementComponent(): CurrentVelocityDirection(), CurrentAccelerationDirection(), currentLocomotionState(), currentLocomotionStance(),
                                                                   PrevLocomotionState(), PrevLocomotionStance(),
                                                                   PrevTargetLocomotionState(),
                                                                   PrevVelocityDirection(),
@@ -36,19 +36,19 @@ UFPCCharacterMovementComponent::UFPCCharacterMovementComponent(): CurrentVelocit
 	bWantsInitializeComponent = true;
 }
 
-void UFPCCharacterMovementComponent::ToggleRunSprint()
+void UFPCOperatorMovementComponent::ToggleRunSprint()
 {
 	if (IsCharacterAccelerating)
 		SetTargetLocomotionState(TargetLocomotionState != ELocomotionState::Running ? ELocomotionState::Running : ELocomotionState::Sprinting);
 }
 
-void UFPCCharacterMovementComponent::ToggleCrouch()
+void UFPCOperatorMovementComponent::ToggleCrouch()
 {
 	bWantsToCrouch = !bWantsToCrouch;
 	currentLocomotionStance = bWantsToCrouch ? ELocomotionStance::Crouching : ELocomotionStance::Standing;
 }
 
-void UFPCCharacterMovementComponent::InitializeComponent()
+void UFPCOperatorMovementComponent::InitializeComponent()
 {
 	Super::InitializeComponent();
 
@@ -72,7 +72,7 @@ void UFPCCharacterMovementComponent::InitializeComponent()
 	}
 }
 
-void UFPCCharacterMovementComponent::AddControllerPitchAndYawInput(float Pitch, float Yaw)
+void UFPCOperatorMovementComponent::AddControllerPitchAndYawInput(float Pitch, float Yaw)
 {
 	if (FPCPlayerController.IsValid())
 	{
@@ -81,7 +81,7 @@ void UFPCCharacterMovementComponent::AddControllerPitchAndYawInput(float Pitch, 
 	}
 }
 
-void UFPCCharacterMovementComponent::TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+void UFPCOperatorMovementComponent::TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
@@ -188,7 +188,7 @@ void UFPCCharacterMovementComponent::TickComponent(float DeltaTime, enum ELevelT
 	UpdateStateChanges();
 }
 
-void UFPCCharacterMovementComponent::HandleLocomotionStateChange()
+void UFPCOperatorMovementComponent::HandleLocomotionStateChange()
 {
 	// Set the character to default locomotion target state if it's not moving
 	// TODO: Allow the default state to be set somewhere globally
@@ -220,7 +220,7 @@ void UFPCCharacterMovementComponent::HandleLocomotionStateChange()
 	}
 }
 
-void UFPCCharacterMovementComponent::SetCurrentLocomotionState(ELocomotionState newLocomotionState)
+void UFPCOperatorMovementComponent::SetCurrentLocomotionState(ELocomotionState newLocomotionState)
 {
 	if (newLocomotionState == currentLocomotionState)
 		return;
@@ -230,7 +230,7 @@ void UFPCCharacterMovementComponent::SetCurrentLocomotionState(ELocomotionState 
 	OnCurrentLocomotionStateChanged.Broadcast(currentLocomotionState);
 }
 
-void UFPCCharacterMovementComponent::SetTargetLocomotionState(ELocomotionState newLocomotionState)
+void UFPCOperatorMovementComponent::SetTargetLocomotionState(ELocomotionState newLocomotionState)
 {
 	if (newLocomotionState == TargetLocomotionState)
 		return;
@@ -240,7 +240,7 @@ void UFPCCharacterMovementComponent::SetTargetLocomotionState(ELocomotionState n
 	OnTargetLocomotionStateChanged.Broadcast(TargetLocomotionState);
 }
 
-void UFPCCharacterMovementComponent::SetCurrentLocomotionStateWithSettings(ELocomotionState newLocomotionState)
+void UFPCOperatorMovementComponent::SetCurrentLocomotionStateWithSettings(ELocomotionState newLocomotionState)
 {
 	if (currentLocomotionState != newLocomotionState)
 	{
@@ -251,7 +251,7 @@ void UFPCCharacterMovementComponent::SetCurrentLocomotionStateWithSettings(ELoco
 	}
 }
 
-void UFPCCharacterMovementComponent::SetCurrentVelocityDirection(ELocomotionDirection newVelocityDirection)
+void UFPCOperatorMovementComponent::SetCurrentVelocityDirection(ELocomotionDirection newVelocityDirection)
 {
 	if (CurrentVelocityDirection == newVelocityDirection)
 		return;
@@ -259,7 +259,7 @@ void UFPCCharacterMovementComponent::SetCurrentVelocityDirection(ELocomotionDire
 	CurrentVelocityDirection = newVelocityDirection;
 }
 
-void UFPCCharacterMovementComponent::SetCurrentAccelerationDirection(ELocomotionDirection newAccelerationDirection)
+void UFPCOperatorMovementComponent::SetCurrentAccelerationDirection(ELocomotionDirection newAccelerationDirection)
 {
 	if (CurrentAccelerationDirection == newAccelerationDirection)
 		return;
@@ -267,7 +267,7 @@ void UFPCCharacterMovementComponent::SetCurrentAccelerationDirection(ELocomotion
 	CurrentAccelerationDirection = newAccelerationDirection;
 }
 
-void UFPCCharacterMovementComponent::SetLocomotionStateSettings(ELocomotionState newLocomotionState)
+void UFPCOperatorMovementComponent::SetLocomotionStateSettings(ELocomotionState newLocomotionState)
 {
 	const FLocomotionStateSetting& StateSettings = FPCCharacterData->LocomotionStanceSettings[currentLocomotionStance].LocomotionStateSettings[newLocomotionState];
 	bUseSeparateBrakingFriction = StateSettings.bUseSeparateBrakingFriction;
@@ -279,7 +279,7 @@ void UFPCCharacterMovementComponent::SetLocomotionStateSettings(ELocomotionState
 	BrakingFriction = StateSettings.BrakingFriction;
 }
 
-void UFPCCharacterMovementComponent::UpdateDirectionalMaxWalkSpeed(ELocomotionDirection newVelocityDirection)
+void UFPCOperatorMovementComponent::UpdateDirectionalMaxWalkSpeed(ELocomotionDirection newVelocityDirection)
 {
 	const FLocomotionStateSetting& StateSettings = FPCCharacterData->LocomotionStanceSettings[currentLocomotionStance].LocomotionStateSettings[currentLocomotionState];
 	float maxDirectionalWalkSpeed = 0;
@@ -309,7 +309,7 @@ void UFPCCharacterMovementComponent::UpdateDirectionalMaxWalkSpeed(ELocomotionDi
 		MaxWalkSpeed = maxDirectionalWalkSpeed;
 }
 
-void UFPCCharacterMovementComponent::UpdateStateChanges()
+void UFPCOperatorMovementComponent::UpdateStateChanges()
 {
 	// Check if the character changed it's moving state
 	MovementStateChanged = IsCharacterMoving != WasMovingLastFrame;
@@ -358,7 +358,7 @@ void UFPCCharacterMovementComponent::UpdateStateChanges()
 		AccelerationDirectionChanged || CurrentLocomotionStateChanged || CurrentLocomotionStanceChanged || TargetLocomotionStateChanged;
 }
 
-ELocomotionDirection UFPCCharacterMovementComponent::CalculateLocomotionDirection(const float LocomotionDirectionAngle, const ELocomotionDirection CurrentDirection) const
+ELocomotionDirection UFPCOperatorMovementComponent::CalculateLocomotionDirection(const float LocomotionDirectionAngle, const ELocomotionDirection CurrentDirection) const
 {
 	// First check for dead-zones
 
@@ -389,7 +389,7 @@ ELocomotionDirection UFPCCharacterMovementComponent::CalculateLocomotionDirectio
 	return LocomotionDirectionAngle > 0 ? ELocomotionDirection::Right : ELocomotionDirection::Left;
 }
 
-void UFPCCharacterMovementComponent::CalculateLeanAngle()
+void UFPCOperatorMovementComponent::CalculateLeanAngle()
 {
 	// Get the yaw angular velocity and multiply by strength 
 	LeanAngle = YawAngularVelocity * FPCCharacterData->TurningLeanStrength;

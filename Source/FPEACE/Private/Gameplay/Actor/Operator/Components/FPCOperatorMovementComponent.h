@@ -1,4 +1,4 @@
-// Copyright © 2024 Sooraj Prakash. All rights reserved.
+// Copyright © Sooraj Prakash. All rights reserved.
 // Unauthorized distribution of this file, or any part of it, is prohibited.
 
 #pragma once
@@ -6,14 +6,14 @@
 #include "CoreMinimal.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Gameplay/Common/CommonEnums.h"
-#include "FPCCharacterMovementComponent.generated.h"
+#include "FPCOperatorMovementComponent.generated.h"
 
 class UFPCSkeletalMeshComponent;
 class UFPCOperatorSkeletalAnimInstance;
 class AFPCOperator;
 class AFPCGameplayPlayerController;
 class UFPCCapsuleComponent;
-class UFPCCharacterWeaponManagerComponent;
+class UFPCOperatorWeaponManagerComponent;
 class UFPCCharacterData;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FLocomotionStateChangeDelegate, ELocomotionState, NewLocomotionState);
@@ -22,7 +22,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FLocomotionStateChangeDelegate, ELoc
  * An extension of the character movement component class of the character
  */
 UCLASS(BlueprintType, Blueprintable, Meta = (BlueprintSpawnableComponent))
-class FPEACE_API UFPCCharacterMovementComponent : public UCharacterMovementComponent
+class FPEACE_API UFPCOperatorMovementComponent : public UCharacterMovementComponent
 {
 	GENERATED_BODY()
 
@@ -50,7 +50,7 @@ public:
 	void AddControllerPitchAndYawInput(float Pitch,float Yaw);
 
 protected:
-	UFPCCharacterMovementComponent();
+	UFPCOperatorMovementComponent();
 
 
 	UPROPERTY()
@@ -72,7 +72,7 @@ protected:
 	TWeakObjectPtr<AFPCGameplayPlayerController> FPCPlayerController;
 
 	UPROPERTY()
-	TWeakObjectPtr<UFPCCharacterWeaponManagerComponent> FPCCharacterWeaponManager;
+	TWeakObjectPtr<UFPCOperatorWeaponManagerComponent> FPCCharacterWeaponManager;
 
 	/*
 	 * Reference to the anim instance running on the base skeletal mesh component

@@ -1,4 +1,4 @@
-// Copyright © 2024 Sooraj Prakash. All rights reserved.
+// Copyright © Sooraj Prakash. All rights reserved.
 // Unauthorized distribution of this file, or any part of it, is prohibited.
 
 #include "FPCGun.h"
@@ -8,8 +8,8 @@
 #include "ObjectPoolSubsystem.h"
 #include "RecoilHelper.h"
 #include "Gameplay/Actor/Operator/FPCOperator.h"
-#include "Gameplay/Actor/Operator/Components/FPCCharacterCameraManagerComponent.h"
-#include "Gameplay/Actor/Operator/Components/FPCCharacterWeaponManagerComponent.h"
+#include "Gameplay/Actor/Operator/Components/FPCOperatorCameraManagerComponent.h"
+#include "Gameplay/Actor/Operator/Components/FPCOperatorWeaponManagerComponent.h"
 #include "Gameplay/ExtendedClasses/Components/FPCSkeletalMeshComponent.h"
 #include "Gameplay/ExtendedClasses/Components/FPCStaticMeshComponent.h"
 

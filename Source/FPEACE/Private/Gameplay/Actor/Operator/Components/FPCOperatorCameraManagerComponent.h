@@ -1,4 +1,4 @@
-﻿// Copyright © 2024 Sooraj Prakash. All rights reserved.
+﻿// Copyright © Sooraj Prakash. All rights reserved.
 // Unauthorized distribution of this file, or any part of it, is prohibited.
 
 #pragma once
@@ -6,7 +6,7 @@
 #include "CoreMinimal.h"
 #include "FPCOperatorComponentBase.h"
 #include "Gameplay/Common/CommonEnums.h"
-#include "FPCCharacterCameraManagerComponent.generated.h"
+#include "FPCOperatorCameraManagerComponent.generated.h"
 
 
 class FCTweenInstanceFloat;
@@ -14,13 +14,13 @@ class UFPCCameraComponent;
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FCameraModeChanged, ECameraMode, NewCameraMode);
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
-class FPEACE_API UFPCCharacterCameraManagerComponent : public UFPCOperatorComponentBase
+class FPEACE_API UFPCOperatorCameraManagerComponent : public UFPCOperatorComponentBase
 {
 	GENERATED_BODY()
 
 public:
 	// Sets default values for this component's properties
-	UFPCCharacterCameraManagerComponent();
+	UFPCOperatorCameraManagerComponent();
 
 	UPROPERTY(BlueprintReadOnly)
 	bool IsInTPSCameraMode = false;

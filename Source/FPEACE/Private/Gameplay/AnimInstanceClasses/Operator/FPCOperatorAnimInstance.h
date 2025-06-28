@@ -1,4 +1,4 @@
-// Copyright © 2024 Sooraj Prakash. All rights reserved.
+// Copyright © Sooraj Prakash. All rights reserved.
 // Unauthorized distribution of this file, or any part of it, is prohibited.
 
 #pragma once
@@ -8,10 +8,10 @@
 #include "FPCOperatorAnimInstance.generated.h"
 
 class AFPCOperator;
-class UFPCCharacterAnimationManagerComponent;
-class UFPCCharacterCameraManagerComponent;
-class UFPCCharacterWeaponManagerComponent;
-class UFPCCharacterMovementComponent;
+class UFPCOperatorAnimationManagerComponent;
+class UFPCOperatorCameraManagerComponent;
+class UFPCOperatorWeaponManagerComponent;
+class UFPCOperatorMovementComponent;
 class UFPCSkeletalMeshComponent;
 /**
  * 
@@ -38,25 +38,25 @@ public:
 	 * Reference to the movement component in the character that is actively using this anim instance
 	 */
 	UPROPERTY(BlueprintReadOnly)
-	TWeakObjectPtr<UFPCCharacterMovementComponent> OwningCharacterMovementComponent;
+	TWeakObjectPtr<UFPCOperatorMovementComponent> OwningCharacterMovementComponent;
 
 	/*
 	 * Reference to the weapon manager component in the owning character
 	 */
 	UPROPERTY(BlueprintReadOnly)
-	TWeakObjectPtr<UFPCCharacterWeaponManagerComponent> OwningCharacterWeaponManager;
+	TWeakObjectPtr<UFPCOperatorWeaponManagerComponent> OwningCharacterWeaponManager;
 
 	/*
 	 * Reference to the camera manager component in the owning character
 	 */
 	UPROPERTY(BlueprintReadOnly)
-	TWeakObjectPtr<UFPCCharacterCameraManagerComponent> OwningCharacterCameraManager;
+	TWeakObjectPtr<UFPCOperatorCameraManagerComponent> OwningCharacterCameraManager;
 
 	/*
 	 * Reference to the animation manager component in the owning character
 	 */
 	UPROPERTY(BlueprintReadOnly)
-	TWeakObjectPtr<UFPCCharacterAnimationManagerComponent> OwningCharacterAnimationManager;
+	TWeakObjectPtr<UFPCOperatorAnimationManagerComponent> OwningCharacterAnimationManager;
 
 protected:
 	virtual void NativeInitializeAnimation() override;

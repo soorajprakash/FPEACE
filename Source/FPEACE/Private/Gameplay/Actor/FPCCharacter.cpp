@@ -1,4 +1,4 @@
-// Copyright © 2024 Sooraj Prakash. All rights reserved.
+// Copyright © Sooraj Prakash. All rights reserved.
 // Unauthorized distribution of this file, or any part of it, is prohibited.
 
 
@@ -7,20 +7,20 @@
 #include "ObjectPoolSubsystem.h"
 #include "Gameplay/ExtendedClasses/Components/FPCSkeletalMeshComponent.h"
 #include "Gameplay/ExtendedClasses/Components/FPCCapsuleComponent.h"
-#include "Operator/Components/FPCCharacterMovementComponent.h"
+#include "Operator/Components/FPCOperatorMovementComponent.h"
 
 // Sets default values
 AFPCCharacter::AFPCCharacter(const FObjectInitializer& ObjectInitializer): Super(
-	ObjectInitializer.SetDefaultSubobjectClass<UFPCSkeletalMeshComponent>(MeshComponentName).SetDefaultSubobjectClass<UFPCCharacterMovementComponent>(CharacterMovementComponentName).
+	ObjectInitializer.SetDefaultSubobjectClass<UFPCSkeletalMeshComponent>(MeshComponentName).SetDefaultSubobjectClass<UFPCOperatorMovementComponent>(CharacterMovementComponentName).
 	                  SetDefaultSubobjectClass<UFPCCapsuleComponent>(CapsuleComponentName))
 {
 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = false;
 
 	// Get references to the Extensions 
-	TPSBodyMeshComp = Cast<UFPCSkeletalMeshComponent>(GetMesh());
-	TPSBodyMeshComp->VisibilityBasedAnimTickOption = EVisibilityBasedAnimTickOption::AlwaysTickPoseAndRefreshBones;
-	TPSBodyMeshComp->SetCastHiddenShadow(true);
+	MainBodyMeshComp = Cast<UFPCSkeletalMeshComponent>(GetMesh());
+	MainBodyMeshComp->VisibilityBasedAnimTickOption = EVisibilityBasedAnimTickOption::AlwaysTickPoseAndRefreshBones;
+	MainBodyMeshComp->SetCastHiddenShadow(true);
 }
 
 void AFPCCharacter::PossessedBy(AController* NewController)
@@ -41,7 +41,7 @@ void AFPCCharacter::OnConstruction(const FTransform& Transform)
 
 TWeakObjectPtr<UFPCSkeletalMeshComponent> AFPCCharacter::GetTPSBodyMeshComp() const
 {
-	return TPSBodyMeshComp;
+	return MainBodyMeshComp;
 }
 
 TWeakObjectPtr<AFPCGameplayPlayerController> AFPCCharacter::GetFPCPlayerController() const

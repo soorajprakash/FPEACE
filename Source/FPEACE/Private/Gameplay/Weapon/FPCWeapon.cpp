@@ -1,9 +1,9 @@
-// Copyright © 2024 Sooraj Prakash. All rights reserved.
+// Copyright © Sooraj Prakash. All rights reserved.
 // Unauthorized distribution of this file, or any part of it, is prohibited.
 
 #include "FPCWeapon.h"
 #include "Gameplay/Actor/Operator/FPCOperator.h"
-#include "Gameplay/Actor/Operator/Components/FPCCharacterCameraManagerComponent.h"
+#include "Gameplay/Actor/Operator/Components/FPCOperatorCameraManagerComponent.h"
 #include "Gameplay/Common/CommonEnums.h"
 
 AFPCWeapon::AFPCWeapon(): UsedInCameraMode(ECameraMode::TPS), bIsWeaponInUse(false)
@@ -88,7 +88,7 @@ void AFPCWeapon::SetupWeapon(const ECameraMode TargetCameraMode, USceneComponent
 	// Register events
 	if (OwningCharacterCameraManager.IsValid())
 	{
-		if (UFPCCharacterCameraManagerComponent* CManager = OwningCharacterCameraManager.Get())
+		if (UFPCOperatorCameraManagerComponent* CManager = OwningCharacterCameraManager.Get())
 		{
 			CManager->OnCameraModeChanged.RemoveAll(this);
 			CManager->OnCameraModeChanged.AddDynamic(this, &AFPCWeapon::OnCameraModeChanged);

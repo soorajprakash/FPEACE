@@ -1,4 +1,4 @@
-// Copyright © 2024 Sooraj Prakash. All rights reserved.
+// Copyright © Sooraj Prakash. All rights reserved.
 // Unauthorized distribution of this file, or any part of it, is prohibited.
 
 #pragma once
@@ -30,14 +30,12 @@ public:
 	TWeakObjectPtr<UFPCSkeletalMeshComponent> GetTPSBodyMeshComp() const;
 	TWeakObjectPtr<AFPCGameplayPlayerController> GetFPCPlayerController() const ;
 
-	
-
 protected:
 	
 	//	--------------------- COMPONENTS ---------------------
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="FPEACE|Components")
-	TObjectPtr<UFPCSkeletalMeshComponent> TPSBodyMeshComp;
+	TObjectPtr<UFPCSkeletalMeshComponent> MainBodyMeshComp;
 	
 	/*
 	 * Reference to the FPC Player Controller instance
@@ -46,7 +44,6 @@ protected:
 	TObjectPtr<AFPCGameplayPlayerController> FPCPlayerControllerInstance;
 
 	
-
 	//	--------------------- OVERRIDES ---------------------
 
 	/*

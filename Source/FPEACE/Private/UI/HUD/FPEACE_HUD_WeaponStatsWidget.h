@@ -1,4 +1,4 @@
-﻿// Copyright © 2024 Sooraj Prakash. All rights reserved.Unauthorized distribution or sharing of this code is prohibited.
+﻿// Copyright © Sooraj Prakash. All rights reserved.Unauthorized distribution or sharing of this code is prohibited.
 
 #pragma once
 
@@ -10,7 +10,7 @@ class AFPCOperator;
 class AFPCWeapon;
 class AFPCGun;
 class UMVVM_HUD_WeaponStats;
-class UFPCCharacterWeaponManagerComponent;
+class UFPCOperatorWeaponManagerComponent;
 
 /**
  * The base class for the player stats widget
@@ -43,5 +43,5 @@ private:
 	TWeakObjectPtr<AFPCOperator> OwningOperator;
 	
 	UPROPERTY()
-	TWeakObjectPtr<UFPCCharacterWeaponManagerComponent> OwningCharacterWeaponManagerComp;
+	TWeakObjectPtr<UFPCOperatorWeaponManagerComponent> OwningCharacterWeaponManagerComp;
 };

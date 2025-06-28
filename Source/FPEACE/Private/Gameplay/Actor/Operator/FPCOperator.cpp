@@ -1,11 +1,11 @@
-﻿// Copyright © 2025 Sooraj Prakash. All rights reserved.Unauthorized distribution or sharing of this code is prohibited.
+﻿// Copyright © Sooraj Prakash. All rights reserved.Unauthorized distribution or sharing of this code is prohibited.
 
 #include "FPCOperator.h"
 #include "EnhancedInputComponent.h"
-#include "Components/FPCCharacterAnimationManagerComponent.h"
-#include "Components/FPCCharacterCameraManagerComponent.h"
-#include "Components/FPCCharacterMovementComponent.h"
-#include "Components/FPCCharacterWeaponManagerComponent.h"
+#include "Components/FPCOperatorAnimationManagerComponent.h"
+#include "Components/FPCOperatorCameraManagerComponent.h"
+#include "Components/FPCOperatorMovementComponent.h"
+#include "Components/FPCOperatorWeaponManagerComponent.h"
 #include "DataStructures/FPCCharacterData.h"
 #include "Gameplay/Actor/FPCGameplayPlayerController.h"
 #include "Gameplay/ExtendedClasses/FPCGameInstance.h"
@@ -22,14 +22,14 @@ AFPCOperator::AFPCOperator()
 	PrimaryActorTick.bCanEverTick = true;
 
 	FPCCapsuleComp = Cast<UFPCCapsuleComponent>(GetCapsuleComponent());
-	FPCMovementComp = Cast<UFPCCharacterMovementComponent>(ACharacter::GetMovementComponent());
+	FPCMovementComp = Cast<UFPCOperatorMovementComponent>(ACharacter::GetMovementComponent());
 
 	// Create Components
 
 	if (!FPSArmsMeshComp)
 	{
 		FPSArmsMeshComp = CreateDefaultSubobject<UFPCSkeletalMeshComponent>(TEXT("FPSArms"));
-		FPSArmsMeshComp->SetupAttachment(TPSBodyMeshComp);
+		FPSArmsMeshComp->SetupAttachment(MainBodyMeshComp);
 		FPSArmsMeshComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		FPSArmsMeshComp->VisibilityBasedAnimTickOption = EVisibilityBasedAnimTickOption::OnlyTickPoseWhenRendered;
 		FPSArmsMeshComp->SetCastShadow(false);
@@ -39,7 +39,7 @@ AFPCOperator::AFPCOperator()
 	if (!FPSLowerBodyMeshComp)
 	{
 		FPSLowerBodyMeshComp = CreateDefaultSubobject<UFPCSkeletalMeshComponent>(TEXT("FPSLowerBody"));
-		FPSLowerBodyMeshComp->SetupAttachment(TPSBodyMeshComp);
+		FPSLowerBodyMeshComp->SetupAttachment(MainBodyMeshComp);
 		FPSLowerBodyMeshComp->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		FPSLowerBodyMeshComp->VisibilityBasedAnimTickOption = EVisibilityBasedAnimTickOption::OnlyTickPoseWhenRendered;
 		FPSLowerBodyMeshComp->SetCastShadow(false);
@@ -60,13 +60,13 @@ AFPCOperator::AFPCOperator()
 	}
 
 	if (!FPCCameraManagerComp)
-		FPCCameraManagerComp = CreateDefaultSubobject<UFPCCharacterCameraManagerComponent>(TEXT("FPC Camera Manager"));
+		FPCCameraManagerComp = CreateDefaultSubobject<UFPCOperatorCameraManagerComponent>(TEXT("FPC Camera Manager"));
 
 	if (!FPCCharacterWeaponManagerComp)
-		FPCCharacterWeaponManagerComp = CreateDefaultSubobject<UFPCCharacterWeaponManagerComponent>(TEXT("FPC Weapon Manager"));
+		FPCCharacterWeaponManagerComp = CreateDefaultSubobject<UFPCOperatorWeaponManagerComponent>(TEXT("FPC Weapon Manager"));
 
 	if (!FPCCharacterAnimationManagerComp)
-		FPCCharacterAnimationManagerComp = CreateDefaultSubobject<UFPCCharacterAnimationManagerComponent>(TEXT("FPC Animation Manager"));
+		FPCCharacterAnimationManagerComp = CreateDefaultSubobject<UFPCOperatorAnimationManagerComponent>(TEXT("FPC Animation Manager"));
 }
 
 TWeakObjectPtr<UFPCCharacterData> AFPCOperator::GetCharacterData()
@@ -79,7 +79,7 @@ TWeakObjectPtr<UFPCCharacterData> AFPCOperator::GetCharacterData()
 	return FPCCharacterData;
 }
 
-TWeakObjectPtr<UFPCCharacterMovementComponent> AFPCOperator::GetCharacterMovementComponent() const
+TWeakObjectPtr<UFPCOperatorMovementComponent> AFPCOperator::GetCharacterMovementComponent() const
 {
 	return FPCMovementComp;
 }
@@ -99,7 +99,7 @@ TWeakObjectPtr<UFPCCapsuleComponent> AFPCOperator::GetFPCCapsuleComp() const
 	return FPCCapsuleComp;
 }
 
-TWeakObjectPtr<UFPCCharacterMovementComponent> AFPCOperator::GetFPCMovementComp() const
+TWeakObjectPtr<UFPCOperatorMovementComponent> AFPCOperator::GetFPCMovementComp() const
 {
 	return FPCMovementComp;
 }
@@ -114,17 +114,17 @@ TWeakObjectPtr<UFPCSpringArmComponent> AFPCOperator::GetFPCSpringArmComp() const
 	return FPCSpringArmComp;
 }
 
-TWeakObjectPtr<UFPCCharacterWeaponManagerComponent> AFPCOperator::GetFPCCharacterWeaponManager() const
+TWeakObjectPtr<UFPCOperatorWeaponManagerComponent> AFPCOperator::GetFPCCharacterWeaponManager() const
 {
 	return FPCCharacterWeaponManagerComp;
 }
 
-TWeakObjectPtr<UFPCCharacterCameraManagerComponent> AFPCOperator::GetFPCCharacterCameraManager() const
+TWeakObjectPtr<UFPCOperatorCameraManagerComponent> AFPCOperator::GetFPCCharacterCameraManager() const
 {
 	return FPCCameraManagerComp;
 }
 
-TWeakObjectPtr<UFPCCharacterAnimationManagerComponent> AFPCOperator::GetFPCCharacterAnimationManager() const
+TWeakObjectPtr<UFPCOperatorAnimationManagerComponent> AFPCOperator::GetFPCCharacterAnimationManager() const
 {
 	return FPCCharacterAnimationManagerComp;
 }

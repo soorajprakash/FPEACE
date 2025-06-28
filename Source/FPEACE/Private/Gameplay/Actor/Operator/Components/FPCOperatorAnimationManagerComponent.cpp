@@ -1,10 +1,10 @@
-﻿// Copyright © 2024 Sooraj Prakash. All rights reserved.
+﻿// Copyright © Sooraj Prakash. All rights reserved.
 // Unauthorized distribution of this file, or any part of it, is prohibited.
 
 
-#include "FPCCharacterAnimationManagerComponent.h"
-#include "FPCCharacterMovementComponent.h"
-#include "FPCCharacterWeaponManagerComponent.h"
+#include "FPCOperatorAnimationManagerComponent.h"
+#include "FPCOperatorMovementComponent.h"
+#include "FPCOperatorWeaponManagerComponent.h"
 #include "DataStructures/FCameraModeAnimSelectionStruct.h"
 #include "DataStructures/FPCCharacterData.h"
 #include "Gameplay/AnimInstanceClasses/Operator/FPCOperatorLayerAnimInstance.h"
@@ -15,7 +15,7 @@
 
 
 // Sets default values for this component's properties
-UFPCCharacterAnimationManagerComponent::UFPCCharacterAnimationManagerComponent()
+UFPCOperatorAnimationManagerComponent::UFPCOperatorAnimationManagerComponent()
 {
 	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
 	// off to improve performance if you don't need them.
@@ -23,46 +23,46 @@ UFPCCharacterAnimationManagerComponent::UFPCCharacterAnimationManagerComponent()
 	bWantsInitializeComponent = true;
 }
 
-void UFPCCharacterAnimationManagerComponent::InitializeComponent()
+void UFPCOperatorAnimationManagerComponent::InitializeComponent()
 {
 	Super::InitializeComponent();
 
-	FPCWeaponManagerComp->OnNewWeaponEquipped.AddDynamic(this, &UFPCCharacterAnimationManagerComponent::OnEquipNewWeapon);
+	FPCOperatorWeaponManagerComp->OnNewWeaponEquipped.AddDynamic(this, &UFPCOperatorAnimationManagerComponent::OnEquipNewWeapon);
 }
 
-void UFPCCharacterAnimationManagerComponent::BeginPlay()
+void UFPCOperatorAnimationManagerComponent::BeginPlay()
 {
 	Super::BeginPlay();
 }
 
 // Called every frame
-void UFPCCharacterAnimationManagerComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+void UFPCOperatorAnimationManagerComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
 	// Calculate Play rate
-	CurrentAnimPlayRate = FMath::Clamp(FPCCharacterMovementComp->GetCharacterAbsoluteSpeed2D() / FPCCharacterMovementComp->MaxWalkSpeed, 0.f, 1.f);
+	CurrentAnimPlayRate = FMath::Clamp(FPCOperatorMovementComp->GetCharacterAbsoluteSpeed2D() / FPCOperatorMovementComp->MaxWalkSpeed, 0.f, 1.f);
 
 	CharacterLookSpineVertical = FRotator::ZeroRotator;
 	CharacterLookSpineVertical.Roll = -PlayerControllerRef->GetControlRotation().Pitch / 3;
 
 	// Update if character has reached close to max speed
-	HasCharacterReachedCurrentMaxSpeed = FMath::IsNearlyEqual(FPCCharacterMovementComp->GetCharacterAbsoluteSpeed2D(), FPCCharacterMovementComp->MaxWalkSpeed, 10);
+	HasCharacterReachedCurrentMaxSpeed = FMath::IsNearlyEqual(FPCOperatorMovementComp->GetCharacterAbsoluteSpeed2D(), FPCOperatorMovementComp->MaxWalkSpeed, 10);
 }
 
-void UFPCCharacterAnimationManagerComponent::LinkCombatAnimClassToCharacter(FName AnimClassNameToLink) const
+void UFPCOperatorAnimationManagerComponent::LinkCombatAnimClassToCharacter(FName AnimClassNameToLink) const
 {
 	if (TPSMeshAnimInstance->CurrentLinkedAnimInstance)
 	{
-		TPSBodyMeshComp->UnlinkAnimClassLayers(TPSMeshAnimInstance->CurrentLinkedAnimInstance->GetClass());
-		TPSBodyMeshComp->ResetLinkedAnimInstances();
+		MainBodyMeshComp->UnlinkAnimClassLayers(TPSMeshAnimInstance->CurrentLinkedAnimInstance->GetClass());
+		MainBodyMeshComp->ResetLinkedAnimInstances();
 		TPSMeshAnimInstance->CurrentLinkedAnimInstance->MarkAsGarbage();
 		TPSMeshAnimInstance->CurrentLinkedAnimInstance = nullptr;
 	}
 
 	UClass* TPSCombatAnimClass = GetAnimClassFor(ECameraMode::TPS, AnimClassNameToLink, FString(TEXT("Linking Anim Class To Character"))).LoadSynchronous();
-	TPSBodyMeshComp->LinkAnimClassLayers(TPSCombatAnimClass);
-	TPSMeshAnimInstance->CurrentLinkedAnimInstance = Cast<UFPCOperatorLayerAnimInstance>(TPSBodyMeshComp->GetLinkedAnimLayerInstanceByClass(TPSCombatAnimClass));
+	MainBodyMeshComp->LinkAnimClassLayers(TPSCombatAnimClass);
+	TPSMeshAnimInstance->CurrentLinkedAnimInstance = Cast<UFPCOperatorLayerAnimInstance>(MainBodyMeshComp->GetLinkedAnimLayerInstanceByClass(TPSCombatAnimClass));
 	TPSCombatAnimClass = nullptr;
 
 	if (FPSMeshAnimInstance->CurrentLinkedAnimInstance)
@@ -79,10 +79,10 @@ void UFPCCharacterAnimationManagerComponent::LinkCombatAnimClassToCharacter(FNam
 	FPSCombatAnimClass = nullptr;
 }
 
-TSoftClassPtr<UFPCOperatorLayerAnimInstance> UFPCCharacterAnimationManagerComponent::GetAnimClassFor(ECameraMode TargetCameraMode, FName AnimStateName, const FString& ReasonForGettingThisAnim) const
+TSoftClassPtr<UFPCOperatorLayerAnimInstance> UFPCOperatorAnimationManagerComponent::GetAnimClassFor(ECameraMode TargetCameraMode, FName AnimStateName, const FString& ReasonForGettingThisAnim) const
 {
 	TSoftClassPtr<UFPCOperatorLayerAnimInstance> ReturnValue;
-	if (const UDataTable* AnimClassTable = FPCCharacterData->AnimClassTable.Get())
+	if (const UDataTable* AnimClassTable = FPCOperatorData->AnimClassTable.Get())
 	{
 		if (const FCameraModeAnimSelectionStruct* SelectedItem = AnimClassTable->FindRow<FCameraModeAnimSelectionStruct>(AnimStateName, ReasonForGettingThisAnim))
 		{
@@ -102,7 +102,7 @@ TSoftClassPtr<UFPCOperatorLayerAnimInstance> UFPCCharacterAnimationManagerCompon
 	return ReturnValue;
 }
 
-void UFPCCharacterAnimationManagerComponent::OnEquipNewWeapon(AFPCWeapon* SpawnedFPSWeapon, AFPCWeapon* SpawnedTPSWeapon)
+void UFPCOperatorAnimationManagerComponent::OnEquipNewWeapon(AFPCWeapon* SpawnedFPSWeapon, AFPCWeapon* SpawnedTPSWeapon)
 {
 	// Link the animation class to the character
 	if (SpawnedFPSWeapon && SpawnedTPSWeapon)
@@ -111,21 +111,21 @@ void UFPCCharacterAnimationManagerComponent::OnEquipNewWeapon(AFPCWeapon* Spawne
 
 		// Subscribe to the weapon's animation related events events
 		SpawnedFPSWeapon->OnWeaponSuccessfullyUsed.RemoveAll(this);
-		SpawnedFPSWeapon->OnWeaponSuccessfullyUsed.AddDynamic(this, &UFPCCharacterAnimationManagerComponent::OnCurrentFPSWeaponUsed);
+		SpawnedFPSWeapon->OnWeaponSuccessfullyUsed.AddDynamic(this, &UFPCOperatorAnimationManagerComponent::OnCurrentFPSWeaponUsed);
 
 		SpawnedTPSWeapon->OnWeaponSuccessfullyUsed.RemoveAll(this);
-		SpawnedTPSWeapon->OnWeaponSuccessfullyUsed.AddDynamic(this, &UFPCCharacterAnimationManagerComponent::OnCurrentTPSWeaponUsed);
+		SpawnedTPSWeapon->OnWeaponSuccessfullyUsed.AddDynamic(this, &UFPCOperatorAnimationManagerComponent::OnCurrentTPSWeaponUsed);
 
 		if (AFPCGun* SpawnedGun = Cast<AFPCGun>(SpawnedFPSWeapon))
 		{
 			SpawnedGun->OnReloadStarted.RemoveAll(this);
-			SpawnedGun->OnReloadStarted.AddDynamic(this, &UFPCCharacterAnimationManagerComponent::OnGunReloadStart);
+			SpawnedGun->OnReloadStarted.AddDynamic(this, &UFPCOperatorAnimationManagerComponent::OnGunReloadStart);
 		}
 
 		if (AFPCGun* SpawnedGun = Cast<AFPCGun>(SpawnedTPSWeapon))
 		{
 			SpawnedGun->OnReloadStarted.RemoveAll(this);
-			SpawnedGun->OnReloadStarted.AddDynamic(this, &UFPCCharacterAnimationManagerComponent::OnGunReloadStart);
+			SpawnedGun->OnReloadStarted.AddDynamic(this, &UFPCOperatorAnimationManagerComponent::OnGunReloadStart);
 		}
 	}
 	else
@@ -136,17 +136,17 @@ void UFPCCharacterAnimationManagerComponent::OnEquipNewWeapon(AFPCWeapon* Spawne
 	TPSMeshAnimInstance->CurrentLinkedAnimInstance->OnWeaponEquipped(SpawnedTPSWeapon);
 }
 
-void UFPCCharacterAnimationManagerComponent::OnCurrentFPSWeaponUsed()
+void UFPCOperatorAnimationManagerComponent::OnCurrentFPSWeaponUsed()
 {
 	FPSMeshAnimInstance->CurrentLinkedAnimInstance->OnCurrentWeaponUsed();
 }
 
-void UFPCCharacterAnimationManagerComponent::OnCurrentTPSWeaponUsed()
+void UFPCOperatorAnimationManagerComponent::OnCurrentTPSWeaponUsed()
 {
 	TPSMeshAnimInstance->CurrentLinkedAnimInstance->OnCurrentWeaponUsed();
 }
 
-void UFPCCharacterAnimationManagerComponent::OnGunReloadStart(bool bEmptyReload, AFPCGun* ReloadingGun)
+void UFPCOperatorAnimationManagerComponent::OnGunReloadStart(bool bEmptyReload, AFPCGun* ReloadingGun)
 {
 	if (ReloadingGun->UsedInCameraMode == ECameraMode::FPS)
 		FPSMeshAnimInstance->CurrentLinkedAnimInstance->OnCurrentWeaponReloadStart(bEmptyReload);

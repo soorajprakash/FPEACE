@@ -1,4 +1,4 @@
-﻿// Copyright © 2025 Sooraj Prakash. All rights reserved.Unauthorized distribution or sharing of this code is prohibited.
+﻿// Copyright © Sooraj Prakash. All rights reserved.Unauthorized distribution or sharing of this code is prohibited.
 
 
 #include "FPCOperatorComponentBase.h"
@@ -32,18 +32,18 @@ void UFPCOperatorComponentBase::InitializeComponent()
 
 	if (OwningOperator.IsValid())
 	{
-		FPCCharacterMovementComp = OwningOperator->GetCharacterMovementComponent();
-		FPCWeaponManagerComp = OwningOperator->GetFPCCharacterWeaponManager();
-		FPCCameraManagerComp = OwningOperator->GetFPCCharacterCameraManager();
-		FPCAnimationManagerComp = OwningOperator->GetFPCCharacterAnimationManager();
-		FPCCharacterData = OwningOperator->GetCharacterData();
+		FPCOperatorMovementComp = OwningOperator->GetCharacterMovementComponent();
+		FPCOperatorWeaponManagerComp = OwningOperator->GetFPCCharacterWeaponManager();
+		FPCOperatorCameraManagerComp = OwningOperator->GetFPCCharacterCameraManager();
+		FPCOperatorAnimationManagerComp = OwningOperator->GetFPCCharacterAnimationManager();
+		FPCOperatorData = OwningOperator->GetCharacterData();
 
 		FPCSpringArmComp = OwningOperator->GetFPCSpringArmComp();
-		TPSBodyMeshComp = OwningOperator->GetTPSBodyMeshComp();
+		MainBodyMeshComp = OwningOperator->GetTPSBodyMeshComp();
 		FPSBodyMeshComp = OwningOperator->GetFPSArmsMeshComp();
 		FPSLowerBodyMeshComp = OwningOperator->GetFPSLowerBodyMeshComp();
 
-		TPSMeshAnimInstance = Cast<UFPCOperatorSkeletalAnimInstance>(TPSBodyMeshComp->GetAnimInstance());
+		TPSMeshAnimInstance = Cast<UFPCOperatorSkeletalAnimInstance>(MainBodyMeshComp->GetAnimInstance());
 		if (TPSMeshAnimInstance)
 			TPSMeshAnimInstance->isBaseAnimInstance = true;
 		FPSMeshAnimInstance = Cast<UFPCOperatorSkeletalAnimInstance>(FPSBodyMeshComp->GetAnimInstance());

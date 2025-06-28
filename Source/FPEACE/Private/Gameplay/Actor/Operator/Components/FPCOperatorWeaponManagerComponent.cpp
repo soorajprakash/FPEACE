@@ -1,9 +1,9 @@
-﻿// Copyright © 2024 Sooraj Prakash. All rights reserved.
+﻿// Copyright © Sooraj Prakash. All rights reserved.
 // Unauthorized distribution of this file, or any part of it, is prohibited.
 
-#include "FPCCharacterWeaponManagerComponent.h"
-#include "FPCCharacterCameraManagerComponent.h"
-#include "FPCCharacterMovementComponent.h"
+#include "FPCOperatorWeaponManagerComponent.h"
+#include "FPCOperatorCameraManagerComponent.h"
+#include "FPCOperatorMovementComponent.h"
 #include "Gameplay/Weapon/FPCWeapon.h"
 #include "FCTween.h"
 #include "AnimNotifies/FPCCharacterAnimationStateChangedNotify.h"
@@ -14,7 +14,7 @@
 #include "Kismet/KismetMathLibrary.h"
 
 // Sets default values for this component's properties
-UFPCCharacterWeaponManagerComponent::UFPCCharacterWeaponManagerComponent(): CurrentWeaponLocationLag(), CurrentWeaponRotationLag(),
+UFPCOperatorWeaponManagerComponent::UFPCOperatorWeaponManagerComponent(): CurrentWeaponLocationLag(), CurrentWeaponRotationLag(),
                                                                             CurrentWeaponRotationLagVector(),
                                                                             CurrentADSBlendFactor(0),
                                                                             CurrentWeaponHandIKLocationOffset(),
@@ -28,21 +28,21 @@ UFPCCharacterWeaponManagerComponent::UFPCCharacterWeaponManagerComponent(): Curr
 	bWantsInitializeComponent = true;
 }
 
-void UFPCCharacterWeaponManagerComponent::InitializeComponent()
+void UFPCOperatorWeaponManagerComponent::InitializeComponent()
 {
 	Super::InitializeComponent();
 
-	if (FPCCameraManagerComp.IsValid())
-		FPCCameraManagerComp->OnCameraModeChanged.AddDynamic(this, &UFPCCharacterWeaponManagerComponent::CharacterCameraModeChanged);
+	if (FPCOperatorCameraManagerComp.IsValid())
+		FPCOperatorCameraManagerComp->OnCameraModeChanged.AddDynamic(this, &UFPCOperatorWeaponManagerComponent::CharacterCameraModeChanged);
 
-	if (FPCCharacterMovementComp.IsValid())
-		FPCCharacterMovementComp->OnCurrentLocomotionStateChanged.AddDynamic(this, &UFPCCharacterWeaponManagerComponent::CharacterCurrentLocomotionStateChanged);
+	if (FPCOperatorMovementComp.IsValid())
+		FPCOperatorMovementComp->OnCurrentLocomotionStateChanged.AddDynamic(this, &UFPCOperatorWeaponManagerComponent::CharacterCurrentLocomotionStateChanged);
 
 	// Register to the ADS Anim Notify callback
-	UFPCCharacterAnimationStateChangedNotify::OnAnimationStateChanged.AddDynamic(this, &UFPCCharacterWeaponManagerComponent::OnADSAnimStateChanged);
+	UFPCCharacterAnimationStateChangedNotify::OnAnimationStateChanged.AddDynamic(this, &UFPCOperatorWeaponManagerComponent::OnADSAnimStateChanged);
 }
 
-void UFPCCharacterWeaponManagerComponent::BeginPlay()
+void UFPCOperatorWeaponManagerComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
@@ -54,7 +54,7 @@ void UFPCCharacterWeaponManagerComponent::BeginPlay()
 		EquipWeapon(WeaponSatchel[0]);
 }
 
-void UFPCCharacterWeaponManagerComponent::TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+void UFPCOperatorWeaponManagerComponent::TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
@@ -62,7 +62,7 @@ void UFPCCharacterWeaponManagerComponent::TickComponent(float DeltaTime, enum EL
 	CalculateCurrentWeaponLagValues();
 }
 
-void UFPCCharacterWeaponManagerComponent::UpdateWeaponVisibility(const bool IsInTPSCameraMode) const
+void UFPCOperatorWeaponManagerComponent::UpdateWeaponVisibility(const bool IsInTPSCameraMode) const
 {
 	if (CurrentTPSWeaponRef)
 		CurrentTPSWeaponRef->ToggleVisibilityToOwner(IsInTPSCameraMode);
@@ -71,16 +71,16 @@ void UFPCCharacterWeaponManagerComponent::UpdateWeaponVisibility(const bool IsIn
 		CurrentFPSWeaponRef->SetActorHiddenInGame(IsInTPSCameraMode);
 }
 
-void UFPCCharacterWeaponManagerComponent::SwitchADSState(bool UseADS)
+void UFPCOperatorWeaponManagerComponent::SwitchADSState(bool UseADS)
 {
 	bWantsToADS = UseADS && bIsCharacterArmed;
 
 	ToggleADSBlendFactor(bWantsToADS);
-	FPCCameraManagerComp->SwitchCameraFOV(UseADS);
+	FPCOperatorCameraManagerComp->SwitchCameraFOV(UseADS);
 	SetCurrentWeaponHandIKOffset();
 }
 
-void UFPCCharacterWeaponManagerComponent::ToggleADSBlendFactor(const int targetBlendFactor)
+void UFPCOperatorWeaponManagerComponent::ToggleADSBlendFactor(const int targetBlendFactor)
 {
 	if (ADSBlendFactorTween)
 		ADSBlendFactorTween->Destroy();
@@ -88,7 +88,7 @@ void UFPCCharacterWeaponManagerComponent::ToggleADSBlendFactor(const int targetB
 	ADSBlendFactorTween = FCTween::Play(CurrentADSBlendFactor, targetBlendFactor, [&](float V) { CurrentADSBlendFactor = V; }, CurrentWeaponAnimSettings.FocusTime);
 }
 
-void UFPCCharacterWeaponManagerComponent::ToggleWeaponUse(const bool UseWeapon)
+void UFPCOperatorWeaponManagerComponent::ToggleWeaponUse(const bool UseWeapon)
 {
 	CurrentFPSWeaponRef->SetIsWeaponInUse(UseWeapon);
 	CurrentTPSWeaponRef->SetIsWeaponInUse(UseWeapon);
@@ -107,11 +107,11 @@ void UFPCCharacterWeaponManagerComponent::ToggleWeaponUse(const bool UseWeapon)
 			bWasWeaponUsedRecently = false;
 		});
 
-		GetWorld()->GetTimerManager().SetTimer(WeaponUseCoolDownTimer, WeaponUseCoolDownDelegate, FPCCharacterData->WeaponUseCoolDownTime, false);
+		GetWorld()->GetTimerManager().SetTimer(WeaponUseCoolDownTimer, WeaponUseCoolDownDelegate, FPCOperatorData->WeaponUseCoolDownTime, false);
 	}
 }
 
-void UFPCCharacterWeaponManagerComponent::TryCurrentGunReload() const
+void UFPCOperatorWeaponManagerComponent::TryCurrentGunReload() const
 {
 	if (CurrentFPSGunRef && CurrentTPSGunRef)
 	{
@@ -120,7 +120,7 @@ void UFPCCharacterWeaponManagerComponent::TryCurrentGunReload() const
 	}
 }
 
-void UFPCCharacterWeaponManagerComponent::CycleWeaponInSatchel(bool bGoNext)
+void UFPCOperatorWeaponManagerComponent::CycleWeaponInSatchel(bool bGoNext)
 {
 	currentWeaponSatchelIndex += bGoNext ? 1 : -1;
 
@@ -132,7 +132,7 @@ void UFPCCharacterWeaponManagerComponent::CycleWeaponInSatchel(bool bGoNext)
 	EquipWeapon(WeaponSatchel[currentWeaponSatchelIndex]);
 }
 
-void UFPCCharacterWeaponManagerComponent::OnADSAnimStateChanged(ENotifyAnimationType AnimType, ENotifyAnimationEventType AnimEventType)
+void UFPCOperatorWeaponManagerComponent::OnADSAnimStateChanged(ENotifyAnimationType AnimType, ENotifyAnimationEventType AnimEventType)
 {
 	if (AnimType == EnterADS || AnimType == ExitADS)
 	{
@@ -141,17 +141,17 @@ void UFPCCharacterWeaponManagerComponent::OnADSAnimStateChanged(ENotifyAnimation
 	}
 }
 
-void UFPCCharacterWeaponManagerComponent::OnGunReloadStart(bool bEmptyReload, AFPCGun* ReloadingGun)
+void UFPCOperatorWeaponManagerComponent::OnGunReloadStart(bool bEmptyReload, AFPCGun* ReloadingGun)
 {
 	ToggleADSBlendFactor(0);
 }
 
-void UFPCCharacterWeaponManagerComponent::OnGunReloadComplete(AFPCGun* ReloadingGun)
+void UFPCOperatorWeaponManagerComponent::OnGunReloadComplete(AFPCGun* ReloadingGun)
 {
 	ToggleADSBlendFactor(1);
 }
 
-void UFPCCharacterWeaponManagerComponent::EquipWeapon(const FWeaponSatchelItem& SatchelItem)
+void UFPCOperatorWeaponManagerComponent::EquipWeapon(const FWeaponSatchelItem& SatchelItem)
 {
 	if (CurrentFPSWeaponRef && CurrentTPSWeaponRef)
 	{
@@ -203,11 +203,11 @@ void UFPCCharacterWeaponManagerComponent::EquipWeapon(const FWeaponSatchelItem& 
 		// Bind callbacks to current guns (if the weapon is a gun)
 		if (CurrentFPSGunRef && CurrentTPSGunRef)
 		{
-			CurrentFPSGunRef->OnReloadStarted.AddDynamic(this, &UFPCCharacterWeaponManagerComponent::OnGunReloadStart);
-			CurrentTPSGunRef->OnReloadStarted.AddDynamic(this, &UFPCCharacterWeaponManagerComponent::OnGunReloadStart);
+			CurrentFPSGunRef->OnReloadStarted.AddDynamic(this, &UFPCOperatorWeaponManagerComponent::OnGunReloadStart);
+			CurrentTPSGunRef->OnReloadStarted.AddDynamic(this, &UFPCOperatorWeaponManagerComponent::OnGunReloadStart);
 
-			CurrentFPSGunRef->OnReloadFinished.AddDynamic(this, &UFPCCharacterWeaponManagerComponent::OnGunReloadComplete);
-			CurrentTPSGunRef->OnReloadFinished.AddDynamic(this, &UFPCCharacterWeaponManagerComponent::OnGunReloadComplete);
+			CurrentFPSGunRef->OnReloadFinished.AddDynamic(this, &UFPCOperatorWeaponManagerComponent::OnGunReloadComplete);
+			CurrentTPSGunRef->OnReloadFinished.AddDynamic(this, &UFPCOperatorWeaponManagerComponent::OnGunReloadComplete);
 		}
 	}
 
@@ -215,7 +215,7 @@ void UFPCCharacterWeaponManagerComponent::EquipWeapon(const FWeaponSatchelItem& 
 
 	SwitchADSState(bWantsToADS);
 
-	UpdateWeaponVisibility(FPCCameraManagerComp->IsInTPSCameraMode);
+	UpdateWeaponVisibility(FPCOperatorCameraManagerComp->IsInTPSCameraMode);
 
 	SetCurrentWeaponHandIKOffset();
 
@@ -223,14 +223,14 @@ void UFPCCharacterWeaponManagerComponent::EquipWeapon(const FWeaponSatchelItem& 
 	OnNewWeaponEquipped.Broadcast(CurrentFPSWeaponRef, CurrentTPSWeaponRef);
 }
 
-void UFPCCharacterWeaponManagerComponent::GenerateSatchel()
+void UFPCOperatorWeaponManagerComponent::GenerateSatchel()
 {
-	if (FPCCharacterData.IsValid())
-		for (TSubclassOf WeaponClass : FPCCharacterData->InitialWeaponsInSatchel)
+	if (FPCOperatorData.IsValid())
+		for (TSubclassOf WeaponClass : FPCOperatorData->InitialWeaponsInSatchel)
 			AddNewWeaponToSatchel(WeaponClass);
 }
 
-void UFPCCharacterWeaponManagerComponent::AddNewWeaponToSatchel(const TSubclassOf<AFPCWeapon> WeaponBP)
+void UFPCOperatorWeaponManagerComponent::AddNewWeaponToSatchel(const TSubclassOf<AFPCWeapon> WeaponBP)
 {
 	FWeaponSatchelItem NewSatchelItem = FWeaponSatchelItem();
 	if (WeaponBP != nullptr)
@@ -241,24 +241,24 @@ void UFPCCharacterWeaponManagerComponent::AddNewWeaponToSatchel(const TSubclassO
 
 
 		NewSatchelItem.TPSWeaponIns = Cast<AFPCWeapon>(GetWorld()->SpawnActor(WeaponBP));
-		NewSatchelItem.TPSWeaponIns->SetupWeapon(ECameraMode::TPS, TPSBodyMeshComp.Get());
+		NewSatchelItem.TPSWeaponIns->SetupWeapon(ECameraMode::TPS, MainBodyMeshComp.Get());
 		NewSatchelItem.TPSWeaponIns->ToggleActor(false);
 	}
 
 	WeaponSatchel.Add(NewSatchelItem);
 }
 
-void UFPCCharacterWeaponManagerComponent::CharacterCameraModeChanged(ECameraMode NewCameraMode)
+void UFPCOperatorWeaponManagerComponent::CharacterCameraModeChanged(ECameraMode NewCameraMode)
 {
 	UpdateWeaponVisibility(NewCameraMode == ECameraMode::TPS);
 }
 
-void UFPCCharacterWeaponManagerComponent::CharacterCurrentLocomotionStateChanged(ELocomotionState)
+void UFPCOperatorWeaponManagerComponent::CharacterCurrentLocomotionStateChanged(ELocomotionState)
 {
 	SetCurrentWeaponHandIKOffset();
 }
 
-void UFPCCharacterWeaponManagerComponent::SetCurrentWeaponHandIKOffset()
+void UFPCOperatorWeaponManagerComponent::SetCurrentWeaponHandIKOffset()
 {
 	if (!CurrentFPSWeaponRef || !CurrentTPSWeaponRef)
 		return;
@@ -268,23 +268,23 @@ void UFPCCharacterWeaponManagerComponent::SetCurrentWeaponHandIKOffset()
 
 	if (bWantsToADS)
 	{
-		FCTween::Play(StartLocationValue, CurrentWeaponAnimSettings.ADSLocomotionStateOffsets[FPCCharacterMovementComp->GetCurrentLocomotionState()].GetLocation(),
+		FCTween::Play(StartLocationValue, CurrentWeaponAnimSettings.ADSLocomotionStateOffsets[FPCOperatorMovementComp->GetCurrentLocomotionState()].GetLocation(),
 		              [&](FVector V) { CurrentWeaponHandIKLocationOffset = V; }, 0.25f, EFCEase::Smoothstep);
 
-		FCTween::Play(StartRotationValue, CurrentWeaponAnimSettings.ADSLocomotionStateOffsets[FPCCharacterMovementComp->GetCurrentLocomotionState()].Rotator().Quaternion(),
+		FCTween::Play(StartRotationValue, CurrentWeaponAnimSettings.ADSLocomotionStateOffsets[FPCOperatorMovementComp->GetCurrentLocomotionState()].Rotator().Quaternion(),
 		              [&](FQuat Q) { CurrentWeaponHandIKRotationOffset = Q.Rotator(); }, 0.25f, EFCEase::Smoothstep);
 	}
 	else
 	{
-		FCTween::Play(StartLocationValue, CurrentWeaponAnimSettings.DefaultLocomotionStateOffsets[FPCCharacterMovementComp->GetCurrentLocomotionState()].GetLocation(),
+		FCTween::Play(StartLocationValue, CurrentWeaponAnimSettings.DefaultLocomotionStateOffsets[FPCOperatorMovementComp->GetCurrentLocomotionState()].GetLocation(),
 		              [&](FVector V) { CurrentWeaponHandIKLocationOffset = V; }, 0.25f, EFCEase::Smoothstep);
 
-		FCTween::Play(StartRotationValue, CurrentWeaponAnimSettings.DefaultLocomotionStateOffsets[FPCCharacterMovementComp->GetCurrentLocomotionState()].Rotator().Quaternion(),
+		FCTween::Play(StartRotationValue, CurrentWeaponAnimSettings.DefaultLocomotionStateOffsets[FPCOperatorMovementComp->GetCurrentLocomotionState()].Rotator().Quaternion(),
 		              [&](FQuat Q) { CurrentWeaponHandIKRotationOffset = Q.Rotator(); }, 0.25f, EFCEase::Smoothstep);
 	}
 }
 
-void UFPCCharacterWeaponManagerComponent::UpdateStateChanges()
+void UFPCOperatorWeaponManagerComponent::UpdateStateChanges()
 {
 	ADSStateChanged = bWantsToADS != bLastFrameWantsADSState;
 	bLastFrameWantsADSState = bWantsToADS;
@@ -293,10 +293,10 @@ void UFPCCharacterWeaponManagerComponent::UpdateStateChanges()
 	bLastFrameWeaponRecentlyUsedState = bWasWeaponUsedRecently;
 }
 
-void UFPCCharacterWeaponManagerComponent::CalculateCurrentWeaponLagValues()
+void UFPCOperatorWeaponManagerComponent::CalculateCurrentWeaponLagValues()
 {
-	float ClampedPitchDelta = FMath::Clamp(FPCCameraManagerComp->GetCameraPitchDelta(), -1, 1);
-	float ClampedYawDelta = FMath::Clamp(FPCCharacterMovementComp->GetCharacterYawDelta(), -1, 1);
+	float ClampedPitchDelta = FMath::Clamp(FPCOperatorCameraManagerComp->GetCameraPitchDelta(), -1, 1);
+	float ClampedYawDelta = FMath::Clamp(FPCOperatorMovementComp->GetCharacterYawDelta(), -1, 1);
 	FWeaponLagSettingSection CurrentLagSection = bWantsToADS ? CurrentWeaponLagSettings.ADSWeaponLag : CurrentWeaponLagSettings.DefaultWeaponLag;
 
 	FVector TargetWeaponLocationLag = ClampedPitchDelta * CurrentLagSection.VerticalLocationLag + ClampedYawDelta * CurrentLagSection.HorizontalLocationLag;

@@ -1,4 +1,4 @@
-﻿// Copyright © 2025 Sooraj Prakash. All rights reserved.Unauthorized distribution or sharing of this code is prohibited.
+﻿// Copyright © Sooraj Prakash. All rights reserved.Unauthorized distribution or sharing of this code is prohibited.
 
 #pragma once
 
@@ -8,11 +8,11 @@
 
 
 class UFPCSpringArmComponent;
-class UFPCCharacterAnimationManagerComponent;
-class UFPCCharacterCameraManagerComponent;
+class UFPCOperatorAnimationManagerComponent;
+class UFPCOperatorCameraManagerComponent;
 class UFPCOperatorSkeletalAnimInstance;
-class UFPCCharacterWeaponManagerComponent;
-class UFPCCharacterMovementComponent;
+class UFPCOperatorWeaponManagerComponent;
+class UFPCOperatorMovementComponent;
 class UFPCSkeletalMeshComponent;
 class UFPCCharacterData;
 class AFPCGameplayPlayerController;
@@ -35,25 +35,25 @@ protected:
 	TWeakObjectPtr<AFPCGameplayPlayerController> PlayerControllerRef;
 
 	UPROPERTY()
-	TWeakObjectPtr<UFPCCharacterData> FPCCharacterData;
+	TWeakObjectPtr<UFPCCharacterData> FPCOperatorData;
 	
 	UPROPERTY()
-	TWeakObjectPtr<UFPCCharacterMovementComponent> FPCCharacterMovementComp;
+	TWeakObjectPtr<UFPCOperatorMovementComponent> FPCOperatorMovementComp;
 
 	UPROPERTY()
-	TWeakObjectPtr<UFPCCharacterCameraManagerComponent> FPCCameraManagerComp;
+	TWeakObjectPtr<UFPCOperatorCameraManagerComponent> FPCOperatorCameraManagerComp;
 
 	UPROPERTY()
-	TWeakObjectPtr<UFPCCharacterAnimationManagerComponent> FPCAnimationManagerComp;
+	TWeakObjectPtr<UFPCOperatorAnimationManagerComponent> FPCOperatorAnimationManagerComp;
 
 	UPROPERTY()
-	TWeakObjectPtr<UFPCCharacterWeaponManagerComponent> FPCWeaponManagerComp;
+	TWeakObjectPtr<UFPCOperatorWeaponManagerComponent> FPCOperatorWeaponManagerComp;
 
 	UPROPERTY()
 	TWeakObjectPtr<UFPCSpringArmComponent> FPCSpringArmComp;
 
 	UPROPERTY()
-	TWeakObjectPtr<UFPCSkeletalMeshComponent> TPSBodyMeshComp;
+	TWeakObjectPtr<UFPCSkeletalMeshComponent> MainBodyMeshComp;
 
 	UPROPERTY()
 	TWeakObjectPtr<UFPCSkeletalMeshComponent> FPSBodyMeshComp;
