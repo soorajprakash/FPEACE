@@ -8,6 +8,7 @@
 #include "Gameplay/Common/CommonEnums.h"
 #include "FPCOperatorMovementComponent.generated.h"
 
+class UFPCAbilitySystemComponent;
 class UFPCSkeletalMeshComponent;
 class UFPCOperatorSkeletalAnimInstance;
 class AFPCOperator;
@@ -42,12 +43,12 @@ public:
 	void ToggleCrouch();
 
 	float GetCharacterAbsoluteSpeed2D() const { return CharacterAbsoluteSpeed2D; }
-	
+
 	float GetCharacterYawDelta() const { return CharacterYawDelta; }
 
 	ELocomotionState GetCurrentLocomotionState() const { return currentLocomotionState; }
 
-	void AddControllerPitchAndYawInput(float Pitch,float Yaw);
+	void AddControllerPitchAndYawInput(float Pitch, float Yaw);
 
 protected:
 	UFPCOperatorMovementComponent();
@@ -58,6 +59,9 @@ protected:
 
 	UPROPERTY()
 	TWeakObjectPtr<UFPCCharacterData> FPCCharacterData;
+
+	UPROPERTY()
+	TWeakObjectPtr<UFPCAbilitySystemComponent> FPCAbilitySystemComponent;
 
 	UPROPERTY()
 	TWeakObjectPtr<UFPCSkeletalMeshComponent> TPSBodyMeshComp;
@@ -85,7 +89,7 @@ protected:
 	 */
 	UPROPERTY(BlueprintReadOnly)
 	TObjectPtr<UFPCOperatorSkeletalAnimInstance> FPSMeshAnimInstance;
-	
+
 
 	UPROPERTY(BlueprintReadOnly)
 	FVector CharacterAcceleration2D = FVector::ZeroVector;
@@ -241,7 +245,7 @@ private:
 	ELocomotionState LastFrameTargetLocomotionState;
 	bool WasMovingLastFrame;
 	bool WasAcceleratingLastFrame;
-	
+
 	virtual void InitializeComponent() override;
 	virtual void TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 

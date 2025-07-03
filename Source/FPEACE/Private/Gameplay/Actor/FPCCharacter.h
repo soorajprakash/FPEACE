@@ -7,7 +7,7 @@
 #include "GameFramework/Character.h"
 #include "FPCCharacter.generated.h"
 
-class UFPCGameplayTagManagerComponent;
+class UFPCAbilitySystemComponent;
 class AFPCGameplayPlayerController;
 class UFPCSkeletalMeshComponent;
 class UObjectPool;
@@ -30,6 +30,7 @@ public:
 
 	TWeakObjectPtr<UFPCSkeletalMeshComponent> GetTPSBodyMeshComp() const;
 	TWeakObjectPtr<AFPCGameplayPlayerController> GetFPCPlayerController() const;
+	TWeakObjectPtr<UFPCAbilitySystemComponent> GetFPCAbilitySystemComp() const;
 
 protected:
 	//	--------------------- COMPONENTS ---------------------
@@ -38,7 +39,7 @@ protected:
 	TObjectPtr<UFPCSkeletalMeshComponent> MainBodyMeshComp;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="FPEACE|Components")
-	TObjectPtr<UFPCGameplayTagManagerComponent> FPCGameplayTagManager;
+	TObjectPtr<UFPCAbilitySystemComponent> FPCAbilitySystemComponent;
 
 	/*
 	 * Reference to the FPC Player Controller instance

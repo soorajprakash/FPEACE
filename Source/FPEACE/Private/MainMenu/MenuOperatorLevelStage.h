@@ -17,7 +17,11 @@ public:
 	AMenuOperatorLevelStage();
 
 	void SetOperatorActorClass(const TSubclassOf<AActor>& ActorClass) const;
+
 protected:
 	UPROPERTY(VisibleAnywhere)
 	UChildActorComponent* OperatorActor;
+
+	UPROPERTY(EditDefaultsOnly)
+	USceneComponent* SceneRoot;
 };

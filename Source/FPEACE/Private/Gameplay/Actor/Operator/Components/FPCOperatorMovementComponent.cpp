@@ -8,27 +8,29 @@
 #include "DataStructures/FPCCharacterData.h"
 #include "Gameplay/Actor/FPCGameplayPlayerController.h"
 #include "Gameplay/Actor/Operator/FPCOperator.h"
+#include "Gameplay/ExtendedClasses/Components/FPCAbilitySystemComponent.h"
 #include "Gameplay/ExtendedClasses/Components/FPCCapsuleComponent.h"
 #include "Gameplay/Weapon/FPCGun.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Kismet/KismetSystemLibrary.h"
+#include "Gameplay/Common/FPCGameplayTags.h"
 
 struct FLocomotionStateSetting;
 
 UFPCOperatorMovementComponent::UFPCOperatorMovementComponent(): CurrentVelocityDirection(), CurrentAccelerationDirection(), currentLocomotionState(), currentLocomotionStance(),
-                                                                  PrevLocomotionState(), PrevLocomotionStance(),
-                                                                  PrevTargetLocomotionState(),
-                                                                  PrevVelocityDirection(),
-                                                                  PrevAccelerationDirection(),
-                                                                  PrevRotation(),
-                                                                  LastFrameMaxSpeed(0),
-                                                                  LastFrameAccelerationDirection(),
-                                                                  LastFrameVelocityDirection(),
-                                                                  LastFrameLocomotionStance(),
-                                                                  LastFrameLocomotionState(),
-                                                                  LastFrameTargetLocomotionState(),
-                                                                  WasMovingLastFrame(false),
-                                                                  WasAcceleratingLastFrame(false)
+                                                                PrevLocomotionState(), PrevLocomotionStance(),
+                                                                PrevTargetLocomotionState(),
+                                                                PrevVelocityDirection(),
+                                                                PrevAccelerationDirection(),
+                                                                PrevRotation(),
+                                                                LastFrameMaxSpeed(0),
+                                                                LastFrameAccelerationDirection(),
+                                                                LastFrameVelocityDirection(),
+                                                                LastFrameLocomotionStance(),
+                                                                LastFrameLocomotionState(),
+                                                                LastFrameTargetLocomotionState(),
+                                                                WasMovingLastFrame(false),
+                                                                WasAcceleratingLastFrame(false)
 {
 	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
 	// off to improve performance if you don't need them.
@@ -58,6 +60,7 @@ void UFPCOperatorMovementComponent::InitializeComponent()
 	if (OwningOperator.IsValid())
 	{
 		FPCCharacterData = OwningOperator->GetCharacterData();
+		FPCAbilitySystemComponent = OwningOperator->GetFPCAbilitySystemComp();
 		FPCPlayerController = OwningOperator->GetFPCPlayerController();
 		OwningCharacterCapsule = OwningOperator->GetFPCCapsuleComp();
 		FPCCharacterWeaponManager = OwningOperator->GetFPCCharacterWeaponManager();
@@ -119,7 +122,7 @@ void UFPCOperatorMovementComponent::TickComponent(float DeltaTime, enum ELevelTi
 	{
 		VelocityDirectionAngle = UKismetAnimationLibrary::CalculateDirection(CharacterVelocity2D, OwningOperator->GetActorRotation());
 		SetCurrentVelocityDirection(CalculateLocomotionDirection(VelocityDirectionAngle, CurrentVelocityDirection));
-		
+
 		UpdateDirectionalMaxWalkSpeed(CurrentVelocityDirection);
 	}
 	else

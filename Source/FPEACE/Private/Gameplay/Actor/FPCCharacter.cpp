@@ -5,6 +5,7 @@
 #include "FPCCharacter.h"
 #include "FPCGameplayPlayerController.h"
 #include "ObjectPoolSubsystem.h"
+#include "Gameplay/ExtendedClasses/Components/FPCAbilitySystemComponent.h"
 #include "Gameplay/ExtendedClasses/Components/FPCSkeletalMeshComponent.h"
 #include "Gameplay/ExtendedClasses/Components/FPCCapsuleComponent.h"
 #include "Operator/Components/FPCOperatorMovementComponent.h"
@@ -14,13 +15,17 @@ AFPCCharacter::AFPCCharacter(const FObjectInitializer& ObjectInitializer): Super
 	ObjectInitializer.SetDefaultSubobjectClass<UFPCSkeletalMeshComponent>(MeshComponentName).SetDefaultSubobjectClass<UFPCOperatorMovementComponent>(CharacterMovementComponentName).
 	                  SetDefaultSubobjectClass<UFPCCapsuleComponent>(CapsuleComponentName))
 {
-	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+	// Set this character to call Tick() every frame. You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = false;
 
 	// Get references to the Extensions 
 	MainBodyMeshComp = Cast<UFPCSkeletalMeshComponent>(GetMesh());
 	MainBodyMeshComp->VisibilityBasedAnimTickOption = EVisibilityBasedAnimTickOption::AlwaysTickPoseAndRefreshBones;
 	MainBodyMeshComp->SetCastHiddenShadow(true);
+
+	// Construct components
+	if (!FPCAbilitySystemComponent)
+		FPCAbilitySystemComponent = CreateDefaultSubobject<UFPCAbilitySystemComponent>(TEXT("AbilitySystemComponent"));
 }
 
 void AFPCCharacter::PossessedBy(AController* NewController)
@@ -47,4 +52,9 @@ TWeakObjectPtr<UFPCSkeletalMeshComponent> AFPCCharacter::GetTPSBodyMeshComp() co
 TWeakObjectPtr<AFPCGameplayPlayerController> AFPCCharacter::GetFPCPlayerController() const
 {
 	return FPCPlayerControllerInstance;
+}
+
+TWeakObjectPtr<UFPCAbilitySystemComponent> AFPCCharacter::GetFPCAbilitySystemComp() const
+{
+	return FPCAbilitySystemComponent;
 }
