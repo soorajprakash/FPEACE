@@ -107,10 +107,6 @@
 			]
 		},
 		{
-			"Name": "ResonanceAudio",
-			"Enabled": false
-		},
-		{
 			"Name": "NFORDenoise",
 			"Enabled": false,
 			"SupportedTargetPlatforms": [
@@ -120,34 +116,6 @@
 		},
 		{
 			"Name": "ConsoleVariables",
-			"Enabled": true
-		},
-		{
-			"Name": "FSR3",
-			"Enabled": false,
-			"SupportedTargetPlatforms": [
-				"Win64"
-			]
-		},
-		{
-			"Name": "DLSS",
-			"Enabled": false,
-			"MarketplaceURL": "https://www.unrealengine.com/marketplace/en-US/product/nvidia-dlss"
-		},
-		{
-			"Name": "NIS",
-			"Enabled": false,
-			"MarketplaceURL": "https://www.unrealengine.com/marketplace/en-US/product/nvidia-dlss"
-		},
-		{
-			"Name": "AntiLag2",
-			"Enabled": false,
-			"SupportedTargetPlatforms": [
-				"Win64"
-			]
-		},
-		{
-			"Name": "ArmASR",
 			"Enabled": true
 		},
 		{

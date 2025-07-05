@@ -12,13 +12,14 @@ class UAnimSequence;
  * A Collection of soft references to animation sequences used for a cycle animation directionality
  */
 USTRUCT(BlueprintType)
-struct FCycleAnimSet
+struct FDirectionalAnimSet
 {
 	GENERATED_BODY()
 
-	FCycleAnimSet(): WeaponHandGripPose(nullptr), bAreDirectionalAnimsAdditive(false), bSyncUpperAndLowerBodyPlayers(true), bSyncAsLeader(false), BlendTime(0.3f), Forward(nullptr), Backward(nullptr),
-	                 Right(nullptr),
-	                 Left(nullptr)
+	FDirectionalAnimSet(): WeaponHandGripPose(nullptr), bAreDirectionalAnimsAdditive(false), bSyncUpperAndLowerBodyPlayers(true), bSyncAsLeader(false), BlendTime(0.3f), Forward(nullptr),
+	                       Backward(nullptr),
+	                       Right(nullptr),
+	                       Left(nullptr)
 	{
 	}
 

@@ -6,6 +6,8 @@
 
 #include "SequenceEvaluatorLibrary.h"
 #include "AnimNodes/AnimNode_SequenceEvaluator.h"
+#include "Gameplay/Common/CommonEnums.h"
+#include "Gameplay/Common/CommonStructs.h"
 
 bool UFPCBlueprintFunctionLibrary::GetIfAnimSequenceHasRootMotionDelta(UAnimSequence* TargetSequence)
 {
@@ -44,4 +46,40 @@ EAdditiveAnimationType UFPCBlueprintFunctionLibrary::GetAnimSequenceAdditiveType
 		return AAT_None;
 
 	return TargetSequence->GetAdditiveAnimType();
+}
+
+bool UFPCBlueprintFunctionLibrary::DoAnimSetsMatchDirectionally(const FDirectionalAnimSet& Rhs, const FDirectionalAnimSet& Lhs)
+{
+	return Rhs.Forward == Lhs.Forward && Rhs.Backward == Lhs.Backward && Rhs.Left == Lhs.Left && Rhs.Right == Lhs.Right;
+}
+
+UAnimSequence* UFPCBlueprintFunctionLibrary::GetDirectionalAnim(const FDirectionalAnimSet& AnimSet, const ELocomotionDirection& Direction)
+{
+	UAnimSequence* ReturnSequence = nullptr;
+
+	switch (Direction)
+	{
+	case ELocomotionDirection::Center:
+		ReturnSequence = AnimSet.Forward;
+		break;
+	case ELocomotionDirection::Forward:
+		ReturnSequence = AnimSet.Forward;
+		break;
+	case ELocomotionDirection::Backward:
+		ReturnSequence = AnimSet.Backward;
+		break;
+	case ELocomotionDirection::Left:
+		ReturnSequence = AnimSet.Left;
+		break;
+	case ELocomotionDirection::Right:
+		ReturnSequence = AnimSet.Right;
+		break;
+	}
+
+	return ReturnSequence;
+}
+
+bool UFPCBlueprintFunctionLibrary::GripMatchesDirectional(const FDirectionalAnimSet& AnimSet)
+{
+	return AnimSet.WeaponHandGripPose == AnimSet.Forward || AnimSet.WeaponHandGripPose == AnimSet.Backward || AnimSet.WeaponHandGripPose == AnimSet.Left || AnimSet.WeaponHandGripPose == AnimSet.Right;
 }
