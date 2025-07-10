@@ -136,12 +136,12 @@ void UFPCOperatorAnimationManagerComponent::OnEquipNewWeapon(AFPCWeapon* Spawned
 	TPSMeshAnimInstance->CurrentLinkedAnimInstance->OnWeaponEquipped(SpawnedTPSWeapon);
 }
 
-void UFPCOperatorAnimationManagerComponent::OnCurrentFPSWeaponUsed()
+void UFPCOperatorAnimationManagerComponent::OnCurrentFPSWeaponUsed(const AFPCWeapon* WeaponRef)
 {
 	FPSMeshAnimInstance->CurrentLinkedAnimInstance->OnCurrentWeaponUsed();
 }
 
-void UFPCOperatorAnimationManagerComponent::OnCurrentTPSWeaponUsed()
+void UFPCOperatorAnimationManagerComponent::OnCurrentTPSWeaponUsed(const AFPCWeapon* WeaponRef)
 {
 	TPSMeshAnimInstance->CurrentLinkedAnimInstance->OnCurrentWeaponUsed();
 }

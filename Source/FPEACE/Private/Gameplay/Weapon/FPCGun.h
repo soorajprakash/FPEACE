@@ -42,6 +42,9 @@ struct FGunRecoilSettings
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	TObjectPtr<UCurveVector> RecoilCurve;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	TSubclassOf<UCameraShakeBase> RecoilCameraShake;
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(ClampMin=-1.0f, ClampMax=1.0f))
 	float RecoilStrengthMultiplier = -0.5f;
 
@@ -57,7 +60,8 @@ struct FGunSettings
 {
 	GENERATED_BODY()
 
-	FGunSettings(): FireMode(SingleShot), FireRate(10), FireCoolDownInterval(0.3f), BurstFireInterval(0.1f), MagCapacity(10), MagCount(10), BulletSpreadAngle_Aiming(1),
+	FGunSettings(): FireMode(SingleShot), FireRate(10), FireCoolDownInterval(0.3f), BurstFireInterval(0.1f), ReloadTime(1.5f), EmptyReloadTime(2.5f), MagCapacity(10), MagCount(10),
+	                BulletSpreadAngle_Aiming(1),
 	                BulletSpreadAngle(5)
 	{
 	}
@@ -89,6 +93,18 @@ struct FGunSettings
 	 */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	float BurstFireInterval;
+
+	/*
+	 * The time taken to reload the gun when the mag is not empty
+	 */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	float ReloadTime;
+
+	/*
+	 * The time taken to reload the gun when the mag is empty
+	 */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	float EmptyReloadTime;
 
 	/*
 	 * Number of bullets in the magazine.

@@ -22,6 +22,9 @@ class UFPCBlueprintFunctionLibrary : public UBlueprintFunctionLibrary
 
 public:
 	UFUNCTION(BlueprintCallable, BlueprintPure, meta=(BlueprintThreadSafe), Category="FPEACE|Animation")
+	static FString GetAnimSequenceName(const UAnimSequence* TargetSequence);
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, meta=(BlueprintThreadSafe), Category="FPEACE|Animation")
 	static bool GetIfAnimSequenceHasRootMotionDelta(UAnimSequence* TargetSequence);
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, meta=(BlueprintThreadSafe), Category="FPEACE|Animation")
@@ -32,6 +35,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, meta=(BlueprintThreadSafe), Category="FPEACE|Animation")
 	static bool GetIfEvaluatorSequenceIsValidOrEqual(const FSequenceEvaluatorReference& SequenceEvaluatorNode, const UAnimSequenceBase* Sequence);
+
+	UFUNCTION(BlueprintCallable, meta=(BlueprintThreadSafe), Category="FPEACE|Animation")
+	static void SetEvaluatorNormalizedTime(const FSequenceEvaluatorReference& SequenceEvaluatorNode, const float NormalizedTime);
 
 	UFUNCTION(BlueprintCallable, BlueprintPure, meta=(BlueprintThreadSafe), Category="FPEACE|Animation")
 	static EAdditiveAnimationType GetAnimSequenceAdditiveType(UAnimSequence* TargetSequence);

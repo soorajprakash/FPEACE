@@ -1,13 +1,17 @@
 // Copyright © Sooraj Prakash. All rights reserved.
 // Unauthorized distribution of this file, or any part of it, is prohibited.
 
-
 #include "FPCBlueprintFunctionLibrary.h"
-
 #include "SequenceEvaluatorLibrary.h"
 #include "AnimNodes/AnimNode_SequenceEvaluator.h"
 #include "Gameplay/Common/CommonEnums.h"
 #include "Gameplay/Common/CommonStructs.h"
+#include "Kismet/KismetSystemLibrary.h"
+
+FString UFPCBlueprintFunctionLibrary::GetAnimSequenceName(const UAnimSequence* TargetSequence)
+{
+	return UKismetSystemLibrary::GetDisplayName(TargetSequence);
+}
 
 bool UFPCBlueprintFunctionLibrary::GetIfAnimSequenceHasRootMotionDelta(UAnimSequence* TargetSequence)
 {
@@ -38,6 +42,15 @@ bool UFPCBlueprintFunctionLibrary::GetIfEvaluatorSequenceIsValidOrEqual(const FS
 		return true;
 
 	return false;
+}
+
+void UFPCBlueprintFunctionLibrary::SetEvaluatorNormalizedTime(const FSequenceEvaluatorReference& SequenceEvaluatorNode, const float NormalizedTime)
+{
+	if (GetIfEvaluatorHasValidSequence(SequenceEvaluatorNode))
+	{
+		FAnimNode_SequenceEvaluator& EvaluatorNode = SequenceEvaluatorNode.GetAnimNode<FAnimNode_SequenceEvaluator>();
+		EvaluatorNode.SetExplicitTime(EvaluatorNode.GetSequence()->GetPlayLength() * NormalizedTime);
+	}
 }
 
 EAdditiveAnimationType UFPCBlueprintFunctionLibrary::GetAnimSequenceAdditiveType(UAnimSequence* TargetSequence)

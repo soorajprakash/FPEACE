@@ -16,7 +16,7 @@ struct FDirectionalAnimSet
 {
 	GENERATED_BODY()
 
-	FDirectionalAnimSet(): WeaponHandGripPose(nullptr), bAreDirectionalAnimsAdditive(false), bSyncUpperAndLowerBodyPlayers(true), bSyncAsLeader(false), BlendTime(0.3f), Forward(nullptr),
+	FDirectionalAnimSet(): WeaponHandGripPose(nullptr), bSyncUpperAndLowerBodyPlayers(true), bSyncAsLeader(false), BlendTime(0.3f), Forward(nullptr),
 	                       Backward(nullptr),
 	                       Right(nullptr),
 	                       Left(nullptr)
@@ -25,9 +25,6 @@ struct FDirectionalAnimSet
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	TObjectPtr<UAnimSequence> WeaponHandGripPose;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
-	bool bAreDirectionalAnimsAdditive;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
 	bool bSyncUpperAndLowerBodyPlayers;

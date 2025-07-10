@@ -6,6 +6,7 @@
 #include "CoreMinimal.h"
 #include "FPCOperatorComponentBase.h"
 #include "Gameplay/Common/CommonEnums.h"
+#include "Gameplay/Weapon/FPCWeapon.h"
 #include "FPCOperatorCameraManagerComponent.generated.h"
 
 
@@ -55,7 +56,7 @@ protected:
 	float CameraPitchDelta;
 
 	//	--------------------- OVERRIDES ---------------------
-
+	
 	virtual void InitializeComponent() override;
 	virtual void BeginPlay() override;
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
@@ -84,6 +85,12 @@ private:
 	 */
 	UFUNCTION()
 	void SetCameraMode(ECameraMode NewCameraMode);
+
+	UFUNCTION()
+	void OnCurrentWeaponUsed(const AFPCWeapon* WeaponRef);
+	
+	UFUNCTION()
+	void OnEquipNewWeapon(AFPCWeapon* SpawnedFPSWeaponRef, AFPCWeapon* SpawnedTPSWeaponRef);
 
 	/*
 	 * Changes the settings for the camera and the spring arm for the given mode using the character data

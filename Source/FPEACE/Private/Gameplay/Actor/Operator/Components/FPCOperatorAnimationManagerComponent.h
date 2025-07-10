@@ -59,8 +59,8 @@ private:
 	void OnEquipNewWeapon(AFPCWeapon* SpawnedFPSWeapon, AFPCWeapon* SpawnedTPSWeapon);
 
 	UFUNCTION()
-	void OnCurrentFPSWeaponUsed();
+	void OnCurrentFPSWeaponUsed(const AFPCWeapon* WeaponRef);
 
 	UFUNCTION()
-	void OnCurrentTPSWeaponUsed();
+	void OnCurrentTPSWeaponUsed(const AFPCWeapon* WeaponRef);
 };

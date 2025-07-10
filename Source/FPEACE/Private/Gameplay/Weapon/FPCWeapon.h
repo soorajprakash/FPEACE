@@ -18,7 +18,7 @@ enum class ELocomotionState : uint8;
 class UFPCOperatorAnimInstance;
 enum class ECameraMode : uint8;
 
-DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnWeaponSuccessfullyUsed);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnWeaponSuccessfullyUsed, const AFPCWeapon*, WeaponRef);
 
 USTRUCT(BlueprintType)
 struct FWeaponAnimSettings
@@ -138,6 +138,7 @@ public:
 	// --------------------------------- GETTERS ---------------------------------
 	FTransform GetAimSocketTransform() const { return AimSocketActorSpaceTransform; }
 	FTransform GetEmitterSocketTransform() const { return EmitterSocketActorSpaceTransform; }
+	bool GetCameraModeMatchesWeapon() const { return bCameraModeMatchesWeapon; }
 
 	// --------------------------------- SETTERS ---------------------------------
 
@@ -159,6 +160,7 @@ protected:
 	UPROPERTY(BlueprintReadOnly)
 	bool bCameraModeMatchesWeapon;
 
+protected:
 	UPROPERTY(BlueprintReadOnly)
 	FTransform AimSocketActorSpaceTransform;
 

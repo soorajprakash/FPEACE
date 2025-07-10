@@ -10,6 +10,7 @@
 #include "Gameplay/ExtendedClasses/Components/FPCCameraComponent.h"
 #include "Gameplay/ExtendedClasses/Components/FPCSkeletalMeshComponent.h"
 #include "Gameplay/ExtendedClasses/Components/FPCSpringArmComponent.h"
+#include "Gameplay/Weapon/FPCGun.h"
 #include "Kismet/KismetSystemLibrary.h"
 
 
@@ -48,6 +49,30 @@ void UFPCOperatorCameraManagerComponent::SetCameraMode(ECameraMode NewCameraMode
 	OnCameraModeChanged.Broadcast(CurrentCameraMode);
 }
 
+void UFPCOperatorCameraManagerComponent::OnCurrentWeaponUsed(const AFPCWeapon* WeaponRef)
+{
+	if (WeaponRef && WeaponRef->GetCameraModeMatchesWeapon())
+	{
+		if (const AFPCGun* GunRef = Cast<AFPCGun>(WeaponRef))
+			PlayerControllerRef->ClientStartCameraShake(GunRef->GetGunSettings().RecoilSettings.RecoilCameraShake);
+	}
+}
+
+
+void UFPCOperatorCameraManagerComponent::OnEquipNewWeapon(AFPCWeapon* SpawnedFPSWeaponRef, AFPCWeapon* SpawnedTPSWeaponRef)
+{
+	// Link the animation class to the character
+	if (SpawnedFPSWeaponRef && SpawnedTPSWeaponRef)
+	{
+		// Subscribe to the weapon's animation related events events
+		SpawnedFPSWeaponRef->OnWeaponSuccessfullyUsed.RemoveAll(this);
+		SpawnedFPSWeaponRef->OnWeaponSuccessfullyUsed.AddDynamic(this, &UFPCOperatorCameraManagerComponent::OnCurrentWeaponUsed);
+
+		SpawnedTPSWeaponRef->OnWeaponSuccessfullyUsed.RemoveAll(this);
+		SpawnedTPSWeaponRef->OnWeaponSuccessfullyUsed.AddDynamic(this, &UFPCOperatorCameraManagerComponent::OnCurrentWeaponUsed);
+	}
+}
+
 void UFPCOperatorCameraManagerComponent::SetCameraSettings(ECameraMode NewCameraMode) const
 {
 	const FCharacterCameraModeSettings& TargetCameraModeSettings = FPCOperatorData->CameraModeSettings[NewCameraMode];
@@ -81,6 +106,7 @@ void UFPCOperatorCameraManagerComponent::InitializeComponent()
 	if (OwningOperator.IsValid())
 	{
 		FPCCameraComp = OwningOperator->GetCharacterCameraComp();
+		FPCOperatorWeaponManagerComp->OnNewWeaponEquipped.AddDynamic(this, &UFPCOperatorCameraManagerComponent::OnEquipNewWeapon);
 	}
 
 	// Setup Values
@@ -119,7 +145,7 @@ void UFPCOperatorCameraManagerComponent::TickComponent(float DeltaTime, ELevelTi
 
 // Sets default values for this component's properties
 UFPCOperatorCameraManagerComponent::UFPCOperatorCameraManagerComponent(): CameraPitchDelta(0), PrevCameraRotation(), CameraFOVTween(nullptr), DefaultTPSCameraFieldOfView(0),
-                                                                            DefaultFPSCameraFieldOfView(0)
+                                                                          DefaultFPSCameraFieldOfView(0)
 {
 	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
 	// off to improve performance if you don't need them.

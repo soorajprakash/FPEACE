@@ -303,7 +303,7 @@ void AFPCGun::Fire()
 	if (RemainingBulletsInMag == 0)
 		OnMagWasEmptied.Broadcast(this);
 
-	OnWeaponSuccessfullyUsed.Broadcast();
+	OnWeaponSuccessfullyUsed.Broadcast(this);
 
 	bIsWeaponReadyToBeUsed = false;
 }
