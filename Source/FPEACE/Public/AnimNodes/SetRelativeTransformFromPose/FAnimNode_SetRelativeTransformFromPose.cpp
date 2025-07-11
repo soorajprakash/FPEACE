@@ -86,9 +86,15 @@ void FAnimNode_SetRelativeTransformFromPose::EvaluateSkeletalControl_AnyThread(
 
 		// Apply that local transform to the current relative bone's component-space transform to find the new target bone transform
 		FTransform NewTargetCS;
-		NewTargetCS.SetLocation(CurrentRelativeCS.TransformPosition(LocalTransform.GetLocation()));
-		NewTargetCS.SetRotation(CurrentRelativeCS.TransformRotation(LocalTransform.GetRotation()));
-		NewTargetCS.SetScale3D(CurrentTargetCS.GetScale3D());
+
+		if (Pair.CopyLocation)
+			NewTargetCS.SetLocation(CurrentRelativeCS.TransformPosition(LocalTransform.GetLocation()));
+
+		if (Pair.CopyRotation)
+			NewTargetCS.SetRotation(CurrentRelativeCS.TransformRotation(LocalTransform.GetRotation()));
+
+		if (Pair.CopyScale)
+			NewTargetCS.SetScale3D(CurrentTargetCS.GetScale3D());
 
 		OutBoneTransforms.Add(FBoneTransform(TargetIndex, NewTargetCS));
 	}

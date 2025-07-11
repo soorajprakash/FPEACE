@@ -28,7 +28,7 @@ void UFPEACE_HUD_WeaponStatsWidget::NativeConstruct()
 
 	// Bind to player events
 	if (OwningCharacterWeaponManagerComp.IsValid())
-		OwningCharacterWeaponManagerComp.Get()->OnNewWeaponEquipped.AddDynamic(this, &UFPEACE_HUD_WeaponStatsWidget::OnNewWeaponEquipped);
+		OwningCharacterWeaponManagerComp.Get()->OnNewWeaponEquipped.AddUniqueDynamic(this, &UFPEACE_HUD_WeaponStatsWidget::OnNewWeaponEquipped);
 }
 
 void UFPEACE_HUD_WeaponStatsWidget::OnNewWeaponEquippedEvent_Implementation(AFPCGun* NewGun)
@@ -40,8 +40,7 @@ void UFPEACE_HUD_WeaponStatsWidget::OnNewWeaponEquipped(AFPCWeapon* SpawnedFPSWe
 	if (AFPCGun* NewGun = Cast<AFPCGun>(SpawnedTPSWeaponRef))
 	{
 		WidgetViewModelInstance->SetCurrentWepon(NewGun);
-		NewGun->OnRemainingBulletsChanged.RemoveAll(this);
-		NewGun->OnRemainingBulletsChanged.AddDynamic(WidgetViewModelInstance, &UMVVM_HUD_WeaponStats::SetRemainingBullets);
+		NewGun->OnRemainingBulletsChanged.AddUniqueDynamic(WidgetViewModelInstance, &UMVVM_HUD_WeaponStats::SetRemainingBullets);
 		OnNewWeaponEquippedEvent(NewGun);
 	}
 }

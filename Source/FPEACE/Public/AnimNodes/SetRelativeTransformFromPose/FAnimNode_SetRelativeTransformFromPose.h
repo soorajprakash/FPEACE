@@ -21,6 +21,15 @@ struct FPEACE_API FBonePair
 
 	UPROPERTY(EditAnywhere, Category="Settings")
 	FBoneReference RelativeBone;
+
+	UPROPERTY(EditAnywhere, Category="Settings")
+	bool CopyLocation = true;
+
+	UPROPERTY(EditAnywhere, Category="Settings")
+	bool CopyRotation = true;
+
+	UPROPERTY(EditAnywhere, Category="Settings")
+	bool CopyScale = true;
 };
 
 USTRUCT(BlueprintInternalUseOnly)
