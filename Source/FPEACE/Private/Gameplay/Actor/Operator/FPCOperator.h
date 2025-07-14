@@ -57,8 +57,6 @@ public:
 	TWeakObjectPtr<UFPCOperatorAnimationManagerComponent> GetFPCCharacterAnimationManager() const ;
 
 protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
 
 	/*
 	 * Reference to the character data asset referenced in the game instance

@@ -1,7 +1,6 @@
 // Copyright © Sooraj Prakash. All rights reserved.
 // Unauthorized distribution of this file, or any part of it, is prohibited.
 
-
 #include "FPCCharacter.h"
 #include "FPCGameplayPlayerController.h"
 #include "ObjectPoolSubsystem.h"

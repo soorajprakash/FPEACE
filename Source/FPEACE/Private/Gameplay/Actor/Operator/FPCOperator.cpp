@@ -129,12 +129,6 @@ TWeakObjectPtr<UFPCOperatorAnimationManagerComponent> AFPCOperator::GetFPCCharac
 	return FPCCharacterAnimationManagerComp;
 }
 
-// Called when the game starts or when spawned
-void AFPCOperator::BeginPlay()
-{
-	Super::BeginPlay();
-}
-
 void AFPCOperator::AddControllerPitchInput(float Val)
 {
 	if (FPCPlayerControllerInstance && FPCCharacterData)
