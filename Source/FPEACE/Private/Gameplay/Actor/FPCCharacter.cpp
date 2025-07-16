@@ -4,10 +4,13 @@
 #include "FPCCharacter.h"
 #include "FPCGameplayPlayerController.h"
 #include "ObjectPoolSubsystem.h"
+#include "DataStructures/FPCCharacterData.h"
+#include "Gameplay/ExtendedClasses/FPCGameInstance.h"
 #include "Gameplay/ExtendedClasses/Components/FPCAbilitySystemComponent.h"
 #include "Gameplay/ExtendedClasses/Components/FPCSkeletalMeshComponent.h"
 #include "Gameplay/ExtendedClasses/Components/FPCCapsuleComponent.h"
 #include "Operator/Components/FPCOperatorMovementComponent.h"
+#include "Gameplay/GAS/Abilities/FPCCharacterAbilityBase.h"
 
 // Sets default values
 AFPCCharacter::AFPCCharacter(const FObjectInitializer& ObjectInitializer): Super(
@@ -27,6 +30,23 @@ AFPCCharacter::AFPCCharacter(const FObjectInitializer& ObjectInitializer): Super
 		FPCAbilitySystemComponent = CreateDefaultSubobject<UFPCAbilitySystemComponent>(TEXT("AbilitySystemComponent"));
 }
 
+void AFPCCharacter::BeginPlay()
+{
+	Super::BeginPlay();
+
+	if (FPCAbilitySystemComponent)
+	{
+		FPCAbilitySystemComponent->InitAbilityActorInfo(this, this);
+
+		// Grant basic abilities
+		for (TSubclassOf Ability : BasicAbilities)
+		{
+			FPCAbilitySystemComponent->K2_GiveAbility(Ability);
+			FPCAbilitySystemComponent->TryActivateAbilityByClass(Ability);
+		}
+	}
+}
+
 void AFPCCharacter::PossessedBy(AController* NewController)
 {
 	FPCPlayerControllerInstance = CastChecked<AFPCGameplayPlayerController>(NewController);
@@ -41,7 +61,23 @@ void AFPCCharacter::OnConstruction(const FTransform& Transform)
 		WorldObjectPool = World->GetSubsystem<UObjectPool>();
 }
 
+void AFPCCharacter::PreInitializeComponents()
+{
+	Super::PreInitializeComponents();
+	GetCharacterData();
+}
+
 //	--------------------- GETTER FUNCTIONS ---------------------
+
+TWeakObjectPtr<UFPCOperatorData> AFPCCharacter::GetCharacterData()
+{
+	// Get the Character Data asset reference
+	if (FPCCharacterData == nullptr)
+		if (UFPCGameInstance* FPCGameInstance = UFPCGameInstance::GetInstance(this))
+			FPCCharacterData = FPCGameInstance->CharacterData.LoadSynchronous();
+
+	return FPCCharacterData;
+}
 
 TWeakObjectPtr<UFPCSkeletalMeshComponent> AFPCCharacter::GetTPSBodyMeshComp() const
 {
@@ -53,7 +89,7 @@ TWeakObjectPtr<AFPCGameplayPlayerController> AFPCCharacter::GetFPCPlayerControll
 	return FPCPlayerControllerInstance;
 }
 
-TWeakObjectPtr<UFPCAbilitySystemComponent> AFPCCharacter::GetFPCAbilitySystemComp() const
+UAbilitySystemComponent* AFPCCharacter::GetAbilitySystemComponent() const
 {
 	return FPCAbilitySystemComponent;
 }

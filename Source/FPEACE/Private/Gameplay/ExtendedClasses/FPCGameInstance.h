@@ -9,7 +9,7 @@
 #include "FPCGameInstance.generated.h"
 
 class UFPEACE_CUI_PauseMenuScreenWidget;
-class UFPCCharacterData;
+class UFPCOperatorData;
 /**
  * 
  */
@@ -22,7 +22,7 @@ public:
 	virtual ~UFPCGameInstance() override;
 
 	UPROPERTY(EditDefaultsOnly, Category="FPEACE")
-	TSoftObjectPtr<UFPCCharacterData> CharacterData;
+	TSoftObjectPtr<UFPCOperatorData> CharacterData;
 
 	UPROPERTY(VisibleAnywhere, Category="FPEACE")
 	TSubclassOf<APawn> SelectedOperatorPawnClass;

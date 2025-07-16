@@ -15,7 +15,7 @@ class UFPCSpringArmComponent;
 class UFPCCameraComponent;
 class UFPCCapsuleComponent;
 class UFPCOperatorMovementComponent;
-class UFPCCharacterData;
+class UFPCOperatorData;
 
 UCLASS()
 class FPEACE_API AFPCOperator : public AFPCCharacter
@@ -27,11 +27,6 @@ public:
 	AFPCOperator();
 
 	//	--------------------- GETTER FUNCTIONS ---------------------
-
-	/*
-	 * Get reference to the character data asset
-	 */
-	TWeakObjectPtr<UFPCCharacterData> GetCharacterData();
 	
 	/*
 	 * Get the Movement component of this character
@@ -57,12 +52,6 @@ public:
 	TWeakObjectPtr<UFPCOperatorAnimationManagerComponent> GetFPCCharacterAnimationManager() const ;
 
 protected:
-
-	/*
-	 * Reference to the character data asset referenced in the game instance
-	 */
-	UPROPERTY(BlueprintReadOnly, Category="FPEACE")
-	TObjectPtr<UFPCCharacterData> FPCCharacterData;
 	
 	//	--------------------- COMPONENTS ---------------------
 
@@ -164,30 +153,6 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="FPEACE|Inputs")
 	TSoftObjectPtr<UInputAction> CameraSwitchAction;
 
-
-	virtual void AddControllerPitchInput(float Val) override;
-
-	virtual void AddControllerYawInput(float Val) override;
-	
-virtual void PreInitializeComponents() override;
-	
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
-
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
-
-private:
-	
-	//	--------------------- INPUT BINDING FUNCTIONS ---------------------
-
-	/*
-	 * Look input binding function
-	 */
-	void LookAround(const FInputActionValue& InputActionValue);
-
-	/*
-	 * Move input binding function
-	 */
-	void MoveAround(const FInputActionValue& InputActionValue);
 };

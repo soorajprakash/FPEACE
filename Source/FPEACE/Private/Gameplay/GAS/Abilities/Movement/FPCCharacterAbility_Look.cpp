@@ -1,0 +1,55 @@
+﻿// Copyright © 2025 Sooraj Prakash. All rights reserved.Unauthorized distribution or sharing of this code is prohibited.
+
+
+#include "FPCCharacterAbility_Look.h"
+#include "EnhancedInputComponent.h"
+#include "GameplayAbilitySpecHandle.h"
+#include "DataStructures/FPCCharacterData.h"
+#include "Gameplay/Actor/FPCGameplayPlayerController.h"
+
+void UFPCCharacterAbility_Look::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo,
+                                                const FGameplayEventData* TriggerEventData)
+{
+	Super::ActivateAbility(Handle, ActorInfo, ActivationInfo, TriggerEventData);
+
+	if (FPCPlayerInputComponent.IsValid())
+		InputBindingHandle = FPCPlayerInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &UFPCCharacterAbility_Look::LookAround).GetHandle();
+}
+
+void UFPCCharacterAbility_Look::EndAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo,
+                                           bool bReplicateEndAbility,
+                                           bool bWasCancelled)
+{
+	Super::EndAbility(Handle, ActorInfo, ActivationInfo, bReplicateEndAbility, bWasCancelled);
+
+	if (FPCPlayerInputComponent.IsValid())
+		FPCPlayerInputComponent->RemoveBindingByHandle(InputBindingHandle);
+}
+
+void UFPCCharacterAbility_Look::LookAround(const FInputActionValue& InputActionValue)
+{
+	if (!FPCPlayerController.IsValid())
+		return;
+
+	FVector2D input = InputActionValue.Get<FVector2D>();
+	if (FPCCharacterData.IsValid())
+	{
+		FRotator ControlRotation = FPCPlayerController->GetControlRotation();
+
+		// Add Yaw Input
+		ControlRotation.Yaw += input.X;
+		ControlRotation.Pitch = FRotator::NormalizeAxis(ControlRotation.Pitch); // Normalizing flips the direction.
+
+		// Add Pitch Input
+		ControlRotation.Pitch -= input.Y; // Subtracting instead of adding since we are normailizing the values in the next step.
+		ControlRotation.Pitch = FRotator::NormalizeAxis(ControlRotation.Pitch); // Normalizing flips the direction.
+
+		// Clamp the pitch between the limits defined in character data asset
+		ControlRotation.Pitch = FMath::Clamp(ControlRotation.Pitch, -FPCCharacterData->ControllerRotationPitchClamp, FPCCharacterData->ControllerRotationPitchClamp);
+
+		// Set the updated control rotation
+		FPCPlayerController->SetControlRotation(ControlRotation);
+	}
+
+	// FPCCameraManagerComp->UpdateCameraState();
+}
