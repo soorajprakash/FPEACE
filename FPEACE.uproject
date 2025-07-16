@@ -129,6 +129,10 @@
 		{
 			"Name": "SignificanceManager",
 			"Enabled": true
+		},
+		{
+			"Name": "GameplayStateTree",
+			"Enabled": true
 		}
 	],
 	"TargetPlatforms": [
