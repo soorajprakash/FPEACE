@@ -15,7 +15,7 @@ class AFPCOperator;
 class AFPCGameplayPlayerController;
 class UFPCCapsuleComponent;
 class UFPCOperatorWeaponManagerComponent;
-class UFPCCharacterData;
+class UFPCOperatorData;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FLocomotionStateChangeDelegate, ELocomotionState, NewLocomotionState);
 
@@ -58,7 +58,7 @@ protected:
 	TWeakObjectPtr<AFPCOperator> OwningOperator;
 
 	UPROPERTY()
-	TWeakObjectPtr<UFPCCharacterData> FPCCharacterData;
+	TWeakObjectPtr<UFPCOperatorData> FPCCharacterData;
 
 	UPROPERTY()
 	TWeakObjectPtr<UFPCAbilitySystemComponent> FPCAbilitySystemComponent;

@@ -69,16 +69,6 @@ AFPCOperator::AFPCOperator()
 		FPCCharacterAnimationManagerComp = CreateDefaultSubobject<UFPCOperatorAnimationManagerComponent>(TEXT("FPC Animation Manager"));
 }
 
-TWeakObjectPtr<UFPCCharacterData> AFPCOperator::GetCharacterData()
-{
-	// Get the Character Data asset reference
-	if (FPCCharacterData == nullptr)
-		if (UFPCGameInstance* FPCGameInstance = UFPCGameInstance::GetInstance(this))
-			FPCCharacterData = FPCGameInstance->CharacterData.LoadSynchronous();
-
-	return FPCCharacterData;
-}
-
 TWeakObjectPtr<UFPCOperatorMovementComponent> AFPCOperator::GetCharacterMovementComponent() const
 {
 	return FPCMovementComp;
@@ -129,49 +119,6 @@ TWeakObjectPtr<UFPCOperatorAnimationManagerComponent> AFPCOperator::GetFPCCharac
 	return FPCCharacterAnimationManagerComp;
 }
 
-void AFPCOperator::AddControllerPitchInput(float Val)
-{
-	if (FPCPlayerControllerInstance && FPCCharacterData)
-	{
-		FRotator ControlRotation = FPCPlayerControllerInstance->GetControlRotation();
-		ControlRotation.Pitch -= Val; // Subtracting instead of adding since we are normailizing the values in the next step.
-		ControlRotation.Pitch = FRotator::NormalizeAxis(ControlRotation.Pitch); // Normalizing flips the direction.
-
-		// Clamp the pitch between the limits defined in character data asset
-		ControlRotation.Pitch = FMath::Clamp(ControlRotation.Pitch, -FPCCharacterData->ControllerRotationPitchClamp, FPCCharacterData->ControllerRotationPitchClamp);
-
-		// Set the updated control rotation
-		FPCPlayerControllerInstance->SetControlRotation(ControlRotation);
-	}
-}
-
-void AFPCOperator::AddControllerYawInput(float Val)
-{
-	if (FPCPlayerControllerInstance && FPCCharacterData)
-	{
-		FRotator ControlRotation = FPCPlayerControllerInstance->GetControlRotation();
-		ControlRotation.Yaw += Val;
-		ControlRotation.Pitch = FRotator::NormalizeAxis(ControlRotation.Pitch); // Normalizing flips the direction.
-
-		// Set the updated control rotation
-		FPCPlayerControllerInstance->SetControlRotation(ControlRotation);
-	}
-}
-
-void AFPCOperator::PreInitializeComponents()
-{
-	Super::PreInitializeComponents();
-
-	// Get a reference to character data from the player controller instance
-	GetCharacterData();
-}
-
-// Called every frame
-void AFPCOperator::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
-}
-
 // Called to bind functionality to input
 void AFPCOperator::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
@@ -180,8 +127,8 @@ void AFPCOperator::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 	if (UEnhancedInputComponent* EInputComp = Cast<UEnhancedInputComponent>(PlayerInputComponent))
 	{
 		// Bind Gameplay Inputs
-		EInputComp->BindAction(LookAction.LoadSynchronous(), ETriggerEvent::Triggered, this, &AFPCOperator::LookAround);
-		EInputComp->BindAction(MoveAction.LoadSynchronous(), ETriggerEvent::Triggered, this, &AFPCOperator::MoveAround);
+		// EInputComp->BindAction(LookAction.LoadSynchronous(), ETriggerEvent::Triggered, this, &AFPCOperator::LookAround);
+		// EInputComp->BindAction(MoveAction.LoadSynchronous(), ETriggerEvent::Triggered, this, &AFPCOperator::MoveAround);
 		EInputComp->BindActionInstanceLambda(RunAction.LoadSynchronous(), ETriggerEvent::Started, [this](const FInputActionInstance&)
 		{
 			FPCMovementComp->ToggleRunSprint();
@@ -231,21 +178,4 @@ void AFPCOperator::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 			FPCCharacterWeaponManagerComp->TryCurrentGunReload();
 		});
 	}
-}
-
-void AFPCOperator::LookAround(const FInputActionValue& InputActionValue)
-{
-	FVector2D input = InputActionValue.Get<FVector2D>();
-	AddControllerYawInput(input.X);
-	AddControllerPitchInput(input.Y);
-
-	FPCCameraManagerComp->UpdateCameraState();
-}
-
-void AFPCOperator::MoveAround(const FInputActionValue& InputActionValue)
-{
-	FVector2D Input = InputActionValue.Get<FVector2D>();
-	Input = Input.GetRotated(-GetControlRotation().Yaw); // Rotate the input to face the character's direction
-	FVector Input3D = FVector(Input.Y, Input.X, 0);
-	AddMovementInput(Input3D);
 }

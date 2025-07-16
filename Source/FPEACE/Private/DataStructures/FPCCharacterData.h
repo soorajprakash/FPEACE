@@ -18,7 +18,7 @@ enum class ECameraMode : uint8;
  * 
  */
 UCLASS()
-class FPEACE_API UFPCCharacterData : public UDataAsset
+class FPEACE_API UFPCOperatorData : public UDataAsset
 {
 	GENERATED_BODY()
 

@@ -60,7 +60,7 @@ void UFPCOperatorMovementComponent::InitializeComponent()
 	if (OwningOperator.IsValid())
 	{
 		FPCCharacterData = OwningOperator->GetCharacterData();
-		FPCAbilitySystemComponent = OwningOperator->GetFPCAbilitySystemComp();
+		FPCAbilitySystemComponent = Cast<UFPCAbilitySystemComponent>(OwningOperator->GetAbilitySystemComponent());
 		FPCPlayerController = OwningOperator->GetFPCPlayerController();
 		OwningCharacterCapsule = OwningOperator->GetFPCCapsuleComp();
 		FPCCharacterWeaponManager = OwningOperator->GetFPCCharacterWeaponManager();

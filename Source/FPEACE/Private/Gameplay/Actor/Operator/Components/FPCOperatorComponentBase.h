@@ -14,7 +14,7 @@ class UFPCOperatorSkeletalAnimInstance;
 class UFPCOperatorWeaponManagerComponent;
 class UFPCOperatorMovementComponent;
 class UFPCSkeletalMeshComponent;
-class UFPCCharacterData;
+class UFPCOperatorData;
 class AFPCGameplayPlayerController;
 class AFPCOperator;
 
@@ -35,7 +35,7 @@ protected:
 	TWeakObjectPtr<AFPCGameplayPlayerController> PlayerControllerRef;
 
 	UPROPERTY()
-	TWeakObjectPtr<UFPCCharacterData> FPCOperatorData;
+	TWeakObjectPtr<UFPCOperatorData> FPCOperatorData;
 	
 	UPROPERTY()
 	TWeakObjectPtr<UFPCOperatorMovementComponent> FPCOperatorMovementComp;
