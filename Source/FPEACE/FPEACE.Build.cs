@@ -7,14 +7,15 @@ public class FPEACE : ModuleRules
 {
 	public FPEACE(ReadOnlyTargetRules Target) : base(Target)
 	{
-		PrivateDependencyModuleNames.AddRange(new string[] { "FCTween", "ObjectPool" });
+		PrivateDependencyModuleNames.AddRange(new[] { "FCTween", "ObjectPool" });
 		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 
-		PublicDependencyModuleNames.AddRange(new string[]
+		PublicDependencyModuleNames.AddRange(new[]
 		{
 			"Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput", "AnimGraphRuntime",
 			"AnimationLocomotionLibraryRuntime", "Niagara", "UMG", "SlateCore", "Slate", "CommonUI", "CinematicCamera",
-			"ModelViewViewModel", "SignificanceManager", "GameplayTags", "GameplayAbilities", "GameplayTasks"
+			"ModelViewViewModel", "SignificanceManager", "GameplayTags", "GameplayAbilities", "GameplayTasks",
+			"GameplayStateTreeModule", "AIModule"
 		});
 	}
 }

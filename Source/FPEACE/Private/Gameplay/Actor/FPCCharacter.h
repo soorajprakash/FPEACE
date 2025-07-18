@@ -6,9 +6,9 @@
 #include "CoreMinimal.h"
 #include "AbilitySystemInterface.h"
 #include "GameFramework/Character.h"
+#include "Gameplay/GAS/Abilities/FPCOperatorAbilityBase.h"
 #include "FPCCharacter.generated.h"
 
-class UFPCCharacterAbilityBase;
 class UFPCOperatorData;
 class UFPCAbilitySystemComponent;
 class AFPCGameplayPlayerController;
@@ -31,24 +31,12 @@ public:
 
 	//	--------------------- GETTER FUNCTIONS ---------------------
 
-	/*
-	 * Get reference to the character data asset
-	 */
-	TWeakObjectPtr<UFPCOperatorData> GetCharacterData();
-
 	TWeakObjectPtr<UFPCSkeletalMeshComponent> GetTPSBodyMeshComp() const;
-	TWeakObjectPtr<AFPCGameplayPlayerController> GetFPCPlayerController() const;
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
 
 protected:
-	/*
-	 * Reference to the character data asset referenced in the game instance
-	 */
-	UPROPERTY(BlueprintReadOnly, Category="FPEACE")
-	TWeakObjectPtr<UFPCOperatorData> FPCCharacterData;
-
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="FPEACE")
-	TArray<TSubclassOf<UFPCCharacterAbilityBase>> BasicAbilities;
+	TArray<TSubclassOf<UFPCOperatorAbilityBase>> BasicAbilities;
 
 	//	--------------------- COMPONENTS ---------------------
 
@@ -58,23 +46,10 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="FPEACE|Components")
 	TObjectPtr<UFPCAbilitySystemComponent> FPCAbilitySystemComponent;
 
-	/*
-	 * Reference to the FPC Player Controller instance
-	 */
-	UPROPERTY(BlueprintReadOnly, Category="FPEACE")
-	TObjectPtr<AFPCGameplayPlayerController> FPCPlayerControllerInstance;
-
 
 	//	--------------------- OVERRIDES ---------------------
 
 	virtual void BeginPlay() override;
 
-	/*
-	 * When this character is possessed by the player controller
-	 */
-	virtual void PossessedBy(AController* NewController) override;
-
 	virtual void OnConstruction(const FTransform& Transform) override;
-
-	virtual void PreInitializeComponents() override;
 };

@@ -10,11 +10,10 @@
 #include "Gameplay/ExtendedClasses/Components/FPCSkeletalMeshComponent.h"
 #include "Gameplay/ExtendedClasses/Components/FPCCapsuleComponent.h"
 #include "Operator/Components/FPCOperatorMovementComponent.h"
-#include "Gameplay/GAS/Abilities/FPCCharacterAbilityBase.h"
 
 // Sets default values
 AFPCCharacter::AFPCCharacter(const FObjectInitializer& ObjectInitializer): Super(
-	ObjectInitializer.SetDefaultSubobjectClass<UFPCSkeletalMeshComponent>(MeshComponentName).SetDefaultSubobjectClass<UFPCOperatorMovementComponent>(CharacterMovementComponentName).
+	ObjectInitializer.SetDefaultSubobjectClass<UFPCSkeletalMeshComponent>(MeshComponentName).SetDefaultSubobjectClass<UFPCCharacterMovementComponent>(CharacterMovementComponentName).
 	                  SetDefaultSubobjectClass<UFPCCapsuleComponent>(CapsuleComponentName))
 {
 	// Set this character to call Tick() every frame. You can turn this off to improve performance if you don't need it.
@@ -47,12 +46,6 @@ void AFPCCharacter::BeginPlay()
 	}
 }
 
-void AFPCCharacter::PossessedBy(AController* NewController)
-{
-	FPCPlayerControllerInstance = CastChecked<AFPCGameplayPlayerController>(NewController);
-	Super::PossessedBy(NewController);
-}
-
 void AFPCCharacter::OnConstruction(const FTransform& Transform)
 {
 	Super::OnConstruction(Transform);
@@ -61,32 +54,11 @@ void AFPCCharacter::OnConstruction(const FTransform& Transform)
 		WorldObjectPool = World->GetSubsystem<UObjectPool>();
 }
 
-void AFPCCharacter::PreInitializeComponents()
-{
-	Super::PreInitializeComponents();
-	GetCharacterData();
-}
-
 //	--------------------- GETTER FUNCTIONS ---------------------
-
-TWeakObjectPtr<UFPCOperatorData> AFPCCharacter::GetCharacterData()
-{
-	// Get the Character Data asset reference
-	if (FPCCharacterData == nullptr)
-		if (UFPCGameInstance* FPCGameInstance = UFPCGameInstance::GetInstance(this))
-			FPCCharacterData = FPCGameInstance->CharacterData.LoadSynchronous();
-
-	return FPCCharacterData;
-}
 
 TWeakObjectPtr<UFPCSkeletalMeshComponent> AFPCCharacter::GetTPSBodyMeshComp() const
 {
 	return MainBodyMeshComp;
-}
-
-TWeakObjectPtr<AFPCGameplayPlayerController> AFPCCharacter::GetFPCPlayerController() const
-{
-	return FPCPlayerControllerInstance;
 }
 
 UAbilitySystemComponent* AFPCCharacter::GetAbilitySystemComponent() const

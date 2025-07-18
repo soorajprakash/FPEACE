@@ -36,7 +36,7 @@ void UFPCOperatorComponentBase::InitializeComponent()
 		FPCOperatorWeaponManagerComp = OwningOperator->GetFPCCharacterWeaponManager();
 		FPCOperatorCameraManagerComp = OwningOperator->GetFPCCharacterCameraManager();
 		FPCOperatorAnimationManagerComp = OwningOperator->GetFPCCharacterAnimationManager();
-		FPCOperatorData = OwningOperator->GetCharacterData();
+		FPCOperatorData = OwningOperator->GetOperatorData();
 
 		FPCSpringArmComp = OwningOperator->GetFPCSpringArmComp();
 		MainBodyMeshComp = OwningOperator->GetTPSBodyMeshComp();

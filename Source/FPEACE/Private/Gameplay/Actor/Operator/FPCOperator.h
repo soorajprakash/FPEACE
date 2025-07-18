@@ -24,10 +24,17 @@ class FPEACE_API AFPCOperator : public AFPCCharacter
 
 public:
 	// Sets default values for this character's properties
-	AFPCOperator();
+	AFPCOperator(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
 	//	--------------------- GETTER FUNCTIONS ---------------------
-	
+
+	/*
+	 * Get reference to the character data asset
+	 */
+	TWeakObjectPtr<UFPCOperatorData> GetOperatorData();
+
+	TWeakObjectPtr<AFPCGameplayPlayerController> GetFPCPlayerController() const;
+
 	/*
 	 * Get the Movement component of this character
 	 */
@@ -35,24 +42,35 @@ public:
 
 	TWeakObjectPtr<UFPCSkeletalMeshComponent> GetFPSArmsMeshComp() const;
 
-	TWeakObjectPtr<UFPCSkeletalMeshComponent> GetFPSLowerBodyMeshComp() const ;
+	TWeakObjectPtr<UFPCSkeletalMeshComponent> GetFPSLowerBodyMeshComp() const;
 
-	TWeakObjectPtr<UFPCCapsuleComponent> GetFPCCapsuleComp() const ;
+	TWeakObjectPtr<UFPCCapsuleComponent> GetFPCCapsuleComp() const;
 
-	TWeakObjectPtr<UFPCOperatorMovementComponent> GetFPCMovementComp() const ;
+	TWeakObjectPtr<UFPCOperatorMovementComponent> GetFPCMovementComp() const;
 
-	TWeakObjectPtr<UFPCCameraComponent> GetCharacterCameraComp() const ;
+	TWeakObjectPtr<UFPCCameraComponent> GetCharacterCameraComp() const;
 
-	TWeakObjectPtr<UFPCSpringArmComponent> GetFPCSpringArmComp() const ;
+	TWeakObjectPtr<UFPCSpringArmComponent> GetFPCSpringArmComp() const;
 
-	TWeakObjectPtr<UFPCOperatorWeaponManagerComponent> GetFPCCharacterWeaponManager() const ;
+	TWeakObjectPtr<UFPCOperatorWeaponManagerComponent> GetFPCCharacterWeaponManager() const;
 
-	TWeakObjectPtr<UFPCOperatorCameraManagerComponent> GetFPCCharacterCameraManager() const ;
+	TWeakObjectPtr<UFPCOperatorCameraManagerComponent> GetFPCCharacterCameraManager() const;
 
-	TWeakObjectPtr<UFPCOperatorAnimationManagerComponent> GetFPCCharacterAnimationManager() const ;
+	TWeakObjectPtr<UFPCOperatorAnimationManagerComponent> GetFPCCharacterAnimationManager() const;
 
 protected:
-	
+	/*
+	 * Reference to the operator data asset referenced in the game instance
+	 */
+	UPROPERTY(BlueprintReadOnly, Category="FPEACE")
+	TWeakObjectPtr<UFPCOperatorData> FPCOperatorData;
+
+	/*
+	 * Reference to the FPC Player Controller instance
+	 */
+	UPROPERTY(BlueprintReadOnly, Category="FPEACE")
+	TObjectPtr<AFPCGameplayPlayerController> FPCPlayerControllerInstance;
+
 	//	--------------------- COMPONENTS ---------------------
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="FPEACE|Components")
@@ -152,6 +170,12 @@ protected:
 	 */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="FPEACE|Inputs")
 	TSoftObjectPtr<UInputAction> CameraSwitchAction;
+
+	//	--------------------- OVERRIDES ---------------------
+
+	virtual void PreInitializeComponents() override;
+
+	virtual void PossessedBy(AController* NewController) override;
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;

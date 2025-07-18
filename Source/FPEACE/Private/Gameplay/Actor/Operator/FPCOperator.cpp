@@ -16,7 +16,7 @@
 
 
 // Sets default values
-AFPCOperator::AFPCOperator()
+AFPCOperator::AFPCOperator(const FObjectInitializer& ObjectInitializer): Super(ObjectInitializer.SetDefaultSubobjectClass<UFPCOperatorMovementComponent>(CharacterMovementComponentName))
 {
 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -69,6 +69,21 @@ AFPCOperator::AFPCOperator()
 		FPCCharacterAnimationManagerComp = CreateDefaultSubobject<UFPCOperatorAnimationManagerComponent>(TEXT("FPC Animation Manager"));
 }
 
+TWeakObjectPtr<UFPCOperatorData> AFPCOperator::GetOperatorData()
+{
+	// Get the Character Data asset reference
+	if (FPCOperatorData == nullptr)
+		if (UFPCGameInstance* FPCGameInstance = UFPCGameInstance::GetInstance(this))
+			FPCOperatorData = FPCGameInstance->CharacterData.LoadSynchronous();
+
+	return FPCOperatorData;
+}
+
+TWeakObjectPtr<AFPCGameplayPlayerController> AFPCOperator::GetFPCPlayerController() const
+{
+	return FPCPlayerControllerInstance;
+}
+
 TWeakObjectPtr<UFPCOperatorMovementComponent> AFPCOperator::GetCharacterMovementComponent() const
 {
 	return FPCMovementComp;
@@ -117,6 +132,18 @@ TWeakObjectPtr<UFPCOperatorCameraManagerComponent> AFPCOperator::GetFPCCharacter
 TWeakObjectPtr<UFPCOperatorAnimationManagerComponent> AFPCOperator::GetFPCCharacterAnimationManager() const
 {
 	return FPCCharacterAnimationManagerComp;
+}
+
+void AFPCOperator::PreInitializeComponents()
+{
+	Super::PreInitializeComponents();
+	GetOperatorData();
+}
+
+void AFPCOperator::PossessedBy(AController* NewController)
+{
+	Super::PossessedBy(NewController);
+	FPCPlayerControllerInstance = CastChecked<AFPCGameplayPlayerController>(NewController);
 }
 
 // Called to bind functionality to input

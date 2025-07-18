@@ -4,8 +4,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/CharacterMovementComponent.h"
 #include "Gameplay/Common/CommonEnums.h"
+#include "Gameplay/ExtendedClasses/Components/FPCCharacterMovementComponent.h"
 #include "FPCOperatorMovementComponent.generated.h"
 
 class UFPCAbilitySystemComponent;
@@ -23,7 +23,7 @@ DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FLocomotionStateChangeDelegate, ELoc
  * An extension of the character movement component class of the character
  */
 UCLASS(BlueprintType, Blueprintable, Meta = (BlueprintSpawnableComponent))
-class FPEACE_API UFPCOperatorMovementComponent : public UCharacterMovementComponent
+class FPEACE_API UFPCOperatorMovementComponent : public UFPCCharacterMovementComponent
 {
 	GENERATED_BODY()
 
@@ -90,16 +90,6 @@ protected:
 	UPROPERTY(BlueprintReadOnly)
 	TObjectPtr<UFPCOperatorSkeletalAnimInstance> FPSMeshAnimInstance;
 
-
-	UPROPERTY(BlueprintReadOnly)
-	FVector CharacterAcceleration2D = FVector::ZeroVector;
-
-	UPROPERTY(BlueprintReadOnly)
-	FVector CharacterVelocity2D = FVector::ZeroVector;
-
-	UPROPERTY(BlueprintReadOnly)
-	float CharacterVelocityZ = 0;
-
 	UPROPERTY(BlueprintReadOnly)
 	float LeanAngle = 0;
 
@@ -108,15 +98,6 @@ protected:
 
 	UPROPERTY(BlueprintReadOnly)
 	float CharacterYawDelta = 0;
-
-	UPROPERTY(BlueprintReadOnly)
-	float CharacterAbsoluteSpeed = 0;
-
-	UPROPERTY(BlueprintReadOnly)
-	float CharacterAbsoluteSpeed2D = 0;
-
-	UPROPERTY(BlueprintReadOnly)
-	float CharacterNormalizedSpeed = 0;
 
 	UPROPERTY(BlueprintReadOnly)
 	float AccelerationDirectionAngle = 0;
@@ -129,9 +110,6 @@ protected:
 
 	UPROPERTY(BlueprintReadOnly)
 	float CurrentDeltaDistanceZ = 0;
-
-	UPROPERTY(BlueprintReadOnly)
-	float CurrentVelocityAccelerationDot = 0;
 
 	/*
 	 * Current distance from the character's lowest point to the ground straight below
@@ -208,12 +186,6 @@ protected:
 
 	UPROPERTY(BlueprintReadOnly)
 	bool PrevAccelerationState = false;
-
-	UPROPERTY(BlueprintReadOnly)
-	bool IsCharacterMoving = false;
-
-	UPROPERTY(BlueprintReadOnly)
-	bool IsCharacterAccelerating = false;
 
 	UPROPERTY(BlueprintReadOnly)
 	bool IsCharacterTurningInPlace = false;

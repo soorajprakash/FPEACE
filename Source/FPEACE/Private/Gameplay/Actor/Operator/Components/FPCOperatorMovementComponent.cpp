@@ -59,7 +59,7 @@ void UFPCOperatorMovementComponent::InitializeComponent()
 
 	if (OwningOperator.IsValid())
 	{
-		FPCCharacterData = OwningOperator->GetCharacterData();
+		FPCCharacterData = OwningOperator->GetOperatorData();
 		FPCAbilitySystemComponent = Cast<UFPCAbilitySystemComponent>(OwningOperator->GetAbilitySystemComponent());
 		FPCPlayerController = OwningOperator->GetFPCPlayerController();
 		OwningCharacterCapsule = OwningOperator->GetFPCCapsuleComp();
@@ -87,24 +87,6 @@ void UFPCOperatorMovementComponent::AddControllerPitchAndYawInput(float Pitch, f
 void UFPCOperatorMovementComponent::TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-
-	// Fetch movement data
-	const FVector& CharacterAcceleration = GetCurrentAcceleration();
-
-	CharacterAcceleration2D = FVector(CharacterAcceleration.X, CharacterAcceleration.Y, 0);
-	CharacterVelocity2D = FVector(Velocity.X, Velocity.Y, 0);
-	CharacterVelocityZ = Velocity.Z;
-	CharacterAbsoluteSpeed = Velocity.Length();
-	CharacterAbsoluteSpeed2D = UKismetMathLibrary::VSizeXY(CharacterVelocity2D);
-	CharacterNormalizedSpeed = CharacterAbsoluteSpeed / MaxWalkSpeed;
-
-	// Update if the character is moving
-	if (IsCharacterMoving && CharacterVelocity2D.Length() < 1)
-		IsCharacterMoving = false;
-	else if (!IsCharacterMoving && CharacterVelocity2D.Length() > 10)
-		IsCharacterMoving = true;
-
-	IsCharacterAccelerating = !CharacterAcceleration.IsNearlyZero();
 
 	//Calculate the directions
 	if (IsCharacterAccelerating)
@@ -136,13 +118,6 @@ void UFPCOperatorMovementComponent::TickComponent(float DeltaTime, enum ELevelTi
 	CurrentDeltaDistance = FVector::Distance(LastWorldLocation, CurrentWorldLocation);
 	CurrentDeltaDistanceZ = CurrentWorldLocation.Z - LastWorldLocation.Z;
 	LastWorldLocation = CurrentWorldLocation;
-
-	// Precompute normalized velocity and acceleration for clarity
-	const FVector NormalizedVelocity = CharacterVelocity2D.GetSafeNormal();
-	const FVector NormalizedAcceleration = CharacterAcceleration2D.GetSafeNormal();
-
-	// Calculate the dot product once
-	CurrentVelocityAccelerationDot = FVector::DotProduct(NormalizedVelocity, NormalizedAcceleration);
 
 	// Calculate Yaw Angular Velocity
 	FRotator CurrentRotation = OwningOperator->GetActorRotation();

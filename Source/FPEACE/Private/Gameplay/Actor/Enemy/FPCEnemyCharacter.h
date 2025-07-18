@@ -15,14 +15,10 @@ public:
 	// Sets default values for this character's properties
 	AFPCEnemyCharacter();
 
-protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
+	// ----------------- GETTERS -------------------
+	TWeakObjectPtr<class UFPCCharacterMovementComponent> GetEnemyMovementComponent() const {return EnemyMovementComponent;}
 
-public:
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
+private:
 
-	// Called to bind functionality to input
-	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+	TWeakObjectPtr<class UFPCCharacterMovementComponent> EnemyMovementComponent;
 };
