@@ -4,9 +4,11 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "AbilitySystemInterface.h"
 #include "Gameplay/ExtendedClasses/FPCActor.h"
 #include "FPCWeapon.generated.h"
 
+class UFPCAbilitySystemComponent;
 class AFPCOperator;
 class AFPCGameplayPlayerController;
 class UFPCOperatorAnimationManagerComponent;
@@ -88,7 +90,7 @@ struct FWeaponLagSettings
  * The base class for all weapons in the game.
  */
 UCLASS()
-class FPEACE_API AFPCWeapon : public AFPCActor
+class FPEACE_API AFPCWeapon : public AFPCActor, public IAbilitySystemInterface
 {
 	GENERATED_BODY()
 
@@ -147,6 +149,12 @@ public:
 protected:
 	AFPCWeapon();
 
+	/*
+	 * The identifier used to look up curve tables and other GAS values for this weapon
+	 */
+	UPROPERTY(EditDefaultsOnly, Category="Weapon")
+	FName ContentID;
+
 	UPROPERTY(EditDefaultsOnly, Category="Weapon")
 	FWeaponAnimSettings AnimSettings;
 
@@ -160,7 +168,6 @@ protected:
 	UPROPERTY(BlueprintReadOnly)
 	bool bCameraModeMatchesWeapon;
 
-protected:
 	UPROPERTY(BlueprintReadOnly)
 	FTransform AimSocketActorSpaceTransform;
 
@@ -168,13 +175,10 @@ protected:
 	FTransform EmitterSocketActorSpaceTransform;
 
 	UPROPERTY(BlueprintReadOnly)
-	bool bIsWeaponReadyToBeUsed = true;
-
-	UPROPERTY(BlueprintReadOnly)
-	bool bIsWeaponInCoolDown = false;
-
-	UPROPERTY(BlueprintReadOnly)
 	bool bIsWeaponInUse;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	TObjectPtr<UFPCAbilitySystemComponent> FPCAbilitySystemComponent;
 
 	/*
 	 * Reference to the character that is actively using this weapon
@@ -224,7 +228,9 @@ protected:
 
 	virtual void OnConstruction(const FTransform& Transform) override;
 
-	virtual void Tick(float DeltaSeconds) override;
+	virtual void PostInitializeComponents() override;
+
+	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
 
 	// --------------------- OTHER FUNCTIONS ---------------------
 	virtual TArray<TObjectPtr<UMeshComponent>> GatherWeaponMeshComps();

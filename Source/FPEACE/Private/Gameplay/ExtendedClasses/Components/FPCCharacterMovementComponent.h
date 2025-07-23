@@ -18,21 +18,32 @@ public:
 
 protected:
 
+	/*
+	 * Reference to the FPC character that owns this instance of the component
+	 */
+	TWeakObjectPtr<class AFPCCharacter> OwningCharacter;
+	
 	UPROPERTY(BlueprintReadOnly)
 	FVector CharacterAcceleration2D = FVector::ZeroVector;
-	
+
 	UPROPERTY(BlueprintReadOnly)
 	FVector CharacterVelocity2D = FVector::ZeroVector;
-	
+
+	/*
+	 * Velocity relative to controller rotation
+	 */
+	UPROPERTY(BlueprintReadOnly)
+	FVector RelativeVelocity = FVector::ZeroVector;
+
 	UPROPERTY(BlueprintReadOnly)
 	float CharacterVelocityZ = 0;
-	
+
 	UPROPERTY(BlueprintReadOnly)
 	float CharacterAbsoluteSpeed = 0;
-	
+
 	UPROPERTY(BlueprintReadOnly)
 	float CharacterAbsoluteSpeed2D = 0;
-	
+
 	UPROPERTY(BlueprintReadOnly)
 	float CurrentVelocityAccelerationDot = 0;
 
@@ -45,6 +56,7 @@ protected:
 	UPROPERTY(BlueprintReadOnly)
 	bool IsCharacterAccelerating = false;
 
-	virtual void TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+	virtual void InitializeComponent() override;
 	
+	virtual void TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 };

@@ -6,7 +6,6 @@
 #include "CoreMinimal.h"
 #include "AbilitySystemInterface.h"
 #include "GameFramework/Character.h"
-#include "Gameplay/GAS/Abilities/FPCOperatorAbilityBase.h"
 #include "FPCCharacter.generated.h"
 
 class UFPCOperatorData;
@@ -36,7 +35,7 @@ public:
 
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="FPEACE")
-	TArray<TSubclassOf<UFPCOperatorAbilityBase>> BasicAbilities;
+	TArray<TSubclassOf<class UFPCOperatorAbilityBase>> BasicAbilities;
 
 	//	--------------------- COMPONENTS ---------------------
 
@@ -50,6 +49,8 @@ protected:
 	//	--------------------- OVERRIDES ---------------------
 
 	virtual void BeginPlay() override;
+
+	virtual void PostInitializeComponents() override;
 
 	virtual void OnConstruction(const FTransform& Transform) override;
 };

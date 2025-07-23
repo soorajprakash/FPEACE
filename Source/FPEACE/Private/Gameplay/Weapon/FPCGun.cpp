@@ -6,15 +6,19 @@
 #include "NiagaraComponent.h"
 #include "FPCBullet.h"
 #include "ObjectPoolSubsystem.h"
-#include "RecoilHelper.h"
 #include "Gameplay/Actor/Operator/FPCOperator.h"
 #include "Gameplay/Actor/Operator/Components/FPCOperatorCameraManagerComponent.h"
 #include "Gameplay/Actor/Operator/Components/FPCOperatorWeaponManagerComponent.h"
+#include "Gameplay/ExtendedClasses/Components/FPCAbilitySystemComponent.h"
 #include "Gameplay/ExtendedClasses/Components/FPCSkeletalMeshComponent.h"
 #include "Gameplay/ExtendedClasses/Components/FPCStaticMeshComponent.h"
+#include "Gameplay/GAS/Abilities/WeaponAbilities/FPCGunAbility_Fire.h"
+#include "Gameplay/GAS/AttribueSets/FPCGunAttributeSet.h"
 
 AFPCGun::AFPCGun()
 {
+	GunAttributeSet = CreateDefaultSubobject<UFPCGunAttributeSet>(TEXT("GunValueSet"));
+
 	if (!ReceiverMeshComp)
 	{
 		ReceiverMeshComp = CreateDefaultSubobject<UFPCSkeletalMeshComponent>(TEXT("ReceiverMeshComp"));
@@ -65,118 +69,50 @@ void AFPCGun::UseWeapon()
 {
 	Super::UseWeapon();
 
-	if (RemainingBulletsInMag < 1 || bIsReloading)
+	if (GunAttributeSet->GetRemainingBulletsInMag() < 1 || bIsReloading)
 		return;
 
-	if (bIsWeaponReadyToBeUsed)
+	switch (GunSettings.FireMode)
 	{
-		switch (GunSettings.FireMode)
+	case SingleShot:
 		{
-		case SingleShot:
-			{
-				Fire();
-				bIsWeaponInCoolDown = true;
-				GunCoolDownHandle.Invalidate();
-				FTimerDelegate CooldownTimerDelegate = FTimerDelegate::CreateLambda([this]()
-				{
-					bIsWeaponInCoolDown = false;
-					GunRecoilHelper->RecoilStop();
-				});
+			if (bWasTriggerLiftedAfterLastFire)
+				FPCAbilitySystemComponent->TryActivateAbilityByClass(FireAbility);
 
-				GetWorld()->GetTimerManager().SetTimer(GunCoolDownHandle, CooldownTimerDelegate, 1 / GunSettings.FireRate, false);
-
-				// Start Recoil
-				GunRecoilHelper->RecoilStart();
-
-				break;
-			}
-
-		case BurstFire:
-			{
-				bIsWeaponInCoolDown = true;
-				RemainingShotsInBurst = GunSettings.FireRate;
-				BurstModeFire();
-				// Start Recoil
-				GunRecoilHelper->RecoilStart();
-				break;
-			}
-
-		case Automatic:
-			{
-				Fire();
-				bIsWeaponInCoolDown = true;
-				GunCoolDownHandle.Invalidate();
-				FTimerDelegate CooldownTimerDelegate = FTimerDelegate::CreateLambda([this]()
-				{
-					bIsWeaponInCoolDown = false;
-				});
-
-				GetWorld()->GetTimerManager().SetTimer(GunCoolDownHandle, CooldownTimerDelegate, 1 / GunSettings.FireRate, false);
-
-				// Start Recoil
-				GunRecoilHelper->RecoilStart();
-				break;
-			}
-		default: break;
+			break;
 		}
-	}
-	else
-	{
-		// Check when the weapon can fire/again
 
-		switch (GunSettings.FireMode)
+	case BurstFire:
 		{
-		case SingleShot:
-			{
-				if (!bIsWeaponInCoolDown && bWasTriggerLiftedAfterLastFire)
-					bIsWeaponReadyToBeUsed = true;
-				break;
-			}
-
-		case BurstFire:
-			{
-				if (!bIsWeaponInCoolDown && bWasTriggerLiftedAfterLastFire)
-					bIsWeaponReadyToBeUsed = true;
-				break;
-			}
-
-		case Automatic:
-			{
-				if (!bIsWeaponInCoolDown)
-					bIsWeaponReadyToBeUsed = true;
-				break;
-			}
-
-		default: break;
+			RemainingShotsInBurst = GunAttributeSet->GetFireRate();
+			BurstModeFire();
+			break;
 		}
+
+	case Automatic:
+		{
+			FPCAbilitySystemComponent->TryActivateAbilityByClass(FireAbility);
+			break;
+		}
+	default: break;
 	}
 }
 
 void AFPCGun::TryBeginReload()
 {
-	if (!bIsReloading && RemainingBulletsInMag < GunSettings.MagCapacity)
+	if (!bIsReloading && GunAttributeSet->GetRemainingBulletsInMag() < GunAttributeSet->GetMagCapacity())
 	{
 		bIsReloading = true;
-		OnReloadStarted.Broadcast(RemainingBulletsInMag == 0, this);
+		OnReloadStarted.Broadcast(GunAttributeSet->GetRemainingBulletsInMag() == 0, this);
 	}
 }
 
 void AFPCGun::OnMagReloadFinishedPlaying()
 {
-	RemainingMagazines--;
+	GunAttributeSet->SetRemainingMags(GunAttributeSet->GetRemainingMags() - 1);
 	bIsReloading = false;
 	OnReloadFinished.Broadcast(this);
-	SetRemainingBulletsInMag(GunSettings.MagCapacity);
-}
-
-void AFPCGun::SetRemainingBulletsInMag(int InRemainingBullets)
-{
-	RemainingBulletsInMag = InRemainingBullets;
-
-	if (OnRemainingBulletsChanged.IsBound())
-	{
-		OnRemainingBulletsChanged.Broadcast(RemainingBulletsInMag);
-	}
+	GunAttributeSet->SetRemainingBulletsInMag(GunAttributeSet->GetMagCapacity());
 }
 
 TArray<TObjectPtr<UMeshComponent>> AFPCGun::GatherWeaponMeshComps()
@@ -188,24 +124,30 @@ void AFPCGun::OnConstruction(const FTransform& Transform)
 {
 	Super::OnConstruction(Transform);
 
-	// Construct the recoil helper for the weapon
-	GunRecoilHelper = NewObject<URecoilHelper>(this, URecoilHelper::StaticClass());
-	GunRecoilHelper->RecoilCurve = GunSettings.RecoilSettings.RecoilCurve;
-	GunRecoilHelper->FireRate = 1 / GunSettings.FireRate;
-	GunRecoilHelper->RecoveryTime = GunSettings.RecoilSettings.RecoveryTime;
-	GunRecoilHelper->RecoverySpeed = GunSettings.RecoilSettings.RecoverySpeed;
-	GunRecoilHelper->RecoilStrengthMultiplier = GunSettings.RecoilSettings.RecoilStrengthMultiplier;
-
 	// Get required Socket Transforms
 	AimSocketActorSpaceTransform = OpticMeshComp->GetSocketTransform(TEXT("SOCKET_Aim"), RTS_Actor);
 	EmitterSocketActorSpaceTransform = MuzzleMeshComp->GetSocketTransform(TEXT("SOCKET_Emitter"), RTS_Actor);
 
 	// Initial gun settings
-	SetRemainingBulletsInMag(GunSettings.MagCapacity);
+	GunAttributeSet->SetRemainingBulletsInMag(GunAttributeSet->GetMagCapacity());
 
 	// Set up the gun to have no collision
 	// TODO : Collision is probably required. Change this to suit the game's needs
 	SetActorEnableCollision(false);
+}
+
+void AFPCGun::PostInitializeComponents()
+{
+	Super::PostInitializeComponents();
+
+	FPCAbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(UFPCGunAttributeSet::GetRemainingBulletsInMagAttribute()).AddLambda([this](const FOnAttributeChangeData& Data)
+	{
+		if (OnRemainingBulletsChanged.IsBound())
+			OnRemainingBulletsChanged.Broadcast(Data.NewValue);
+	});
+
+	// Give abilities to the gun
+	FPCAbilitySystemComponent->K2_GiveAbility(FireAbility.Get());
 }
 
 void AFPCGun::Tick(float DeltaSeconds)
@@ -222,25 +164,12 @@ void AFPCGun::Tick(float DeltaSeconds)
 		if (!bWasTriggerLiftedAfterLastFire)
 		{
 			// Try starting a reload when the mag is empty
-			if (RemainingBulletsInMag == 0)
+			if (GunAttributeSet->GetRemainingBulletsInMag() == 0)
 				TryBeginReload();
-
-			switch (GunSettings.FireMode)
-			{
-			case Automatic:
-				{
-					GunRecoilHelper->RecoilStop();
-					break;
-				}
-			default: ;
-			}
 		}
 
 		bWasTriggerLiftedAfterLastFire = true;
 	}
-
-	if (GunRecoilHelper)
-		GunRecoilHelper->RecoilTick(DeltaSeconds);
 }
 
 void AFPCGun::SetupWeapon(const ECameraMode TargetCameraMode, USceneComponent* AttachCharacterMesh)
@@ -252,7 +181,7 @@ void AFPCGun::SetupWeapon(const ECameraMode TargetCameraMode, USceneComponent* A
 	{
 		FPooledActorSettings BulletPoolSettings;
 		BulletPoolSettings.bCanExpand = false;
-		BulletPoolSettings.InitialSpawnCount = GunSettings.MagCapacity;
+		BulletPoolSettings.InitialSpawnCount = GunAttributeSet->GetMagCapacity();
 		OwningOperator->WorldObjectPool->AddActorType(BulletClass, BulletPoolSettings);
 	}
 }
@@ -281,13 +210,13 @@ void AFPCGun::Fire()
 		BulletSpawnTransform = EmitterSocketTransform;
 	}
 
-	if (UsedInCameraMode == OwningCharacterCameraManager->GetCurrentCameraMode())
+	if (bCameraModeMatchesWeapon)
 	{
 		// This is the direction vector that points directly at the point the user is looking at
 		FVector AccurateFireDirectionVector = OwningCharacterCameraManager->GetCurrentCameraLookAtHit() - BulletSpawnTransform.GetLocation();
 
 		// Now we add inaccuracy to it using the gun settings depending on whether it's aiming down sight.
-		float BulletSpreadAngle = OwningCharacterWeaponManager->GetIsCharacterInADSState() ? GunSettings.BulletSpreadAngle_Aiming : GunSettings.BulletSpreadAngle;
+		float BulletSpreadAngle = OwningCharacterWeaponManager->GetIsCharacterInADSState() ? GunAttributeSet->GetBulletSpreadAngle_ADS() : GunAttributeSet->GetBulletSpreadAngle();
 		float HalfAngleRad = FMath::DegreesToRadians(BulletSpreadAngle * 0.5f);
 		FVector SpreadFireDirection = FMath::VRandCone(AccurateFireDirectionVector, HalfAngleRad).GetSafeNormal();
 
@@ -295,40 +224,28 @@ void AFPCGun::Fire()
 		BulletSpawnTransform.SetRotation(BulletRotation.Quaternion());
 
 		if (AFPCBullet* NewBullet = AcquireBullet())
-			NewBullet->PropelBullet(BulletSpawnTransform, GunSettings.BulletVelocity);
+			NewBullet->PropelBullet(BulletSpawnTransform, GunAttributeSet->GetBulletVelocity());
 	}
 
 	// Shot count
-	SetRemainingBulletsInMag(RemainingBulletsInMag - 1);
-	if (RemainingBulletsInMag == 0)
+	// SetRemainingBulletsInMag(RemainingBulletsInMag - 1);
+	if (GunAttributeSet->GetRemainingBulletsInMag() == 0)
 		OnMagWasEmptied.Broadcast(this);
 
 	OnWeaponSuccessfullyUsed.Broadcast(this);
-
-	bIsWeaponReadyToBeUsed = false;
 }
 
 void AFPCGun::BurstModeFire()
 {
 	if (RemainingShotsInBurst > 0)
 	{
-		Fire();
+		FPCAbilitySystemComponent->TryActivateAbilityByClass(FireAbility);
 		RemainingShotsInBurst--;
 
 		if (RemainingShotsInBurst > 0)
 			GetWorld()->GetTimerManager().SetTimer(GunContinuosFireHandle, this, &AFPCGun::BurstModeFire, GunSettings.BurstFireInterval, false);
 		else
 			BurstModeFire();
-	}
-	else
-	{
-		GunCoolDownHandle.Invalidate();
-		// Stop Recoil
-		GunRecoilHelper->RecoilStop();
-		GetWorld()->GetTimerManager().SetTimer(GunCoolDownHandle, [this]()
-		{
-			bIsWeaponInCoolDown = false;
-		}, GunSettings.FireCoolDownInterval, false);
 	}
 }
 

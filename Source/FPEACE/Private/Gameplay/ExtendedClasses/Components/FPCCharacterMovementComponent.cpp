@@ -2,6 +2,8 @@
 
 
 #include "FPCCharacterMovementComponent.h"
+
+#include "Gameplay/Actor/FPCCharacter.h"
 #include "Kismet/KismetMathLibrary.h"
 
 
@@ -15,6 +17,13 @@ UFPCCharacterMovementComponent::UFPCCharacterMovementComponent()
 	// ...
 }
 
+void UFPCCharacterMovementComponent::InitializeComponent()
+{
+	Super::InitializeComponent();
+
+	OwningCharacter = Cast<AFPCCharacter>(GetOwner());
+}
+
 void UFPCCharacterMovementComponent::TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
@@ -24,6 +33,7 @@ void UFPCCharacterMovementComponent::TickComponent(float DeltaTime, enum ELevelT
 
 	CharacterAcceleration2D = FVector(CharacterAcceleration.X, CharacterAcceleration.Y, 0);
 	CharacterVelocity2D = FVector(Velocity.X, Velocity.Y, 0);
+	RelativeVelocity = OwningCharacter->GetActorRotation().UnrotateVector(Velocity);
 	CharacterVelocityZ = Velocity.Z;
 	CharacterAbsoluteSpeed = Velocity.Length();
 	CharacterAbsoluteSpeed2D = UKismetMathLibrary::VSizeXY(CharacterVelocity2D);

@@ -5,8 +5,11 @@
 
 #include "CoreMinimal.h"
 #include "FPCWeapon.h"
+#include "Gameplay/GAS/AttribueSets/FPCGunAttributeSet.h"
 #include "FPCGun.generated.h"
 
+class UFPCGunAbility_Fire;
+class UFPCGunAttributeSet;
 class URecoilHelper;
 class UCurveVector;
 class AFPCBullet;
@@ -31,38 +34,11 @@ enum EGunFireMode
 };
 
 USTRUCT(BlueprintType)
-struct FGunRecoilSettings
-{
-	GENERATED_BODY()
-
-	FGunRecoilSettings(): RecoilCurve(nullptr), RecoveryTime(1), RecoverySpeed(10.0f)
-	{
-	}
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	TObjectPtr<UCurveVector> RecoilCurve;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	TSubclassOf<UCameraShakeBase> RecoilCameraShake;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, meta=(ClampMin=-1.0f, ClampMax=1.0f))
-	float RecoilStrengthMultiplier = -0.5f;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	float RecoveryTime;
-
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	float RecoverySpeed;
-};
-
-USTRUCT(BlueprintType)
 struct FGunSettings
 {
 	GENERATED_BODY()
 
-	FGunSettings(): FireMode(SingleShot), FireRate(10), FireCoolDownInterval(0.3f), BurstFireInterval(0.1f), ReloadTime(1.5f), EmptyReloadTime(2.5f), MagCapacity(10), MagCount(10),
-	                BulletSpreadAngle_Aiming(1),
-	                BulletSpreadAngle(5)
+	FGunSettings(): FireMode(SingleShot), BurstFireInterval(0.1f)
 	{
 	}
 
@@ -73,73 +49,11 @@ struct FGunSettings
 	TEnumAsByte<EGunFireMode> FireMode;
 
 	/*
-	 * This value is the number of bullets per second for automatic fire mode.
-	 * For burst fire, this value is the number of bullets per burst.
-	 * For a single shot, the inverse of this value is used as the cool-down time
-	 */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	float FireRate;
-
-	/*
-	 * This is the cool-down time between each single bullet shot.
-	 * This value is not used for single shot and automatic mode.
-	 */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	float FireCoolDownInterval;
-
-	/*
 	 * This is the cool-down time between each single bullet shot within a burst.
 	 * This value is not used for single shot and automatic mode.
 	 */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
 	float BurstFireInterval;
-
-	/*
-	 * The time taken to reload the gun when the mag is not empty
-	 */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	float ReloadTime;
-
-	/*
-	 * The time taken to reload the gun when the mag is empty
-	 */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	float EmptyReloadTime;
-
-	/*
-	 * Number of bullets in the magazine.
-	 */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	int32 MagCapacity;
-
-	/*
-	 * The number of magazines the player holds for this weapon
-	 */
-	int32 MagCount;
-
-	/*
-	 * The angle of the bullet spread cone in degrees of this gun when aiming down sight
-	 */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	float BulletSpreadAngle_Aiming;
-
-	/*
-	 * The angle of the bullet spread cone in degrees of this gun when not aiming down sight
-	 */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	float BulletSpreadAngle;
-
-	/*
-	 * The velocity of the fired bullet in centimeters per second.
-	 */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	float BulletVelocity = 35000;
-
-	/*
-	 * The recoil settings of this gun
-	 */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	FGunRecoilSettings RecoilSettings;
 };
 
 /**
@@ -210,15 +124,27 @@ public:
 
 	virtual UFPCSkeletalMeshComponent* GetBaseMeshComp() const override { return ReceiverMeshComp; }
 
-	int32 GetCurrentRemainingBullets() const { return RemainingBulletsInMag; }
+	int32 GetCurrentRemainingBullets() const { return GunAttributeSet->GetRemainingBulletsInMag(); }
+
+	int32 GetMagCapacity() const { return GunAttributeSet->GetMagCapacity(); }
 
 	FGunSettings GetGunSettings() const { return GunSettings; }
 
-	int32 GetTotalBulletsInUnusedMagazines() const { return GunSettings.MagCount * GunSettings.MagCapacity; }
+	int32 GetTotalBulletsInUnusedMagazines() const { return GunAttributeSet->GetRemainingMags() * GunAttributeSet->GetMagCapacity(); }
 
 	bool GetIsGunReloading() const { return bIsReloading; }
 
 protected:
+	//	--------------------- GUN ABILITIES ---------------------
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	TSubclassOf<UFPCGunAbility_Fire> FireAbility;
+
+	//	--------------------- GUN ATTRIBUTES ---------------------
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	TObjectPtr<UFPCGunAttributeSet> GunAttributeSet;
+
 	//	--------------------- GUN COMPONENTS ---------------------
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Gun")
@@ -251,36 +177,29 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="Gun")
 	TSubclassOf<AFPCBullet> BulletClass;
 
+	// --------------------- GUN FUNCTIONS ---------------------
+
+	UFUNCTION(BlueprintCallable)
+	void Fire();
+
 	// --------------------- OVERRIDDEN FUNCTIONS ---------------------
 
 	virtual TArray<TObjectPtr<UMeshComponent>> GatherWeaponMeshComps() override;
 
 	virtual void OnConstruction(const FTransform& Transform) override;
 
+	virtual void PostInitializeComponents() override;
+
 	virtual void Tick(float DeltaSeconds) override;
 
 	virtual void SetupWeapon(const ECameraMode TargetCameraMode, USceneComponent* AttachCharacterMesh) override;
 
 private:
-	UPROPERTY()
-	TObjectPtr<URecoilHelper> GunRecoilHelper;
-
 	bool bWasTriggerLiftedAfterLastFire = true;
 
 	bool bIsReloading = false;
 
-	/*
-	 * The number of bullets currently remaining in the mag
-	 */
-	int32 RemainingBulletsInMag;
-
 	//	--------------------- SETTERS ---------------------
-	void SetRemainingBulletsInMag(int InRemainingBullets);
-
-	/*
-	 * Total number of spare magazines the player has for this weapon.
-	 */
-	int32 RemainingMagazines;
 
 	/*
 	 * Used when the gun is in burst fire mode.
@@ -288,8 +207,6 @@ private:
 	 */
 	int32 RemainingShotsInBurst;
 	FTimerHandle GunContinuosFireHandle;
-	FTimerHandle GunCoolDownHandle;
-	void Fire();
 	void BurstModeFire();
 	AFPCBullet* AcquireBullet();
 };

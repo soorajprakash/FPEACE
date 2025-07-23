@@ -86,12 +86,6 @@ private:
 	UFUNCTION()
 	void SetCameraMode(ECameraMode NewCameraMode);
 
-	UFUNCTION()
-	void OnCurrentWeaponUsed(const AFPCWeapon* WeaponRef);
-	
-	UFUNCTION()
-	void OnEquipNewWeapon(AFPCWeapon* SpawnedFPSWeaponRef, AFPCWeapon* SpawnedTPSWeaponRef);
-
 	/*
 	 * Changes the settings for the camera and the spring arm for the given mode using the character data
 	 */

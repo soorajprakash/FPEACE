@@ -10,7 +10,7 @@ void UMVVM_HUD_WeaponStats::SetCurrentWepon(const TWeakObjectPtr<AFPCGun>& InCur
 	if (UE_MVVM_SET_PROPERTY_VALUE(CurrentGun, InCurrentWepon))
 	{
 		UE_MVVM_BROADCAST_FIELD_VALUE_CHANGED(CurrentGun);
-		SetMagCapacity(CurrentGun->GetGunSettings().MagCapacity);
+		SetMagCapacity(CurrentGun->GetMagCapacity());
 		SetRemainingBullets(CurrentGun->GetCurrentRemainingBullets());
 	}
 }

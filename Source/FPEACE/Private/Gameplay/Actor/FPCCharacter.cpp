@@ -2,14 +2,12 @@
 // Unauthorized distribution of this file, or any part of it, is prohibited.
 
 #include "FPCCharacter.h"
-#include "FPCGameplayPlayerController.h"
 #include "ObjectPoolSubsystem.h"
-#include "DataStructures/FPCCharacterData.h"
-#include "Gameplay/ExtendedClasses/FPCGameInstance.h"
 #include "Gameplay/ExtendedClasses/Components/FPCAbilitySystemComponent.h"
 #include "Gameplay/ExtendedClasses/Components/FPCSkeletalMeshComponent.h"
 #include "Gameplay/ExtendedClasses/Components/FPCCapsuleComponent.h"
 #include "Operator/Components/FPCOperatorMovementComponent.h"
+#include "Gameplay/GAS/Abilities/OperatorAbilities/FPCOperatorAbilityBase.h"
 
 // Sets default values
 AFPCCharacter::AFPCCharacter(const FObjectInitializer& ObjectInitializer): Super(
@@ -35,8 +33,6 @@ void AFPCCharacter::BeginPlay()
 
 	if (FPCAbilitySystemComponent)
 	{
-		FPCAbilitySystemComponent->InitAbilityActorInfo(this, this);
-
 		// Grant basic abilities
 		for (TSubclassOf Ability : BasicAbilities)
 		{
@@ -44,6 +40,13 @@ void AFPCCharacter::BeginPlay()
 			FPCAbilitySystemComponent->TryActivateAbilityByClass(Ability);
 		}
 	}
+}
+
+void AFPCCharacter::PostInitializeComponents()
+{
+	Super::PostInitializeComponents();
+
+	FPCAbilitySystemComponent->InitAbilityActorInfo(this, this);
 }
 
 void AFPCCharacter::OnConstruction(const FTransform& Transform)

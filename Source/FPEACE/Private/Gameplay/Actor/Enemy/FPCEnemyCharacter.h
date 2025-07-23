@@ -6,7 +6,7 @@
 #include "Gameplay/Actor/FPCCharacter.h"
 #include "FPCEnemyCharacter.generated.h"
 
-UCLASS()
+UCLASS(Abstract)
 class FPEACE_API AFPCEnemyCharacter : public AFPCCharacter
 {
 	GENERATED_BODY()
@@ -20,5 +20,5 @@ public:
 
 private:
 
-	TWeakObjectPtr<class UFPCCharacterMovementComponent> EnemyMovementComponent;
+	TWeakObjectPtr<UFPCCharacterMovementComponent> EnemyMovementComponent;
 };

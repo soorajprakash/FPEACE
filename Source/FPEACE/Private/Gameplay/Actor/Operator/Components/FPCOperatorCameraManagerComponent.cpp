@@ -49,30 +49,6 @@ void UFPCOperatorCameraManagerComponent::SetCameraMode(ECameraMode NewCameraMode
 	OnCameraModeChanged.Broadcast(CurrentCameraMode);
 }
 
-void UFPCOperatorCameraManagerComponent::OnCurrentWeaponUsed(const AFPCWeapon* WeaponRef)
-{
-	if (WeaponRef && WeaponRef->GetCameraModeMatchesWeapon())
-	{
-		if (const AFPCGun* GunRef = Cast<AFPCGun>(WeaponRef))
-			PlayerControllerRef->ClientStartCameraShake(GunRef->GetGunSettings().RecoilSettings.RecoilCameraShake);
-	}
-}
-
-
-void UFPCOperatorCameraManagerComponent::OnEquipNewWeapon(AFPCWeapon* SpawnedFPSWeaponRef, AFPCWeapon* SpawnedTPSWeaponRef)
-{
-	// Link the animation class to the character
-	if (SpawnedFPSWeaponRef && SpawnedTPSWeaponRef)
-	{
-		// Subscribe to the weapon's animation related events events
-		SpawnedFPSWeaponRef->OnWeaponSuccessfullyUsed.RemoveAll(this);
-		SpawnedFPSWeaponRef->OnWeaponSuccessfullyUsed.AddDynamic(this, &UFPCOperatorCameraManagerComponent::OnCurrentWeaponUsed);
-
-		SpawnedTPSWeaponRef->OnWeaponSuccessfullyUsed.RemoveAll(this);
-		SpawnedTPSWeaponRef->OnWeaponSuccessfullyUsed.AddDynamic(this, &UFPCOperatorCameraManagerComponent::OnCurrentWeaponUsed);
-	}
-}
-
 void UFPCOperatorCameraManagerComponent::SetCameraSettings(ECameraMode NewCameraMode) const
 {
 	const FCharacterCameraModeSettings& TargetCameraModeSettings = FPCOperatorData->CameraModeSettings[NewCameraMode];
@@ -104,10 +80,7 @@ void UFPCOperatorCameraManagerComponent::InitializeComponent()
 	Super::InitializeComponent();
 
 	if (OwningOperator.IsValid())
-	{
 		FPCCameraComp = OwningOperator->GetCharacterCameraComp();
-		FPCOperatorWeaponManagerComp->OnNewWeaponEquipped.AddDynamic(this, &UFPCOperatorCameraManagerComponent::OnEquipNewWeapon);
-	}
 
 	// Setup Values
 	if (FPCOperatorData.IsValid())

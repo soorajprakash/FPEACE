@@ -2,13 +2,19 @@
 // Unauthorized distribution of this file, or any part of it, is prohibited.
 
 #include "FPCWeapon.h"
+
+#include "AbilitySystemGlobals.h"
+#include "GameplayAbilitiesModule.h"
 #include "Gameplay/Actor/Operator/FPCOperator.h"
 #include "Gameplay/Actor/Operator/Components/FPCOperatorCameraManagerComponent.h"
 #include "Gameplay/Common/CommonEnums.h"
+#include "Gameplay/ExtendedClasses/Components/FPCAbilitySystemComponent.h"
 
 AFPCWeapon::AFPCWeapon(): UsedInCameraMode(ECameraMode::TPS), bIsWeaponInUse(false)
 {
 	PrimaryActorTick.bCanEverTick = true;
+
+	FPCAbilitySystemComponent = CreateDefaultSubobject<UFPCAbilitySystemComponent>(TEXT("FPCAbilitySystemComponent"));
 }
 
 void AFPCWeapon::OnConstruction(const FTransform& Transform)
@@ -18,9 +24,17 @@ void AFPCWeapon::OnConstruction(const FTransform& Transform)
 	WeaponMeshComps = GatherWeaponMeshComps();
 }
 
-void AFPCWeapon::Tick(float DeltaSeconds)
+void AFPCWeapon::PostInitializeComponents()
 {
-	Super::Tick(DeltaSeconds);
+	Super::PostInitializeComponents();
+
+	FPCAbilitySystemComponent->InitAbilityActorInfo(this, this);
+	IGameplayAbilitiesModule::Get().GetAbilitySystemGlobals()->GetAttributeSetInitter()->InitAttributeSetDefaults(FPCAbilitySystemComponent, ContentID, 1, true);
+}
+
+UAbilitySystemComponent* AFPCWeapon::GetAbilitySystemComponent() const
+{
+	return FPCAbilitySystemComponent;
 }
 
 TArray<TObjectPtr<UMeshComponent>> AFPCWeapon::GatherWeaponMeshComps()
