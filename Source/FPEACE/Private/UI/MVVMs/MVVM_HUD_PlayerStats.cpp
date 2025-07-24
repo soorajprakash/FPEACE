@@ -2,6 +2,12 @@
 
 #include "UI/MVVMs/MVVM_HUD_PlayerStats.h"
 
+void UMVVM_HUD_PlayerStats::SetScore(const int32& NewScore)
+{
+	if (UE_MVVM_SET_PROPERTY_VALUE(Score, NewScore))
+		UE_MVVM_BROADCAST_FIELD_VALUE_CHANGED(Score);
+}
+
 void UMVVM_HUD_PlayerStats::SetHealth(const float& NewHealth)
 {
 	if (UE_MVVM_SET_PROPERTY_VALUE(Health, NewHealth))

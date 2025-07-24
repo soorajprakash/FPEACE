@@ -4,6 +4,10 @@
 #include "FPCEnemyAnimInstance.h"
 #include "Gameplay/Actor/Enemy/FPCEnemyCharacter.h"
 
+void UFPCEnemyAnimInstance::OnHitDamageTaken_Implementation(UAnimMontage* HitReactionMontage)
+{
+}
+
 void UFPCEnemyAnimInstance::NativeInitializeAnimation()
 {
 	Super::NativeInitializeAnimation();

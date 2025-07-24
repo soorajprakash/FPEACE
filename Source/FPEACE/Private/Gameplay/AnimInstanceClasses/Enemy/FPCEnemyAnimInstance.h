@@ -6,7 +6,6 @@
 #include "Animation/AnimInstance.h"
 #include "FPCEnemyAnimInstance.generated.h"
 
-
 /**
  * 
  */
@@ -15,18 +14,23 @@ class FPEACE_API UFPCEnemyAnimInstance : public UAnimInstance
 {
 	GENERATED_BODY()
 
+	friend class AFPCEnemyCharacter;
+
 protected:
 	/*
 	 * Reference to the enemy character that is actively using this anim instance
 	 */
 	UPROPERTY(BlueprintReadOnly)
-	TWeakObjectPtr<class AFPCEnemyCharacter> OwningEnemyCharacter;
+	TWeakObjectPtr<AFPCEnemyCharacter> OwningEnemyCharacter;
 
 	/*
 	 * Reference to the movement component in the character that is actively using this anim instance
 	 */
 	UPROPERTY(BlueprintReadOnly)
 	TWeakObjectPtr<class UFPCCharacterMovementComponent> OwningCharacterMovementComponent;
+
+	UFUNCTION(BlueprintNativeEvent)
+	void OnHitDamageTaken(UAnimMontage* HitReactionMontage);
 
 	virtual void NativeInitializeAnimation() override;
 };

@@ -8,6 +8,7 @@
 #include "GameFramework/Character.h"
 #include "FPCCharacter.generated.h"
 
+class UFPCHealthAttributeSet;
 class UFPCOperatorData;
 class UFPCAbilitySystemComponent;
 class AFPCGameplayPlayerController;
@@ -36,6 +37,17 @@ public:
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="FPEACE")
 	TArray<TSubclassOf<class UFPCOperatorAbilityBase>> BasicAbilities;
+
+	/*
+	 * Name of the content ID used to fetch default attribute values
+	 */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="FPEACE")
+	FName ContentID;
+
+	//	--------------------- ATTRIBUTES ---------------------
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="FPEACE")
+	TObjectPtr<UFPCHealthAttributeSet> HealthAttributeSet;
 
 	//	--------------------- COMPONENTS ---------------------
 

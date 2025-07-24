@@ -255,7 +255,7 @@ AFPCBullet* AFPCGun::AcquireBullet()
 	OwningOperator->WorldObjectPool->Pull(BulletClass, BulletActorFromPool);
 	if (AFPCBullet* NewBullet = Cast<AFPCBullet>(BulletActorFromPool))
 	{
-		NewBullet->SetOwners(OwningOperator.Get(), this);
+		NewBullet->Initialize(OwningOperator.Get(), this);
 		return NewBullet;
 	}
 

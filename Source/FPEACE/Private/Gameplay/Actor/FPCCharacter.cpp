@@ -2,12 +2,16 @@
 // Unauthorized distribution of this file, or any part of it, is prohibited.
 
 #include "FPCCharacter.h"
+
+#include "AbilitySystemGlobals.h"
+#include "GameplayAbilitiesModule.h"
 #include "ObjectPoolSubsystem.h"
 #include "Gameplay/ExtendedClasses/Components/FPCAbilitySystemComponent.h"
 #include "Gameplay/ExtendedClasses/Components/FPCSkeletalMeshComponent.h"
 #include "Gameplay/ExtendedClasses/Components/FPCCapsuleComponent.h"
 #include "Operator/Components/FPCOperatorMovementComponent.h"
 #include "Gameplay/GAS/Abilities/OperatorAbilities/FPCOperatorAbilityBase.h"
+#include "Gameplay/GAS/AttribueSets/FPCHealthAttributeSet.h"
 
 // Sets default values
 AFPCCharacter::AFPCCharacter(const FObjectInitializer& ObjectInitializer): Super(
@@ -25,6 +29,8 @@ AFPCCharacter::AFPCCharacter(const FObjectInitializer& ObjectInitializer): Super
 	// Construct components
 	if (!FPCAbilitySystemComponent)
 		FPCAbilitySystemComponent = CreateDefaultSubobject<UFPCAbilitySystemComponent>(TEXT("AbilitySystemComponent"));
+
+	HealthAttributeSet = CreateDefaultSubobject<UFPCHealthAttributeSet>(TEXT("HealthSet"));
 }
 
 void AFPCCharacter::BeginPlay()
@@ -47,6 +53,8 @@ void AFPCCharacter::PostInitializeComponents()
 	Super::PostInitializeComponents();
 
 	FPCAbilitySystemComponent->InitAbilityActorInfo(this, this);
+
+	IGameplayAbilitiesModule::Get().GetAbilitySystemGlobals()->GetAttributeSetInitter()->InitAttributeSetDefaults(FPCAbilitySystemComponent, ContentID, 1, true);
 }
 
 void AFPCCharacter::OnConstruction(const FTransform& Transform)

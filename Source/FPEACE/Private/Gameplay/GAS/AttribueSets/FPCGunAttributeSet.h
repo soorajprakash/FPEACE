@@ -16,6 +16,7 @@ class FPEACE_API UFPCGunAttributeSet : public UAttributeSet
 	GENERATED_BODY()
 
 public:
+	ATTRIBUTE_ACCESSORS_BASIC(UFPCGunAttributeSet, BaseBulletDamage)
 	ATTRIBUTE_ACCESSORS_BASIC(UFPCGunAttributeSet, RemainingBulletsInMag)
 	ATTRIBUTE_ACCESSORS_BASIC(UFPCGunAttributeSet, MagCapacity)
 	ATTRIBUTE_ACCESSORS_BASIC(UFPCGunAttributeSet, RemainingMags)
@@ -27,6 +28,12 @@ public:
 	ATTRIBUTE_ACCESSORS_BASIC(UFPCGunAttributeSet, BulletVelocity)
 
 protected:
+	/*
+	 * The amount of damage dealt to the target character by each bullet of this gun
+	 */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="FPEACE|Attributes")
+	FGameplayAttributeData BaseBulletDamage;
+
 	/*
 	 * Remaining number of bullets in the mag
 	 */

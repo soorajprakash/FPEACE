@@ -4,12 +4,14 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Gameplay/Actor/FPCCharacter.h"
 #include "Gameplay/ExtendedClasses/FPCPooledActor.h"
 #include "FPCBullet.generated.h"
 
+class AFPCOperator;
+class UFPCAbilitySystemComponent;
+class UAbilitySystemComponent;
+class UGameplayEffect;
 class AFPCGun;
-class AFPCCharacter;
 class UBoxComponent;
 class UFPCProjectileMovementComponent;
 class UFPCStaticMeshComponent;
@@ -23,18 +25,21 @@ public:
 	// Sets default values for this actor's properties
 	AFPCBullet();
 
-	void SetOwners(AFPCCharacter* OwnerCharacter, AFPCGun* OwnerGun);
+	void Initialize(AFPCOperator* OwnerCharacter, AFPCGun* OwnerGun);
 
 	void PropelBullet(const FTransform& FireFromTransform, const float BulletVelocity);
 
 protected:
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="FPEACE")
+	TSubclassOf<UGameplayEffect> BulletDamageEffect;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="FPEACE")
 	TObjectPtr<UFPCStaticMeshComponent> BulletMeshComp;
 
-	UPROPERTY(EditAnywhere, BlueprintReadOnly)
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="FPEACE")
 	TObjectPtr<UBoxComponent> BulletCollisionComponent;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="FPEACE")
 	TObjectPtr<UFPCProjectileMovementComponent> BulletMovementComp;
 
 	virtual void OnPushedToPool_Implementation() override;
@@ -61,16 +66,21 @@ private:
 	 * Reference to the character that is actively using the gun that fired this bullet
 	 */
 	UPROPERTY()
-	TObjectPtr<AFPCCharacter> OwningCharacter;
+	TWeakObjectPtr<AFPCOperator> OwningOperator;
 
 	/*
 	 * Reference to the gun that fired this bullet
 	 */
 	UPROPERTY()
-	AFPCGun* OwningGun;
+	TWeakObjectPtr<AFPCGun> OwningGun;
+
+	UPROPERTY()
+	TWeakObjectPtr<UFPCAbilitySystemComponent> OwningGunASC;
 
 	void ToggleBulletActivation(const bool bActivate) const;
 
+	void ApplyDamage(UAbilitySystemComponent* TargetAsc);
+	
 	UFUNCTION()
 	void BulletOverlapedSomething(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 };

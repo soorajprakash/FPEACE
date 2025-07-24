@@ -141,6 +141,7 @@ public:
 	FTransform GetAimSocketTransform() const { return AimSocketActorSpaceTransform; }
 	FTransform GetEmitterSocketTransform() const { return EmitterSocketActorSpaceTransform; }
 	bool GetCameraModeMatchesWeapon() const { return bCameraModeMatchesWeapon; }
+	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
 
 	// --------------------------------- SETTERS ---------------------------------
 
@@ -229,8 +230,6 @@ protected:
 	virtual void OnConstruction(const FTransform& Transform) override;
 
 	virtual void PostInitializeComponents() override;
-
-	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
 
 	// --------------------- OTHER FUNCTIONS ---------------------
 	virtual TArray<TObjectPtr<UMeshComponent>> GatherWeaponMeshComps();

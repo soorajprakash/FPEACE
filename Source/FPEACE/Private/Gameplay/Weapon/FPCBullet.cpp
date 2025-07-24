@@ -3,8 +3,13 @@
 
 
 #include "FPCBullet.h"
+#include "FPCGun.h"
+#include "GameplayEffectTypes.h"
 #include "ObjectPoolSubsystem.h"
 #include "Components/BoxComponent.h"
+#include "Gameplay/Actor/Enemy/FPCEnemyCharacter.h"
+#include "Gameplay/Actor/Operator/FPCOperator.h"
+#include "Gameplay/ExtendedClasses/Components/FPCAbilitySystemComponent.h"
 #include "Gameplay/ExtendedClasses/Components/FPCProjectileMovementComponent.h"
 #include "Gameplay/ExtendedClasses/Components/FPCStaticMeshComponent.h"
 
@@ -43,10 +48,14 @@ AFPCBullet::AFPCBullet()
 	}
 }
 
-void AFPCBullet::SetOwners(AFPCCharacter* OwnerCharacter, AFPCGun* OwnerGun)
+void AFPCBullet::Initialize(AFPCOperator* OwnerCharacter, AFPCGun* OwnerGun)
 {
-	OwningCharacter = OwnerCharacter;
+	SetInstigator(OwnerCharacter);
+	SetOwner(OwnerGun);
+	OwningOperator = OwnerCharacter;
 	OwningGun = OwnerGun;
+
+	OwningGunASC = Cast<UFPCAbilitySystemComponent>(OwningGun->GetAbilitySystemComponent());
 }
 
 void AFPCBullet::PropelBullet(const FTransform& FireFromTransform, const float BulletVelocity)
@@ -95,7 +104,7 @@ void AFPCBullet::Tick(float DeltaSeconds)
 		CurrentBulletAge += DeltaSeconds;
 
 		if (CurrentBulletAge >= BulletLifeSpan)
-			OwningCharacter->WorldObjectPool->Push(this);
+			OwningOperator->WorldObjectPool->Push(this);
 	}
 }
 
@@ -119,9 +128,30 @@ void AFPCBullet::ToggleBulletActivation(const bool bActivate) const
 	BulletMovementComp->Velocity = FVector::ZeroVector;
 }
 
+void AFPCBullet::ApplyDamage(UAbilitySystemComponent* TargetAsc)
+{
+	if (!TargetAsc)
+		return;
+
+	FGameplayEffectContextHandle EffectContext = OwningGunASC->MakeEffectContext();
+	EffectContext.AddInstigator(OwningGun.Get(), OwningGun.Get());
+
+	FGameplayEffectSpecHandle SpecHandle = OwningGunASC->MakeOutgoingSpec(BulletDamageEffect, 1, EffectContext);
+
+	// Apply Damage Effect
+	OwningGunASC->ApplyGameplayEffectSpecToTarget(*SpecHandle.Data, TargetAsc);
+}
+
 void AFPCBullet::BulletOverlapedSomething(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep,
                                           const FHitResult& SweepResult)
 {
 	DrawDebugSphere(GetWorld(), SweepResult.Location, 5, 12, FColor::Red, false, 2);
-	OwningCharacter->WorldObjectPool->Push(this);
+	OwningOperator->WorldObjectPool->Push(this);
+
+	if (AFPCEnemyCharacter* EnemyCharacter = Cast<AFPCEnemyCharacter>(OtherActor))
+	{
+		UAbilitySystemComponent* TargetASC = EnemyCharacter->GetAbilitySystemComponent();
+		ApplyDamage(TargetASC);
+		EnemyCharacter->OnTookDamage(OwningOperator, SweepResult.BoneName);
+	}
 }

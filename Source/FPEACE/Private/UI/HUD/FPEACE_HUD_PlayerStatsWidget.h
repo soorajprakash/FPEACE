@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Gameplay/ExtendedClasses/FPCPlayerState.h"
 #include "UI/Common/FPCUserWidget.h"
 #include "FPEACE_HUD_PlayerStatsWidget.generated.h"
 

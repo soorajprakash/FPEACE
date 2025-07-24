@@ -3,7 +3,13 @@
 
 #include "FPCEnemyCharacter.h"
 
+#include "Gameplay/Actor/Operator/FPCOperator.h"
+#include "Gameplay/AnimInstanceClasses/Enemy/FPCEnemyAnimInstance.h"
+#include "Gameplay/ExtendedClasses/FPCPlayerState.h"
+#include "Gameplay/ExtendedClasses/Components/FPCAbilitySystemComponent.h"
 #include "Gameplay/ExtendedClasses/Components/FPCCharacterMovementComponent.h"
+#include "Gameplay/ExtendedClasses/Components/FPCSkeletalMeshComponent.h"
+#include "Gameplay/GAS/AttribueSets/FPCHealthAttributeSet.h"
 
 
 // Sets default values
@@ -13,4 +19,57 @@ AFPCEnemyCharacter::AFPCEnemyCharacter()
 	PrimaryActorTick.bCanEverTick = false;
 
 	EnemyMovementComponent = Cast<UFPCCharacterMovementComponent>(ACharacter::GetMovementComponent());
+}
+
+void AFPCEnemyCharacter::OnTookDamage(TWeakObjectPtr<AFPCOperator> From, FName HitBone)
+{
+	if (HealthAttributeSet->GetHealth() > 0)
+	{
+		if (BaseAnimInstance.IsValid())
+		{
+			// Decide which montage gets played
+			UAnimMontage* SelectedMontage;
+			FString BoneNameString = HitBone.ToString();
+
+			if (BoneNameString.Contains("arm_l", ESearchCase::IgnoreCase, ESearchDir::FromEnd) || BoneNameString.Contains("hand_l", ESearchCase::IgnoreCase, ESearchDir::FromEnd))
+				SelectedMontage = HitReaction_LeftHand;
+			else if (BoneNameString.Contains("arm_r", ESearchCase::IgnoreCase, ESearchDir::FromEnd) || BoneNameString.Contains("hand_r", ESearchCase::IgnoreCase, ESearchDir::FromEnd))
+				SelectedMontage = HitReaction_RightHand;
+			else if (BoneNameString.Contains("thigh_r", ESearchCase::IgnoreCase, ESearchDir::FromEnd) || BoneNameString.Contains("calf_r", ESearchCase::IgnoreCase, ESearchDir::FromEnd) ||
+				BoneNameString.
+				Contains("foot_r", ESearchCase::IgnoreCase, ESearchDir::FromEnd))
+				SelectedMontage = HitReaction_RightLeg;
+			else if (BoneNameString.Contains("thigh_l", ESearchCase::IgnoreCase, ESearchDir::FromEnd) || BoneNameString.Contains("calf_l", ESearchCase::IgnoreCase, ESearchDir::FromEnd) ||
+				BoneNameString.
+				Contains("foot_l", ESearchCase::IgnoreCase, ESearchDir::FromEnd))
+				SelectedMontage = HitReaction_LeftLeg;
+			else
+				SelectedMontage = HitReaction_Head;
+
+			BaseAnimInstance->OnHitDamageTaken(SelectedMontage);
+		}
+	}
+	else
+	{
+		// Add score for player
+		if (AFPCPlayerState* PS = Cast<AFPCPlayerState>(From->GetPlayerState()))
+			PS->AddScore(KillPoints);
+
+		OnDeath();
+	}
+}
+
+void AFPCEnemyCharacter::OnDeath()
+{
+	EnemyMovementComponent->DisableMovement();
+	FPCAbilitySystemComponent->CancelAllAbilities();
+	MainBodyMeshComp->SetCollisionProfileName("Ragdoll");
+	MainBodyMeshComp->SetSimulatePhysics(true);
+}
+
+void AFPCEnemyCharacter::PostInitializeComponents()
+{
+	Super::PostInitializeComponents();
+
+	BaseAnimInstance = Cast<UFPCEnemyAnimInstance>(MainBodyMeshComp->GetAnimInstance());
 }

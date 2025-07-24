@@ -2,6 +2,7 @@
 
 #include "FPEACE_HUD_PlayerStatsWidget.h"
 #include "Gameplay/ExtendedClasses/FPCGameInstance.h"
+#include "Gameplay/ExtendedClasses/FPCPlayerState.h"
 #include "ModelViewViewModel/Public/View/MVVMView.h"
 #include "UI/MVVMs/MVVM_HUD_PlayerStats.h"
 

@@ -27,11 +27,15 @@ public:
 	float GetHealthPercentage() const { return MaxHealth != 0 ? Health / MaxHealth : 0; }
 
 	//---------------------- SETTERS ----------------------
+	void SetScore(const int32& NewScore);
 	void SetHealth(const float& NewHealth);
 	void SetMaxHealth(const float& NewMaxHealth);
 	void SetSelectedOperatorData(const FFPEACEOperatorData& NewOperatorData);
 
 protected:
+	UPROPERTY(BlueprintReadOnly, FieldNotify, Setter)
+	int32 Score = 0;
+
 	UPROPERTY(BlueprintReadOnly, FieldNotify, Setter)
 	float Health = 50;
 
