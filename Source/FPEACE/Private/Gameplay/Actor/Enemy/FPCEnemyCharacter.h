@@ -6,6 +6,7 @@
 #include "Gameplay/Actor/FPCCharacter.h"
 #include "FPCEnemyCharacter.generated.h"
 
+class UWidgetComponent;
 class AFPCOperator;
 class UFPCEnemyAnimInstance;
 
@@ -18,7 +19,7 @@ public:
 	// Sets default values for this character's properties
 	AFPCEnemyCharacter();
 
-	void OnTookDamage(TWeakObjectPtr<AFPCOperator> From, FName HitBone);
+	virtual void OnReceivedDamage(TWeakObjectPtr<AFPCOperator> From, FName HitBone);
 
 	void OnDeath();
 
@@ -28,6 +29,9 @@ public:
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="FPEACE")
 	int32 KillPoints = 100;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	TObjectPtr<UWidgetComponent> HealthBarWidgetComp;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="FPEACE|HitReactions")
 	TObjectPtr<UAnimMontage> HitReaction_Head;

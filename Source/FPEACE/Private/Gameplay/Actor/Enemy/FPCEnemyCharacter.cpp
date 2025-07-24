@@ -2,7 +2,8 @@
 
 
 #include "FPCEnemyCharacter.h"
-
+#include "FCTween.h"
+#include "Components/WidgetComponent.h"
 #include "Gameplay/Actor/Operator/FPCOperator.h"
 #include "Gameplay/AnimInstanceClasses/Enemy/FPCEnemyAnimInstance.h"
 #include "Gameplay/ExtendedClasses/FPCPlayerState.h"
@@ -18,10 +19,13 @@ AFPCEnemyCharacter::AFPCEnemyCharacter()
 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = false;
 
+	HealthBarWidgetComp = CreateDefaultSubobject<UWidgetComponent>(TEXT("HealthBarWidget"));
+	HealthBarWidgetComp->SetupAttachment(RootComponent);
+	
 	EnemyMovementComponent = Cast<UFPCCharacterMovementComponent>(ACharacter::GetMovementComponent());
 }
 
-void AFPCEnemyCharacter::OnTookDamage(TWeakObjectPtr<AFPCOperator> From, FName HitBone)
+void AFPCEnemyCharacter::OnReceivedDamage(TWeakObjectPtr<AFPCOperator> From, FName HitBone)
 {
 	if (HealthAttributeSet->GetHealth() > 0)
 	{
@@ -65,6 +69,17 @@ void AFPCEnemyCharacter::OnDeath()
 	FPCAbilitySystemComponent->CancelAllAbilities();
 	MainBodyMeshComp->SetCollisionProfileName("Ragdoll");
 	MainBodyMeshComp->SetSimulatePhysics(true);
+	HealthBarWidgetComp->SetHiddenInGame(true);
+
+	UMaterialInstanceDynamic* EnemyMainMat = MainBodyMeshComp->CreateAndSetMaterialInstanceDynamic(0);
+
+	FCTween::Play(-0.4f, 0.7f, [EnemyMainMat](float V)
+	{
+		EnemyMainMat->SetScalarParameterValue(FName("DissolveAmount"), V);
+	}, 5)->SetOnComplete([&]
+	{
+		// Destroy this actor
+	});
 }
 
 void AFPCEnemyCharacter::PostInitializeComponents()

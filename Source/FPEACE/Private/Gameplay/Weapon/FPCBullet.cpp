@@ -152,6 +152,6 @@ void AFPCBullet::BulletOverlapedSomething(UPrimitiveComponent* OverlappedCompone
 	{
 		UAbilitySystemComponent* TargetASC = EnemyCharacter->GetAbilitySystemComponent();
 		ApplyDamage(TargetASC);
-		EnemyCharacter->OnTookDamage(OwningOperator, SweepResult.BoneName);
+		EnemyCharacter->OnReceivedDamage(OwningOperator, SweepResult.BoneName);
 	}
 }
