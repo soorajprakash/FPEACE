@@ -31,6 +31,10 @@ public:
 	//	--------------------- FUNCTIONS ---------------------
 	void PlayEnemyHitRegisterSound(bool bIsKillShot = false) const;
 
+	void PlayTookMeleeDamageSound() const;
+
+	void PlayPlayerDeathEffectSound() const;
+
 	void PlayDamageGruntSound(bool bIsKillShot = false) const;
 
 	//	--------------------- GETTER FUNCTIONS ---------------------
@@ -79,10 +83,22 @@ protected:
 	TObjectPtr<AFPCGameplayPlayerController> FPCPlayerControllerInstance;
 
 	/*
+	 * The sound that is played when the enemy hits the player by hand
+	 */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="FPEACE|Audio")
+	TObjectPtr<USoundBase> TookMeleeDamageEffectSound;
+
+	/*
 	 * The sound that is played when the enemy is hit by a bullet
 	 */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="FPEACE|Audio")
 	TObjectPtr<USoundBase> EnemyHitEffectSound;
+
+	/*
+	 * The sound that is played when the player dies
+	 */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="FPEACE|Audio")
+	TObjectPtr<USoundBase> PlayerDeathSoundEffect;
 
 	/*
 	 * The sound that is played when the enemy is killed by a bullet
@@ -216,6 +232,6 @@ protected:
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
-	
+
 	virtual void OnDeath_Implementation() override;
 };

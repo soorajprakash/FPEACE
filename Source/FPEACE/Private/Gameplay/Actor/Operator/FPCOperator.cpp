@@ -108,12 +108,24 @@ void AFPCOperator::OnReceivedDamage(TWeakObjectPtr<AFPCCharacter> From, FName Hi
 
 		OnHitDamageTaken(SelectedReactionMontage);
 	}
+
+	PlayTookMeleeDamageSound();
 	
 }
 
 void AFPCOperator::PlayEnemyHitRegisterSound(bool bIsKillShot) const
 {
 	UGameplayStatics::PlaySound2D(GetWorld(), bIsKillShot ? EnemyKillEffectSound : EnemyHitEffectSound);
+}
+
+void AFPCOperator::PlayTookMeleeDamageSound() const
+{
+	UGameplayStatics::PlaySound2D(GetWorld(), TookMeleeDamageEffectSound);
+}
+
+void AFPCOperator::PlayPlayerDeathEffectSound() const
+{
+	UGameplayStatics::PlaySound2D(GetWorld(), PlayerDeathSoundEffect);
 }
 
 void AFPCOperator::PlayDamageGruntSound(bool bIsKillShot) const
@@ -266,4 +278,5 @@ void AFPCOperator::OnDeath_Implementation()
 	if (AFPCPlayerState* PS = Cast<AFPCPlayerState>(GetPlayerState()))
 		PS->StopSurvivalTimer();
 
+	PlayPlayerDeathEffectSound();
 }
