@@ -128,9 +128,6 @@ void AFPCGun::OnConstruction(const FTransform& Transform)
 	AimSocketActorSpaceTransform = OpticMeshComp->GetSocketTransform(TEXT("SOCKET_Aim"), RTS_Actor);
 	EmitterSocketActorSpaceTransform = MuzzleMeshComp->GetSocketTransform(TEXT("SOCKET_Emitter"), RTS_Actor);
 
-	// Initial gun settings
-	GunAttributeSet->SetRemainingBulletsInMag(GunAttributeSet->GetMagCapacity());
-
 	// Set up the gun to have no collision
 	// TODO : Collision is probably required. Change this to suit the game's needs
 	SetActorEnableCollision(false);

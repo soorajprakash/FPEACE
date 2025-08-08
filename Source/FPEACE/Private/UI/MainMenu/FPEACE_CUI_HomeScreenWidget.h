@@ -10,7 +10,7 @@ class AFPCGameplayPlayerController;
 /**
  * 
  */
-UCLASS()
+UCLASS(Abstract)
 class FPEACE_API UFPEACE_CUI_HomeScreenWidget : public UCommonActivatableWidget
 {
 	GENERATED_BODY()

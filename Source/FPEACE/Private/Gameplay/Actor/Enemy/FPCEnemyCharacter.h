@@ -1,4 +1,4 @@
-﻿// Copyright © 2025 Sooraj Prakash. All rights reserved.Unauthorized distribution or sharing of this code is prohibited.
+﻿// Copyright © Sooraj Prakash. All rights reserved.Unauthorized distribution or sharing of this code is prohibited.
 
 #pragma once
 
@@ -6,6 +6,10 @@
 #include "Gameplay/Actor/FPCCharacter.h"
 #include "FPCEnemyCharacter.generated.h"
 
+class UFPCEnemyCombatAttributeSet;
+class UGameplayEffect;
+class UBoxComponent;
+class UFPCEnemyAbilityBase;
 class UWidgetComponent;
 class AFPCOperator;
 class UFPCEnemyAnimInstance;
@@ -19,19 +23,31 @@ public:
 	// Sets default values for this character's properties
 	AFPCEnemyCharacter();
 
-	virtual void OnReceivedDamage(TWeakObjectPtr<AFPCOperator> From, FName HitBone);
+	virtual void OnDeath_Implementation() override;
 
-	void OnDeath();
+	virtual void OnReceivedDamage(TWeakObjectPtr<AFPCCharacter> From, FName HitBone) override;
 
 	// ----------------- GETTERS -------------------
 	TWeakObjectPtr<class UFPCCharacterMovementComponent> GetEnemyMovementComponent() const { return EnemyMovementComponent; }
+
+	// ----------------- SETTERS -------------------
+	void SetCanDamagePlayer(bool Value) { bCanDamagePlayer = Value; };
 
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="FPEACE")
 	int32 KillPoints = 100;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
-	TObjectPtr<UWidgetComponent> HealthBarWidgetComp;
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="FPEACE")
+	bool bCanDamagePlayer;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="FPEACE")
+	TSubclassOf<UFPCEnemyAbilityBase> AttackAbility;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="FPEACE")
+	TSubclassOf<UGameplayEffect> MeleeDamageEffect;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="FPEACE")
+	TObjectPtr<UFPCEnemyCombatAttributeSet> EnemyCombatAttributeSet;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="FPEACE|HitReactions")
 	TObjectPtr<UAnimMontage> HitReaction_Head;
@@ -48,11 +64,31 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="FPEACE|HitReactions")
 	TObjectPtr<UAnimMontage> HitReaction_RightLeg;
 
+	// ----------------- COMPONENTS -------------------
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	TObjectPtr<UWidgetComponent> HealthBarWidgetComp;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	TObjectPtr<UBoxComponent> RightHandHitBox;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly)
+	TObjectPtr<UBoxComponent> LeftHandHitBox;
+
 	UPROPERTY()
 	TWeakObjectPtr<UFPCEnemyAnimInstance> BaseAnimInstance;
 
+	// ----------------- OVERRIDES -------------------
 	virtual void PostInitializeComponents() override;
 
+	virtual void BeginPlay() override;
+
 private:
+	
+	static TWeakObjectPtr<AFPCOperator> PlayerOperator;
+	
+	UPROPERTY()
 	TWeakObjectPtr<UFPCCharacterMovementComponent> EnemyMovementComponent;
+
+	UFUNCTION()
+	void HandHit(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 };

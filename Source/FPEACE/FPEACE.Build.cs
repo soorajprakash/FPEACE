@@ -15,7 +15,7 @@ public class FPEACE : ModuleRules
 			"Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput", "AnimGraphRuntime",
 			"AnimationLocomotionLibraryRuntime", "Niagara", "UMG", "SlateCore", "Slate", "CommonUI", "CinematicCamera",
 			"ModelViewViewModel", "SignificanceManager", "GameplayTags", "GameplayAbilities", "GameplayTasks",
-			"GameplayStateTreeModule", "AIModule"
+			"GameplayStateTreeModule", "AIModule", "MetasoundEngine"
 		});
 	}
 }

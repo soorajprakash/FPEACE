@@ -140,6 +140,10 @@
 			"SupportedTargetPlatforms": [
 				"Win64"
 			]
+		},
+		{
+			"Name": "MetasoundExperimental",
+			"Enabled": true
 		}
 	],
 	"TargetPlatforms": [

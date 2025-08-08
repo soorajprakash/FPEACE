@@ -26,6 +26,13 @@ public:
 	// Sets default values for this character's properties
 	AFPCOperator(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
+	virtual void OnReceivedDamage(TWeakObjectPtr<AFPCCharacter> From, FName HitBone) override;
+
+	//	--------------------- FUNCTIONS ---------------------
+	void PlayEnemyHitRegisterSound(bool bIsKillShot = false) const;
+
+	void PlayDamageGruntSound(bool bIsKillShot = false) const;
+
 	//	--------------------- GETTER FUNCTIONS ---------------------
 
 	/*
@@ -70,6 +77,36 @@ protected:
 	 */
 	UPROPERTY(BlueprintReadOnly, Category="FPEACE")
 	TObjectPtr<AFPCGameplayPlayerController> FPCPlayerControllerInstance;
+
+	/*
+	 * The sound that is played when the enemy is hit by a bullet
+	 */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="FPEACE|Audio")
+	TObjectPtr<USoundBase> EnemyHitEffectSound;
+
+	/*
+	 * The sound that is played when the enemy is killed by a bullet
+	 */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="FPEACE|Audio")
+	TObjectPtr<USoundBase> EnemyKillEffectSound;
+
+	/*
+	 * The sound that is played when the player takes a hit
+	 */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="FPEACE|Audio")
+	TObjectPtr<USoundBase> DamageTakenGrunt;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="FPEACE|HitReactions")
+	TObjectPtr<UAnimMontage> HitReaction_Left;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="FPEACE|HitReactions")
+	TObjectPtr<UAnimMontage> HitReaction_Right;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="FPEACE|HitReactions")
+	TObjectPtr<UAnimMontage> HitReaction_Front;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="FPEACE|HitReactions")
+	TObjectPtr<UAnimMontage> HitReaction_Back;
 
 	//	--------------------- COMPONENTS ---------------------
 
@@ -179,4 +216,6 @@ protected:
 
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
+	
+	virtual void OnDeath_Implementation() override;
 };

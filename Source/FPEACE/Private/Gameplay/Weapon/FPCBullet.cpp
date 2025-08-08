@@ -7,7 +7,6 @@
 #include "GameplayEffectTypes.h"
 #include "ObjectPoolSubsystem.h"
 #include "Components/BoxComponent.h"
-#include "Gameplay/Actor/Enemy/FPCEnemyCharacter.h"
 #include "Gameplay/Actor/Operator/FPCOperator.h"
 #include "Gameplay/ExtendedClasses/Components/FPCAbilitySystemComponent.h"
 #include "Gameplay/ExtendedClasses/Components/FPCProjectileMovementComponent.h"
@@ -24,9 +23,6 @@ AFPCBullet::AFPCBullet()
 	{
 		BulletCollisionComponent = CreateDefaultSubobject<UBoxComponent>(TEXT("HitDetectionVolume"));
 		SetRootComponent(BulletCollisionComponent);
-		BulletCollisionComponent->SetCollisionObjectType(ECC_WorldDynamic);
-		BulletCollisionComponent->SetCollisionResponseToAllChannels(ECR_Overlap);
-		BulletCollisionComponent->SetCollisionResponseToChannel(ECC_Camera, ECR_Ignore);
 		BulletCollisionComponent->OnComponentBeginOverlap.RemoveAll(this);
 		BulletCollisionComponent->OnComponentBeginOverlap.AddDynamic(this, &AFPCBullet::BulletOverlapedSomething);
 	}
@@ -148,10 +144,10 @@ void AFPCBullet::BulletOverlapedSomething(UPrimitiveComponent* OverlappedCompone
 	DrawDebugSphere(GetWorld(), SweepResult.Location, 5, 12, FColor::Red, false, 2);
 	OwningOperator->WorldObjectPool->Push(this);
 
-	if (AFPCEnemyCharacter* EnemyCharacter = Cast<AFPCEnemyCharacter>(OtherActor))
+	if (AFPCCharacter* CharacterToDamage = Cast<AFPCCharacter>(OtherActor))
 	{
-		UAbilitySystemComponent* TargetASC = EnemyCharacter->GetAbilitySystemComponent();
+		UAbilitySystemComponent* TargetASC = CharacterToDamage->GetAbilitySystemComponent();
 		ApplyDamage(TargetASC);
-		EnemyCharacter->OnReceivedDamage(OwningOperator, SweepResult.BoneName);
+		CharacterToDamage->OnReceivedDamage(OwningOperator, SweepResult.BoneName);
 	}
 }

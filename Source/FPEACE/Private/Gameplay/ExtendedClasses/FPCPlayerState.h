@@ -1,4 +1,4 @@
-﻿// Copyright © 2025 Sooraj Prakash. All rights reserved.Unauthorized distribution or sharing of this code is prohibited.
+﻿// Copyright © Sooraj Prakash. All rights reserved.Unauthorized distribution or sharing of this code is prohibited.
 
 #pragma once
 
@@ -21,4 +21,15 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void AddScore(int32 Delta);
+
+	void StopSurvivalTimer();
+
+protected:
+	UPROPERTY(VisibleAnywhere)
+	float StartTimeSeconds = 0.f;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	float SurvivalTimeSeconds = 0.f;
+
+	virtual void BeginPlay() override;
 };

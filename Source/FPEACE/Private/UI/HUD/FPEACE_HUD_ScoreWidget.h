@@ -1,4 +1,4 @@
-﻿// Copyright © 2025 Sooraj Prakash. All rights reserved.Unauthorized distribution or sharing of this code is prohibited.
+﻿// Copyright © Sooraj Prakash. All rights reserved.Unauthorized distribution or sharing of this code is prohibited.
 
 #pragma once
 
@@ -11,7 +11,7 @@ class AFPCPlayerState;
 /**
  * 
  */
-UCLASS()
+UCLASS(Abstract)
 class FPEACE_API UFPEACE_HUD_ScoreWidget : public UFPCUserWidget
 {
 	GENERATED_BODY()

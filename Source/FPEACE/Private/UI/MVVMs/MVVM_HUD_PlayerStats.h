@@ -8,6 +8,8 @@
 #include "MVVM_HUD_PlayerStats.generated.h"
 
 
+struct FOnAttributeChangeData;
+class UAbilitySystemComponent;
 DECLARE_DELEGATE(FOnOperatorDataChangedDelegate);
 
 
@@ -22,6 +24,9 @@ class UMVVM_HUD_PlayerStats : public UMVVMViewModelBase
 public:
 	
 	FOnOperatorDataChangedDelegate OnOperatorDataChangedEvent;
+
+	UFUNCTION(BlueprintCallable)
+	void InitializeWithASC(UAbilitySystemComponent* InASC);
 	
 	UFUNCTION(BlueprintPure, FieldNotify)
 	float GetHealthPercentage() const { return MaxHealth != 0 ? Health / MaxHealth : 0; }
@@ -37,11 +42,20 @@ protected:
 	int32 Score = 0;
 
 	UPROPERTY(BlueprintReadOnly, FieldNotify, Setter)
-	float Health = 50;
+	float Health = 100;
 
 	UPROPERTY(BlueprintReadOnly, FieldNotify, Setter)
 	float MaxHealth = 100;
 
 	UPROPERTY(BlueprintReadOnly, FieldNotify, Setter)
 	FFPEACEOperatorData SelectedOperatorData;
+
+private:
+
+	void UpdateHealthFromAttributes();
+
+	void OnHealthChanged(const FOnAttributeChangeData& OnAttributeChangeData);
+	
+	UPROPERTY()
+	UAbilitySystemComponent* ASC;
 };

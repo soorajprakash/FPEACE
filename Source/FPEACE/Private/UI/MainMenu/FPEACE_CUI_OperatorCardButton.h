@@ -12,7 +12,7 @@ class AFPCMainMenuLevelScriptActor;
 /**
  * This class handles the button for the operator card in the operator selection screen
  */
-UCLASS()
+UCLASS(Abstract)
 class FPEACE_API UFPEACE_CUI_OperatorCardButton : public UCommonButtonBase
 {
 	GENERATED_BODY()

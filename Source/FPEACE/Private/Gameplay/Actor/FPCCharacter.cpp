@@ -2,10 +2,11 @@
 // Unauthorized distribution of this file, or any part of it, is prohibited.
 
 #include "FPCCharacter.h"
-
 #include "AbilitySystemGlobals.h"
 #include "GameplayAbilitiesModule.h"
+#include "MetasoundSource.h"
 #include "ObjectPoolSubsystem.h"
+#include "Components/AudioComponent.h"
 #include "Gameplay/ExtendedClasses/Components/FPCAbilitySystemComponent.h"
 #include "Gameplay/ExtendedClasses/Components/FPCSkeletalMeshComponent.h"
 #include "Gameplay/ExtendedClasses/Components/FPCCapsuleComponent.h"
@@ -27,10 +28,47 @@ AFPCCharacter::AFPCCharacter(const FObjectInitializer& ObjectInitializer): Super
 	MainBodyMeshComp->SetCastHiddenShadow(true);
 
 	// Construct components
+	VocalAudioComponent = CreateDefaultSubobject<UAudioComponent>(TEXT("Vocal Audio Component"));
+	VocalAudioComponent->SetupAttachment(MainBodyMeshComp, FName("Head"));
+	VocalAudioComponent->SetAutoActivate(true);
+
 	if (!FPCAbilitySystemComponent)
 		FPCAbilitySystemComponent = CreateDefaultSubobject<UFPCAbilitySystemComponent>(TEXT("AbilitySystemComponent"));
 
 	HealthAttributeSet = CreateDefaultSubobject<UFPCHealthAttributeSet>(TEXT("HealthSet"));
+}
+
+void AFPCCharacter::OnHitDamageTaken_Implementation(UAnimMontage* HitReactionMontage)
+{
+	
+}
+
+void AFPCCharacter::PlayVocalSound(USoundBase* Sound, float CrossfadeDuration)
+{
+	if (!VocalAudioComponent)
+		return;
+
+	if (UMetaSoundSource* MS = Cast<UMetaSoundSource>(Sound))
+	{
+		VocalAudioComponent->SetSound(MS);
+		VocalAudioComponent->Play();
+	}
+	else
+	{
+		if (VocalAudioComponent->GetSound() != VocalCrossfader)
+			VocalAudioComponent->SetSound(VocalCrossfader);
+
+		VocalAudioComponent->SetObjectParameter(FName("NewAudio"), Sound);
+
+		if (VocalAudioComponent->IsPlaying())
+			VocalAudioComponent->SetTriggerParameter(FName("TriggerCrossfade"));
+		else
+			VocalAudioComponent->Play();
+	}
+}
+
+void AFPCCharacter::OnDeath_Implementation()
+{
 }
 
 void AFPCCharacter::BeginPlay()
@@ -63,6 +101,10 @@ void AFPCCharacter::OnConstruction(const FTransform& Transform)
 
 	if (const UWorld* World = GetWorld())
 		WorldObjectPool = World->GetSubsystem<UObjectPool>();
+}
+
+void AFPCCharacter::OnReceivedDamage(TWeakObjectPtr<AFPCCharacter> From, FName HitBone)
+{
 }
 
 //	--------------------- GETTER FUNCTIONS ---------------------

@@ -9,7 +9,7 @@
 /**
  * The Pause Menu Screen widget class
  */
-UCLASS()
+UCLASS(Abstract)
 class FPEACE_API UFPEACE_CUI_PauseMenuScreenWidget : public UCommonActivatableWidget
 {
 	GENERATED_BODY()

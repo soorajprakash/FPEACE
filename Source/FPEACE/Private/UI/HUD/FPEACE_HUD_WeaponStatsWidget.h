@@ -16,7 +16,7 @@ class UFPCOperatorWeaponManagerComponent;
  * The base class for the player stats widget
  * Mostly used in the HUD
  */
-UCLASS()
+UCLASS(Abstract)
 class FPEACE_API UFPEACE_HUD_WeaponStatsWidget : public UFPCUserWidget
 {
 	GENERATED_BODY()

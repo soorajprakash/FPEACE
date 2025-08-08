@@ -9,10 +9,14 @@
 #include "DataStructures/FPCCharacterData.h"
 #include "Gameplay/Actor/FPCGameplayPlayerController.h"
 #include "Gameplay/ExtendedClasses/FPCGameInstance.h"
+#include "Gameplay/ExtendedClasses/FPCPlayerState.h"
+#include "Gameplay/ExtendedClasses/Components/FPCAbilitySystemComponent.h"
 #include "Gameplay/ExtendedClasses/Components/FPCCameraComponent.h"
 #include "Gameplay/ExtendedClasses/Components/FPCCapsuleComponent.h"
 #include "Gameplay/ExtendedClasses/Components/FPCSkeletalMeshComponent.h"
 #include "Gameplay/ExtendedClasses/Components/FPCSpringArmComponent.h"
+#include "Gameplay/GAS/AttribueSets/FPCHealthAttributeSet.h"
+#include "Kismet/GameplayStatics.h"
 
 
 // Sets default values
@@ -67,6 +71,54 @@ AFPCOperator::AFPCOperator(const FObjectInitializer& ObjectInitializer): Super(O
 
 	if (!FPCCharacterAnimationManagerComp)
 		FPCCharacterAnimationManagerComp = CreateDefaultSubobject<UFPCOperatorAnimationManagerComponent>(TEXT("FPC Animation Manager"));
+}
+
+void AFPCOperator::OnReceivedDamage(TWeakObjectPtr<AFPCCharacter> From, FName HitBone)
+{
+	Super::OnReceivedDamage(From, HitBone);
+
+	if (HealthAttributeSet->GetHealth() <= 0)
+	{
+		FPCMovementComp->DisableMovement();
+		FPCAbilitySystemComponent->CancelAllAbilities();
+		GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
+		MainBodyMeshComp->SetCollisionProfileName("Ragdoll");
+		MainBodyMeshComp->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
+		MainBodyMeshComp->SetSimulatePhysics(true);
+		OnDeath();
+
+		if (FPCCameraManagerComp->GetCurrentCameraMode() == ECameraMode::FPS)
+			FPCCameraManagerComp->ToggleCameraMode();
+	}
+	else
+	{
+		//Determine the direction of the enemy who dealt the blow
+		float Angle = UKismetMathLibrary::FindRelativeLookAtRotation(GetActorTransform(), From->GetActorLocation()).Yaw;
+			
+		// Determine the hit reaction animation based on the hit direction
+		UAnimMontage* SelectedReactionMontage;
+		if (Angle <=45 && Angle >=-45)
+			SelectedReactionMontage = HitReaction_Front;
+		else if (Angle >45 && Angle <135)
+			SelectedReactionMontage = HitReaction_Right;
+		else if (Angle >135 && Angle <-135)
+			SelectedReactionMontage = HitReaction_Back;
+		else
+			SelectedReactionMontage = HitReaction_Left;
+
+		OnHitDamageTaken(SelectedReactionMontage);
+	}
+	
+}
+
+void AFPCOperator::PlayEnemyHitRegisterSound(bool bIsKillShot) const
+{
+	UGameplayStatics::PlaySound2D(GetWorld(), bIsKillShot ? EnemyKillEffectSound : EnemyHitEffectSound);
+}
+
+void AFPCOperator::PlayDamageGruntSound(bool bIsKillShot) const
+{
+	UGameplayStatics::PlaySound2D(GetWorld(), DamageTakenGrunt);
 }
 
 TWeakObjectPtr<UFPCOperatorData> AFPCOperator::GetOperatorData()
@@ -205,4 +257,13 @@ void AFPCOperator::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 			FPCCharacterWeaponManagerComp->TryCurrentGunReload();
 		});
 	}
+}
+
+void AFPCOperator::OnDeath_Implementation()
+{
+	Super::OnDeath_Implementation();
+
+	if (AFPCPlayerState* PS = Cast<AFPCPlayerState>(GetPlayerState()))
+		PS->StopSurvivalTimer();
+
 }
