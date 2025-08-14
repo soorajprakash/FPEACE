@@ -3,6 +3,6 @@
 
 #include "FPCGameplayTags.h"
 
-UE_DEFINE_GAMEPLAY_TAG(Character_Stance, "Character.Stance")
-UE_DEFINE_GAMEPLAY_TAG(Character_Stance_Crouch, "Character.Stance.Crouch")
-UE_DEFINE_GAMEPLAY_TAG(Character_Stance_Stand, "Character.Stance.Stand")
+UE_DEFINE_GAMEPLAY_TAG(Character_Health_RegenBlock, "Character.Health.RegenBlock")
+UE_DEFINE_GAMEPLAY_TAG(Character_Health_Dead, "Character.Health.Dead")
+UE_DEFINE_GAMEPLAY_TAG(Character_Health_AtMaxHealth, "Character.Health.AtMaxHealth")

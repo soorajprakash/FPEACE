@@ -22,13 +22,21 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="FPEACE|Attributes")
 	FGameplayAttributeData MaxHealth;
 
+	UPROPERTY(BlueprintReadOnly, Category="FPEACE|Attributes")
+	FGameplayAttributeData RegenRate;
+
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="FPEACE|Attributes")
 	FGameplayAttributeData Damage;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="FPEACE|Attributes")
+	FGameplayAttributeData Heal;
 
 	virtual void PostGameplayEffectExecute(const struct FGameplayEffectModCallbackData& Data) override;
 
 public:
 	ATTRIBUTE_ACCESSORS_BASIC(UFPCHealthAttributeSet, Health);
 	ATTRIBUTE_ACCESSORS_BASIC(UFPCHealthAttributeSet, Damage);
+	ATTRIBUTE_ACCESSORS_BASIC(UFPCHealthAttributeSet, RegenRate);
+	ATTRIBUTE_ACCESSORS_BASIC(UFPCHealthAttributeSet, Heal);
 	ATTRIBUTE_ACCESSORS_BASIC(UFPCHealthAttributeSet, MaxHealth);
 };

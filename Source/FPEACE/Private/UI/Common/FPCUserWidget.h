@@ -29,6 +29,4 @@ protected:
 
 private:
 	FVector2D prevWidgetSize;
-
-	void Test();
 };

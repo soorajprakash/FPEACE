@@ -8,6 +8,7 @@
 #include "Components/FPCOperatorWeaponManagerComponent.h"
 #include "DataStructures/FPCCharacterData.h"
 #include "Gameplay/Actor/FPCGameplayPlayerController.h"
+#include "Gameplay/Common/FPCGameplayTags.h"
 #include "Gameplay/ExtendedClasses/FPCGameInstance.h"
 #include "Gameplay/ExtendedClasses/FPCPlayerState.h"
 #include "Gameplay/ExtendedClasses/Components/FPCAbilitySystemComponent.h"
@@ -218,8 +219,6 @@ void AFPCOperator::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 	if (UEnhancedInputComponent* EInputComp = Cast<UEnhancedInputComponent>(PlayerInputComponent))
 	{
 		// Bind Gameplay Inputs
-		// EInputComp->BindAction(LookAction.LoadSynchronous(), ETriggerEvent::Triggered, this, &AFPCOperator::LookAround);
-		// EInputComp->BindAction(MoveAction.LoadSynchronous(), ETriggerEvent::Triggered, this, &AFPCOperator::MoveAround);
 		EInputComp->BindActionInstanceLambda(RunAction.LoadSynchronous(), ETriggerEvent::Started, [this](const FInputActionInstance&)
 		{
 			FPCMovementComp->ToggleRunSprint();
@@ -275,6 +274,8 @@ void AFPCOperator::OnDeath_Implementation()
 {
 	Super::OnDeath_Implementation();
 
+	FPCAbilitySystemComponent->AddLooseGameplayTag(Character_Health_Dead);
+	
 	if (AFPCPlayerState* PS = Cast<AFPCPlayerState>(GetPlayerState()))
 		PS->StopSurvivalTimer();
 
