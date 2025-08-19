@@ -6,6 +6,7 @@
 #include "Abilities/GameplayAbility.h"
 #include "FPCOperatorAbilityBase.generated.h"
 
+class UEnhancedInputComponent;
 class AFPCOperator;
 class UFPCOperatorData;
 class AFPCGameplayPlayerController;

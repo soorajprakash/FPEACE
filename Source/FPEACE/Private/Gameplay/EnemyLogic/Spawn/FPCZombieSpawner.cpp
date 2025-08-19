@@ -19,11 +19,12 @@ void AFPCZombieSpawner::BeginPlay()
 	const TWeakObjectPtr<AFPCZombieSpawnPoint> SelectedSpawnPoint = GetRandomSpawnPoint();
 	if (SelectedSpawnPoint.IsValid())
 	{
+		UE_LOG(LogTemp, Display, TEXT("Spawn SpawnPoint"));
 		GetWorld()->SpawnActor<AFPCEnemyCharacter>(ZombieClass, SelectedSpawnPoint->GetActorTransform());
 	}
 }
 
 TWeakObjectPtr<AFPCZombieSpawnPoint> AFPCZombieSpawner::GetRandomSpawnPoint()
 {
-	return SpawnPoints[0];
+	return SpawnPoints[FMath::RandRange(0, SpawnPoints.Num() - 1)];
 }
