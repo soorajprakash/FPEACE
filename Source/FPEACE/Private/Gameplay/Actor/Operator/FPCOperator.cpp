@@ -2,6 +2,7 @@
 
 #include "FPCOperator.h"
 #include "EnhancedInputComponent.h"
+#include "Components/FPCFullScreenJoystickComponent.h"
 #include "Components/FPCOperatorAnimationManagerComponent.h"
 #include "Components/FPCOperatorCameraManagerComponent.h"
 #include "Components/FPCOperatorMovementComponent.h"
@@ -21,7 +22,7 @@
 
 
 // Sets default values
-AFPCOperator::AFPCOperator(const FObjectInitializer& ObjectInitializer): Super(ObjectInitializer.SetDefaultSubobjectClass<UFPCOperatorMovementComponent>(CharacterMovementComponentName))
+AFPCOperator::AFPCOperator(const FObjectInitializer& ObjectInitializer) : Super(ObjectInitializer.SetDefaultSubobjectClass<UFPCOperatorMovementComponent>(CharacterMovementComponentName))
 {
 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
@@ -72,6 +73,9 @@ AFPCOperator::AFPCOperator(const FObjectInitializer& ObjectInitializer): Super(O
 
 	if (!FPCCharacterAnimationManagerComp)
 		FPCCharacterAnimationManagerComp = CreateDefaultSubobject<UFPCOperatorAnimationManagerComponent>(TEXT("FPC Animation Manager"));
+
+	if (!FPCFullScreenJoystickComp)
+		FPCFullScreenJoystickComp = CreateDefaultSubobject<UFPCFullScreenJoystickComponent>(TEXT("FullScreenJoystickComponent"));
 }
 
 void AFPCOperator::OnReceivedDamage(TWeakObjectPtr<AFPCCharacter> From, FName HitBone)
@@ -95,14 +99,14 @@ void AFPCOperator::OnReceivedDamage(TWeakObjectPtr<AFPCCharacter> From, FName Hi
 	{
 		//Determine the direction of the enemy who dealt the blow
 		float Angle = UKismetMathLibrary::FindRelativeLookAtRotation(GetActorTransform(), From->GetActorLocation()).Yaw;
-			
+
 		// Determine the hit reaction animation based on the hit direction
 		UAnimMontage* SelectedReactionMontage;
-		if (Angle <=45 && Angle >=-45)
+		if (Angle <= 45 && Angle >= -45)
 			SelectedReactionMontage = HitReaction_Front;
-		else if (Angle >45 && Angle <135)
+		else if (Angle > 45 && Angle < 135)
 			SelectedReactionMontage = HitReaction_Right;
-		else if (Angle >135 && Angle <-135)
+		else if (Angle > 135 && Angle < -135)
 			SelectedReactionMontage = HitReaction_Back;
 		else
 			SelectedReactionMontage = HitReaction_Left;
@@ -111,7 +115,6 @@ void AFPCOperator::OnReceivedDamage(TWeakObjectPtr<AFPCCharacter> From, FName Hi
 	}
 
 	PlayTookMeleeDamageSound();
-	
 }
 
 void AFPCOperator::PlayEnemyHitRegisterSound(bool bIsKillShot) const
@@ -139,7 +142,7 @@ TWeakObjectPtr<UFPCOperatorData> AFPCOperator::GetOperatorData()
 	// Get the Character Data asset reference
 	if (FPCOperatorData == nullptr)
 		if (UFPCGameInstance* FPCGameInstance = UFPCGameInstance::GetInstance(this))
-			FPCOperatorData = FPCGameInstance->CharacterData.LoadSynchronous();
+			FPCOperatorData = FPCGameInstance->CharacterData;
 
 	return FPCOperatorData;
 }
@@ -199,10 +202,23 @@ TWeakObjectPtr<UFPCOperatorAnimationManagerComponent> AFPCOperator::GetFPCCharac
 	return FPCCharacterAnimationManagerComp;
 }
 
+TWeakObjectPtr<UFPCFullScreenJoystickComponent> AFPCOperator::GetFPCFullScreenJoystickComp() const
+{
+	return FPCFullScreenJoystickComp;
+}
+
 void AFPCOperator::PreInitializeComponents()
 {
 	Super::PreInitializeComponents();
 	GetOperatorData();
+}
+
+void AFPCOperator::BeginPlay()
+{
+	Super::BeginPlay();
+
+	if (FPCFullScreenJoystickComp)
+		FPCFullScreenJoystickComp->SetDragAnywhereEnabled(true);
 }
 
 void AFPCOperator::PossessedBy(AController* NewController)
@@ -219,54 +235,18 @@ void AFPCOperator::SetupPlayerInputComponent(UInputComponent* PlayerInputCompone
 	if (UEnhancedInputComponent* EInputComp = Cast<UEnhancedInputComponent>(PlayerInputComponent))
 	{
 		// Bind Gameplay Inputs
-		EInputComp->BindActionInstanceLambda(RunAction.LoadSynchronous(), ETriggerEvent::Started, [this](const FInputActionInstance&)
-		{
-			FPCMovementComp->ToggleRunSprint();
-		});
-		EInputComp->BindActionInstanceLambda(CrouchAction.LoadSynchronous(), ETriggerEvent::Started, [this](const FInputActionInstance&)
-		{
-			FPCMovementComp->ToggleCrouch();
-		});
-		EInputComp->BindActionInstanceLambda(JumpAction.LoadSynchronous(), ETriggerEvent::Started, [this](const FInputActionInstance&)
-		{
-			Jump();
-		});
-		EInputComp->BindActionInstanceLambda(JumpAction.LoadSynchronous(), ETriggerEvent::Completed, [this](const FInputActionInstance&)
-		{
-			StopJumping();
-		});
-		EInputComp->BindActionInstanceLambda(ADSAction.LoadSynchronous(), ETriggerEvent::Started, [this](const FInputActionInstance&)
-		{
-			FPCCharacterWeaponManagerComp->SwitchADSState(true);
-		});
-		EInputComp->BindActionInstanceLambda(ADSAction.LoadSynchronous(), ETriggerEvent::Completed, [this](const FInputActionInstance&)
-		{
-			FPCCharacterWeaponManagerComp->SwitchADSState(false);
-		});
-		EInputComp->BindActionInstanceLambda(FireAction.LoadSynchronous(), ETriggerEvent::Started, [this](const FInputActionInstance&)
-		{
-			FPCCharacterWeaponManagerComp->ToggleWeaponUse(true);
-		});
-		EInputComp->BindActionInstanceLambda(FireAction.LoadSynchronous(), ETriggerEvent::Completed, [this](const FInputActionInstance&)
-		{
-			FPCCharacterWeaponManagerComp->ToggleWeaponUse(false);
-		});
-		EInputComp->BindActionInstanceLambda(WeaponCycleUpAction.LoadSynchronous(), ETriggerEvent::Started, [this](const FInputActionInstance&)
-		{
-			FPCCharacterWeaponManagerComp->CycleWeaponInSatchel();
-		});
-		EInputComp->BindActionInstanceLambda(WeaponCycleDownAction.LoadSynchronous(), ETriggerEvent::Started, [this](const FInputActionInstance&)
-		{
-			FPCCharacterWeaponManagerComp->CycleWeaponInSatchel(false);
-		});
-		EInputComp->BindActionInstanceLambda(CameraSwitchAction.LoadSynchronous(), ETriggerEvent::Completed, [this](const FInputActionInstance&)
-		{
-			FPCCameraManagerComp->ToggleCameraMode();
-		});
-		EInputComp->BindActionInstanceLambda(ReloadAction.LoadSynchronous(), ETriggerEvent::Started, [this](const FInputActionInstance&)
-		{
-			FPCCharacterWeaponManagerComp->TryCurrentGunReload();
-		});
+		EInputComp->BindAction(ToggleSprintAction, ETriggerEvent::Started, this, &AFPCOperator::OnSprintAction);
+		EInputComp->BindAction(FireAction, ETriggerEvent::Started, this, &AFPCOperator::OnFireActionStarted);
+		EInputComp->BindAction(FireAction, ETriggerEvent::Completed, this, &AFPCOperator::OnFireActionEnded);
+		EInputComp->BindAction(CrouchAction, ETriggerEvent::Started, this, &AFPCOperator::OnCrouchAction);
+		EInputComp->BindAction(JumpAction, ETriggerEvent::Started, this, &AFPCOperator::OnJumpActionStarted);
+		EInputComp->BindAction(JumpAction, ETriggerEvent::Completed, this, &AFPCOperator::OnJumpActionEnded);
+		EInputComp->BindAction(ADSAction, ETriggerEvent::Started, this, &AFPCOperator::OnADSActionStarted);
+		EInputComp->BindAction(ADSAction, ETriggerEvent::Completed, this, &AFPCOperator::OnADSActionEnded);
+		EInputComp->BindAction(WeaponCycleUpAction, ETriggerEvent::Started, this, &AFPCOperator::OnWeaponCycleUpAction);
+		EInputComp->BindAction(WeaponCycleDownAction, ETriggerEvent::Started, this, &AFPCOperator::OnWeaponCycleDownAction);
+		EInputComp->BindAction(CameraSwitchAction, ETriggerEvent::Completed, this, &AFPCOperator::OnCameraSwitchAction);
+		EInputComp->BindAction(ReloadAction, ETriggerEvent::Started, this, &AFPCOperator::OnReloadAction);
 	}
 }
 
@@ -275,9 +255,69 @@ void AFPCOperator::OnDeath_Implementation()
 	Super::OnDeath_Implementation();
 
 	FPCAbilitySystemComponent->AddLooseGameplayTag(Character_Health_Dead);
-	
+
 	if (AFPCPlayerState* PS = Cast<AFPCPlayerState>(GetPlayerState()))
 		PS->StopSurvivalTimer();
 
 	PlayPlayerDeathEffectSound();
+}
+
+void AFPCOperator::OnSprintAction()
+{
+	FPCMovementComp->ToggleRunSprint();
+}
+
+void AFPCOperator::OnFireActionStarted()
+{
+	FPCCharacterWeaponManagerComp->ToggleWeaponUse(true);
+}
+
+void AFPCOperator::OnFireActionEnded()
+{
+	FPCCharacterWeaponManagerComp->ToggleWeaponUse(false);
+}
+
+void AFPCOperator::OnCrouchAction()
+{
+	FPCMovementComp->ToggleCrouch();
+}
+
+void AFPCOperator::OnJumpActionStarted()
+{
+	GetCharacterMovementComponent()->Jump();
+}
+
+void AFPCOperator::OnJumpActionEnded()
+{
+	StopJumping();
+}
+
+void AFPCOperator::OnADSActionStarted()
+{
+	FPCCharacterWeaponManagerComp->SwitchADSState(true);
+}
+
+void AFPCOperator::OnADSActionEnded()
+{
+	FPCCharacterWeaponManagerComp->SwitchADSState(false);
+}
+
+void AFPCOperator::OnWeaponCycleUpAction()
+{
+	FPCCharacterWeaponManagerComp->CycleWeaponInSatchel();
+}
+
+void AFPCOperator::OnWeaponCycleDownAction()
+{
+	FPCCharacterWeaponManagerComp->CycleWeaponInSatchel(false);
+}
+
+void AFPCOperator::OnCameraSwitchAction()
+{
+	FPCCameraManagerComp->ToggleCameraMode();
+}
+
+void AFPCOperator::OnReloadAction()
+{
+	FPCCharacterWeaponManagerComp->TryCurrentGunReload();
 }

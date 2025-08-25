@@ -19,6 +19,8 @@ class UFPCOperatorData;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FLocomotionStateChangeDelegate, ELocomotionState, NewLocomotionState);
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FLocomotionStanceChangeDelegate, ELocomotionStance, NewLocomotionStance);
+
 /**
  * An extension of the character movement component class of the character
  */
@@ -36,19 +38,26 @@ public:
 	/*
 	 * Event called when the target locomotion state has been changed
 	 */
+	UPROPERTY(BlueprintAssignable)
 	FLocomotionStateChangeDelegate OnTargetLocomotionStateChanged;
+
+	/*
+	 * Event called when the target locomotion stance has been changed
+	 */
+	UPROPERTY(BlueprintAssignable)
+	FLocomotionStanceChangeDelegate OnCurrentLocomotionStanceChanged;
 
 	void ToggleRunSprint();
 
 	void ToggleCrouch();
+
+	void Jump();
 
 	float GetCharacterAbsoluteSpeed2D() const { return CharacterAbsoluteSpeed2D; }
 
 	float GetCharacterYawDelta() const { return CharacterYawDelta; }
 
 	ELocomotionState GetCurrentLocomotionState() const { return currentLocomotionState; }
-
-	void AddControllerPitchAndYawInput(float Pitch, float Yaw);
 
 protected:
 	UFPCOperatorMovementComponent();

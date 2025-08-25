@@ -14,13 +14,13 @@
 #include "Kismet/KismetMathLibrary.h"
 
 // Sets default values for this component's properties
-UFPCOperatorWeaponManagerComponent::UFPCOperatorWeaponManagerComponent(): CurrentWeaponLocationLag(), CurrentWeaponRotationLag(),
-                                                                            CurrentWeaponRotationLagVector(),
-                                                                            CurrentADSBlendFactor(0),
-                                                                            CurrentWeaponHandIKLocationOffset(),
-                                                                            CurrentWeaponHandIKRotationOffset(), ADSStateChanged(false), RecentlyUsedWeaponStateChanged(false),
-                                                                            currentWeaponSatchelIndex(0),
-                                                                            ADSBlendFactorTween(nullptr), bLastFrameWantsADSState(false), bLastFrameWeaponRecentlyUsedState(false)
+UFPCOperatorWeaponManagerComponent::UFPCOperatorWeaponManagerComponent() : CurrentWeaponLocationLag(), CurrentWeaponRotationLag(),
+                                                                           CurrentWeaponRotationLagVector(),
+                                                                           CurrentADSBlendFactor(0),
+                                                                           CurrentWeaponHandIKLocationOffset(),
+                                                                           CurrentWeaponHandIKRotationOffset(), ADSStateChanged(false), RecentlyUsedWeaponStateChanged(false),
+                                                                           currentWeaponSatchelIndex(0),
+                                                                           ADSBlendFactorTween(nullptr), bLastFrameWantsADSState(false), bLastFrameWeaponRecentlyUsedState(false)
 {
 	// Set this component to be initialized when the game starts, and to be ticked every frame. You can turn these features
 	// off to improve performance if you don't need them.
@@ -74,17 +74,23 @@ void UFPCOperatorWeaponManagerComponent::UpdateWeaponVisibility(const bool IsInT
 void UFPCOperatorWeaponManagerComponent::SwitchADSState(bool UseADS)
 {
 	bWantsToADS = UseADS && bIsCharacterArmed;
+	ADSStateChangedEvent.Broadcast(bWantsToADS);
 
 	ToggleADSBlendFactor(bWantsToADS);
 	FPCOperatorCameraManagerComp->SwitchCameraFOV(UseADS);
 	SetCurrentWeaponHandIKOffset();
 }
 
+void UFPCOperatorWeaponManagerComponent::ToggleADSState()
+{
+	SwitchADSState(!bWantsToADS);
+}
+
 void UFPCOperatorWeaponManagerComponent::ToggleADSBlendFactor(const int targetBlendFactor)
 {
 	if (ADSBlendFactorTween)
 		ADSBlendFactorTween->Destroy();
-	
+
 	ADSBlendFactorTween = FCTween::Play(CurrentADSBlendFactor, targetBlendFactor, [&](float V) { CurrentADSBlendFactor = V; }, CurrentWeaponAnimSettings.FocusTime);
 }
 

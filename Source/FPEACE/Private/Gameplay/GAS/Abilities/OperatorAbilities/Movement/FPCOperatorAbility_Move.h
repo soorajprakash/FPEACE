@@ -21,6 +21,7 @@ public:
 	TObjectPtr<UInputAction> MoveAction;
 
 protected:
+
 	virtual void ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo,
 	                             const FGameplayEventData* TriggerEventData) override;
 
@@ -33,6 +34,10 @@ private:
 	 */
 	uint32 InputBindingHandle;
 
+
+	UFUNCTION()
+	void OnTouchJoystickHeld(FVector2D Delta);
+	
 	// ----------------- INPUT BINDING FUNCTIONS ------------------
 	void MoveAround(const FInputActionValue& InputActionValue);
 };

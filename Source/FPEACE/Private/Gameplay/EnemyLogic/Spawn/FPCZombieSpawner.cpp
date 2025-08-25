@@ -16,6 +16,10 @@ AFPCZombieSpawner::AFPCZombieSpawner()
 void AFPCZombieSpawner::BeginPlay()
 {
 	Super::BeginPlay();
+
+	if (!bEnabled)
+		return;
+
 	const TWeakObjectPtr<AFPCZombieSpawnPoint> SelectedSpawnPoint = GetRandomSpawnPoint();
 	if (SelectedSpawnPoint.IsValid())
 	{

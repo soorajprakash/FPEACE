@@ -6,6 +6,7 @@
 #include "Abilities/GameplayAbility.h"
 #include "FPCOperatorAbilityBase.generated.h"
 
+class UFPCOperatorMovementComponent;
 class UEnhancedInputComponent;
 class AFPCOperator;
 class UFPCOperatorData;
@@ -24,6 +25,7 @@ public:
 protected:
 	static TWeakObjectPtr<AFPCGameplayPlayerController> FPCPlayerController;
 	static TWeakObjectPtr<UEnhancedInputComponent> FPCPlayerInputComponent;
+	static TWeakObjectPtr<UFPCOperatorMovementComponent> FPCOperatorMovementComponent;
 	static TWeakObjectPtr<AFPCOperator> FPCOperator;
 	static TWeakObjectPtr<UFPCOperatorData> FPCOperatorData;
 

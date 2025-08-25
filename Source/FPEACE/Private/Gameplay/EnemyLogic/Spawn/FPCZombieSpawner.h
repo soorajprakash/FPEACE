@@ -15,6 +15,9 @@ public:
 	// Sets default values for this actor's properties
 	AFPCZombieSpawner();
 
+	UPROPERTY(EditAnywhere, Category="FPEACE")
+	bool bEnabled;
+
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="FPEACE")
 	TArray<TObjectPtr<class AFPCZombieSpawnPoint>> SpawnPoints;
 

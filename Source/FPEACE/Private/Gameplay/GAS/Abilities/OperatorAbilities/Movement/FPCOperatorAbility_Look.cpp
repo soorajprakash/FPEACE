@@ -6,24 +6,37 @@
 #include "GameplayAbilitySpecHandle.h"
 #include "DataStructures/FPCCharacterData.h"
 #include "Gameplay/Actor/FPCGameplayPlayerController.h"
+#include "Gameplay/Actor/Operator/FPCOperator.h"
+#include "Gameplay/Actor/Operator/Components/FPCFullScreenJoystickComponent.h"
 
 void UFPCOperatorAbility_Look::ActivateAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo,
-                                                const FGameplayEventData* TriggerEventData)
+                                               const FGameplayEventData* TriggerEventData)
 {
 	Super::ActivateAbility(Handle, ActorInfo, ActivationInfo, TriggerEventData);
 
 	if (FPCPlayerInputComponent.IsValid())
 		InputBindingHandle = FPCPlayerInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &UFPCOperatorAbility_Look::LookAround).GetHandle();
+
+	if (FPCOperator.IsValid())
+		FPCOperator->GetFPCFullScreenJoystickComp()->OnRightDelta.AddDynamic(this, &UFPCOperatorAbility_Look::OnDrag);
 }
 
 void UFPCOperatorAbility_Look::EndAbility(const FGameplayAbilitySpecHandle Handle, const FGameplayAbilityActorInfo* ActorInfo, const FGameplayAbilityActivationInfo ActivationInfo,
-                                           bool bReplicateEndAbility,
-                                           bool bWasCancelled)
+                                          bool bReplicateEndAbility,
+                                          bool bWasCancelled)
 {
 	Super::EndAbility(Handle, ActorInfo, ActivationInfo, bReplicateEndAbility, bWasCancelled);
 
 	if (FPCPlayerInputComponent.IsValid())
 		FPCPlayerInputComponent->RemoveBindingByHandle(InputBindingHandle);
+
+	if (FPCOperator.IsValid())
+		FPCOperator->GetFPCFullScreenJoystickComp()->OnRightDelta.RemoveAll(this);
+}
+
+void UFPCOperatorAbility_Look::OnDrag(FVector2D Delta)
+{
+	LookAround(FInputActionValue(Delta * 0.2f));
 }
 
 void UFPCOperatorAbility_Look::LookAround(const FInputActionValue& InputActionValue)

@@ -16,7 +16,7 @@ void AFPCGameplayPlayerController::TogglePauseMenu()
 	// Pause game and open pause menu
 	if (!bIsGamePaused)
 	{
-		PauseMenuScreenWidget->AddToViewport();
+		PauseMenuScreenWidget->AddToViewport(100);
 		SetInputMode(FInputModeUIOnly());
 	}
 	// Resume game and close pause menu
@@ -46,12 +46,12 @@ void AFPCGameplayPlayerController::TogglePauseMenu()
 	if (ArmASRCVarValue > 0)
 	{
 		FTimerDynamicDelegate ARM_ASR_CrashHandleTimerDelegate = FTimerDynamicDelegate();
-		ARM_ASR_CrashHandleTimerDelegate.BindDynamic(this, &AFPCGameplayPlayerController::WorkAroundThirdPartyTemporalUpscalerCrashOnGamePause);
+		ARM_ASR_CrashHandleTimerDelegate.BindDynamic(this, &AFPCGameplayPlayerController::WorkAroundArmASRCrashOnGamePause);
 		UKismetSystemLibrary::K2_SetTimerDelegate(ARM_ASR_CrashHandleTimerDelegate, 0.01f, false);
 	}
 }
 
-void AFPCGameplayPlayerController::WorkAroundThirdPartyTemporalUpscalerCrashOnGamePause()
+void AFPCGameplayPlayerController::WorkAroundArmASRCrashOnGamePause()
 {
 	ConsoleCommand("r.ArmASR.Enable 1");
 }

@@ -8,6 +8,7 @@
 // ------------- Definitions for static members -------------
 TWeakObjectPtr<AFPCGameplayPlayerController> UFPCOperatorAbilityBase::FPCPlayerController = nullptr;
 TWeakObjectPtr<UEnhancedInputComponent> UFPCOperatorAbilityBase::FPCPlayerInputComponent = nullptr;
+TWeakObjectPtr<UFPCOperatorMovementComponent> UFPCOperatorAbilityBase::FPCOperatorMovementComponent = nullptr;
 TWeakObjectPtr<AFPCOperator> UFPCOperatorAbilityBase::FPCOperator = nullptr;
 TWeakObjectPtr<UFPCOperatorData> UFPCOperatorAbilityBase::FPCOperatorData = nullptr;
 
@@ -25,6 +26,9 @@ void UFPCOperatorAbilityBase::OnGiveAbility(const FGameplayAbilityActorInfo* Act
 
 	if (!FPCPlayerInputComponent.IsValid() && FPCPlayerController.IsValid())
 		FPCPlayerInputComponent = Cast<UEnhancedInputComponent>(FPCPlayerController->InputComponent);
+
+	if (!FPCOperatorMovementComponent.IsValid() && FPCOperator.IsValid())
+		FPCOperatorMovementComponent = FPCOperator->GetFPCMovementComp();
 
 	if (!FPCOperator.IsValid())
 		FPCOperator = Cast<AFPCOperator>(GetOwningActorFromActorInfo());

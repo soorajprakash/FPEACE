@@ -15,6 +15,8 @@ class AFPCGun;
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FWeaponEquipEvent, AFPCWeapon*, SpawnedFPSWeaponRef, AFPCWeapon*, SpawnedTPSWeaponRef);
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FStateChangedEvent, bool, On);
+
 USTRUCT(Blueprintable)
 struct FWeaponSatchelItem
 {
@@ -41,7 +43,11 @@ public:
 
 	void UpdateWeaponVisibility(const bool IsInTPSCameraMode) const;
 
+	UFUNCTION(BlueprintCallable)
 	void SwitchADSState(bool UseADS);
+
+	UFUNCTION(BlueprintCallable)
+	void ToggleADSState();
 
 	void ToggleADSBlendFactor(const int targetBlendFactor);
 
@@ -149,6 +155,9 @@ protected:
 
 	UPROPERTY(BlueprintReadOnly)
 	bool RecentlyUsedWeaponStateChanged;
+
+	UPROPERTY(BlueprintAssignable)
+	FStateChangedEvent ADSStateChangedEvent;
 
 	virtual void InitializeComponent() override;
 

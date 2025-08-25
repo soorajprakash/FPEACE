@@ -14,7 +14,7 @@ UCLASS()
 class FPEACE_API UFPCUserWidget : public UUserWidget
 {
 	GENERATED_BODY()
-
+	
 protected:
 	UPROPERTY(BlueprintReadWrite, Category = "FPEACE|UserWidget")
 	bool bNotifyOnSizeChange = false;

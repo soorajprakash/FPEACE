@@ -22,7 +22,7 @@ public:
 	virtual ~UFPCGameInstance() override;
 
 	UPROPERTY(EditDefaultsOnly, Category="FPEACE")
-	TSoftObjectPtr<UFPCOperatorData> CharacterData;
+	TObjectPtr<UFPCOperatorData> CharacterData;
 
 	UPROPERTY(VisibleAnywhere, Category="FPEACE")
 	TSubclassOf<APawn> SelectedOperatorPawnClass;

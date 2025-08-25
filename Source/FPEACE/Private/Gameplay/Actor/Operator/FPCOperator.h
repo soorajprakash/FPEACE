@@ -6,6 +6,7 @@
 #include "Gameplay/Actor/FPCCharacter.h"
 #include "FPCOperator.generated.h"
 
+class UFPCFullScreenJoystickComponent;
 struct FInputActionValue;
 class UInputAction;
 class UFPCOperatorAnimationManagerComponent;
@@ -21,6 +22,7 @@ UCLASS()
 class FPEACE_API AFPCOperator : public AFPCCharacter
 {
 	GENERATED_BODY()
+	friend class UFPCTouchInputWidget;
 
 public:
 	// Sets default values for this character's properties
@@ -68,6 +70,8 @@ public:
 	TWeakObjectPtr<UFPCOperatorCameraManagerComponent> GetFPCCharacterCameraManager() const;
 
 	TWeakObjectPtr<UFPCOperatorAnimationManagerComponent> GetFPCCharacterAnimationManager() const;
+
+	TWeakObjectPtr<UFPCFullScreenJoystickComponent> GetFPCFullScreenJoystickComp() const;
 
 protected:
 	/*
@@ -156,77 +160,70 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="FPEACE|Components")
 	TObjectPtr<UFPCOperatorAnimationManagerComponent> FPCCharacterAnimationManagerComp;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="FPEACE|Components")
+	TObjectPtr<UFPCFullScreenJoystickComponent> FPCFullScreenJoystickComp;
+
 	//	--------------------- GAMEPLAY INPUT ---------------------
-
-	/*
-	 * Reference to the Look Input Action object
-	 */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="FPEACE|Inputs")
-	TSoftObjectPtr<UInputAction> LookAction;
-
-	/*
-	 * Reference to the Move Input Action object
-	 */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="FPEACE|Inputs")
-	TSoftObjectPtr<UInputAction> MoveAction;
 
 	/*
 	 * Reference to the Run Input Action object
 	 */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="FPEACE|Inputs")
-	TSoftObjectPtr<UInputAction> RunAction;
+	TObjectPtr<UInputAction> ToggleSprintAction;
 
 	/*
 	 * Reference to the Crouch Input Action object
 	 */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="FPEACE|Inputs")
-	TSoftObjectPtr<UInputAction> CrouchAction;
+	TObjectPtr<UInputAction> CrouchAction;
 
 	/*
 	 * Reference to the Jump Input Action object
 	 */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="FPEACE|Inputs")
-	TSoftObjectPtr<UInputAction> JumpAction;
+	TObjectPtr<UInputAction> JumpAction;
 
 	/*
 	 * Reference to the ADS Input Action object
 	 */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="FPEACE|Inputs")
-	TSoftObjectPtr<UInputAction> ADSAction;
+	TObjectPtr<UInputAction> ADSAction;
 
 	/*
 	 * Reference to the Fire Input Action object
 	 */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="FPEACE|Inputs")
-	TSoftObjectPtr<UInputAction> FireAction;
+	TObjectPtr<UInputAction> FireAction;
 
 	/*
 	 * Reference to the Reload Input Action object
 	 */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="FPEACE|Inputs")
-	TSoftObjectPtr<UInputAction> ReloadAction;
+	TObjectPtr<UInputAction> ReloadAction;
 
 	/*
 	 * Reference to the Weapon Cycle Up Input Action object
 	 */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="FPEACE|Inputs")
-	TSoftObjectPtr<UInputAction> WeaponCycleUpAction;
+	TObjectPtr<UInputAction> WeaponCycleUpAction;
 
 	/*
 	 * Reference to the Weapon Cycle Up Input Action object
 	 */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="FPEACE|Inputs")
-	TSoftObjectPtr<UInputAction> WeaponCycleDownAction;
+	TObjectPtr<UInputAction> WeaponCycleDownAction;
 
 	/*
 	 * Reference to the Camera Switching Input Action object
 	 */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="FPEACE|Inputs")
-	TSoftObjectPtr<UInputAction> CameraSwitchAction;
+	TObjectPtr<UInputAction> CameraSwitchAction;
 
 	//	--------------------- OVERRIDES ---------------------
 
 	virtual void PreInitializeComponents() override;
+
+	virtual void BeginPlay() override;
 
 	virtual void PossessedBy(AController* NewController) override;
 
@@ -234,4 +231,41 @@ protected:
 	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
 
 	virtual void OnDeath_Implementation() override;
+
+private:
+	UFUNCTION(BlueprintCallable)
+	void OnSprintAction();
+
+	UFUNCTION(BlueprintCallable)
+	void OnFireActionStarted();
+
+	UFUNCTION(BlueprintCallable)
+	void OnFireActionEnded();
+
+	UFUNCTION(BlueprintCallable)
+	void OnCrouchAction();
+
+	UFUNCTION(BlueprintCallable)
+	void OnJumpActionStarted();
+
+	UFUNCTION(BlueprintCallable)
+	void OnJumpActionEnded();
+
+	UFUNCTION(BlueprintCallable)
+	void OnADSActionStarted();
+
+	UFUNCTION(BlueprintCallable)
+	void OnADSActionEnded();
+
+	UFUNCTION(BlueprintCallable)
+	void OnWeaponCycleUpAction();
+
+	UFUNCTION(BlueprintCallable)
+	void OnWeaponCycleDownAction();
+
+	UFUNCTION(BlueprintCallable)
+	void OnCameraSwitchAction();
+
+	UFUNCTION(BlueprintCallable)
+	void OnReloadAction();
 };

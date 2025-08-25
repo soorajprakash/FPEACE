@@ -17,20 +17,20 @@
 
 struct FLocomotionStateSetting;
 
-UFPCOperatorMovementComponent::UFPCOperatorMovementComponent(): CurrentVelocityDirection(), CurrentAccelerationDirection(), currentLocomotionState(), currentLocomotionStance(),
-                                                                PrevLocomotionState(), PrevLocomotionStance(),
-                                                                PrevTargetLocomotionState(),
-                                                                PrevVelocityDirection(),
-                                                                PrevAccelerationDirection(),
-                                                                PrevRotation(),
-                                                                LastFrameMaxSpeed(0),
-                                                                LastFrameAccelerationDirection(),
-                                                                LastFrameVelocityDirection(),
-                                                                LastFrameLocomotionStance(),
-                                                                LastFrameLocomotionState(),
-                                                                LastFrameTargetLocomotionState(),
-                                                                WasMovingLastFrame(false),
-                                                                WasAcceleratingLastFrame(false)
+UFPCOperatorMovementComponent::UFPCOperatorMovementComponent() : CurrentVelocityDirection(), CurrentAccelerationDirection(), currentLocomotionState(), currentLocomotionStance(),
+                                                                 PrevLocomotionState(), PrevLocomotionStance(),
+                                                                 PrevTargetLocomotionState(),
+                                                                 PrevVelocityDirection(),
+                                                                 PrevAccelerationDirection(),
+                                                                 PrevRotation(),
+                                                                 LastFrameMaxSpeed(0),
+                                                                 LastFrameAccelerationDirection(),
+                                                                 LastFrameVelocityDirection(),
+                                                                 LastFrameLocomotionStance(),
+                                                                 LastFrameLocomotionState(),
+                                                                 LastFrameTargetLocomotionState(),
+                                                                 WasMovingLastFrame(false),
+                                                                 WasAcceleratingLastFrame(false)
 {
 	// Set this component to be initialized when the game starts, and to be ticked every frame.  You can turn these features
 	// off to improve performance if you don't need them.
@@ -48,6 +48,15 @@ void UFPCOperatorMovementComponent::ToggleCrouch()
 {
 	bWantsToCrouch = !bWantsToCrouch;
 	currentLocomotionStance = bWantsToCrouch ? ELocomotionStance::Crouching : ELocomotionStance::Standing;
+	OnCurrentLocomotionStanceChanged.Broadcast(currentLocomotionStance);
+}
+
+void UFPCOperatorMovementComponent::Jump()
+{
+	if (bWantsToCrouch)
+		ToggleCrouch();
+	else
+		OwningOperator->Jump();
 }
 
 void UFPCOperatorMovementComponent::InitializeComponent()
@@ -72,15 +81,6 @@ void UFPCOperatorMovementComponent::InitializeComponent()
 		ForwardLimits = FPCCharacterData->CharacterDirectionLimits.ForwardLimits;
 		BackwardLimits = FPCCharacterData->CharacterDirectionLimits.BackwardLimits;
 		DeadZone = FPCCharacterData->CharacterDirectionLimits.DirectionalDeadzone;
-	}
-}
-
-void UFPCOperatorMovementComponent::AddControllerPitchAndYawInput(float Pitch, float Yaw)
-{
-	if (FPCPlayerController.IsValid())
-	{
-		FPCPlayerController->AddPitchInput(Pitch);
-		FPCPlayerController->AddYawInput(Yaw);
 	}
 }
 
@@ -171,10 +171,7 @@ void UFPCOperatorMovementComponent::HandleLocomotionStateChange()
 	// Set the character to default locomotion target state if it's not moving
 	// TODO: Allow the default state to be set somewhere globally
 	if (!IsCharacterAccelerating)
-	{
 		SetCurrentLocomotionStateWithSettings(ELocomotionState::Stationary);
-		SetTargetLocomotionState(ELocomotionState::Running);
-	}
 	else
 	{
 		//Check if the character is in a state where it can only walk.

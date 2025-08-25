@@ -57,7 +57,7 @@ private:
 	TObjectPtr<AFPCSampleGameplayLevelScriptActor> SampleGameplayLevelScriptActorRef;
 
 	UFUNCTION()
-	void WorkAroundThirdPartyTemporalUpscalerCrashOnGamePause();
+	void WorkAroundArmASRCrashOnGamePause();
 	
 	virtual void SetupInputComponent() override;
 
