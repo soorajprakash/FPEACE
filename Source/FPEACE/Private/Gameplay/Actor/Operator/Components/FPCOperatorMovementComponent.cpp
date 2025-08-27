@@ -171,7 +171,10 @@ void UFPCOperatorMovementComponent::HandleLocomotionStateChange()
 	// Set the character to default locomotion target state if it's not moving
 	// TODO: Allow the default state to be set somewhere globally
 	if (!IsCharacterAccelerating)
+	{
 		SetCurrentLocomotionStateWithSettings(ELocomotionState::Stationary);
+		SetTargetLocomotionState(ELocomotionState::Running);
+	}
 	else
 	{
 		//Check if the character is in a state where it can only walk.

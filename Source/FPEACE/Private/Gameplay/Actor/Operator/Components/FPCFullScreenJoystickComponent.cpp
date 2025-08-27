@@ -1,8 +1,8 @@
 ﻿// Copyright © Sooraj Prakash. All rights reserved.Unauthorized distribution or sharing of this code is prohibited.
 
 #include "FPCFullScreenJoystickComponent.h"
-#include "Engine/GameViewportClient.h"
-#include "UI/Slate/DragAnywhereOverlay.h"
+#include "Framework/Application/SlateApplication.h"
+#include "UI/Slate/DragAnywhereInputPreProcessor.h"
 
 UFPCFullScreenJoystickComponent::UFPCFullScreenJoystickComponent()
 {
@@ -11,41 +11,32 @@ UFPCFullScreenJoystickComponent::UFPCFullScreenJoystickComponent()
 
 void UFPCFullScreenJoystickComponent::SetDragAnywhereEnabled(bool bEnable)
 {
-	SetComponentTickEnabled(bEnable);
 	if (bEnable)
 	{
-		if (!Overlay.IsValid())
+		if (!PP.IsValid())
 		{
-			if (UGameViewportClient* GVC = GetWorld() ? GetWorld()->GetGameViewport() : nullptr)
-			{
-				TWeakObjectPtr Self = this;
-				TSharedRef<SDragAnywhereOverlay> Layer =
-					SNew(SDragAnywhereOverlay).Owner(Self);
-				Overlay = Layer;
-				GVC->AddViewportWidgetContent(Layer, 1);
-			}
+			PP = MakeShared<FDragAnywhereInputPreProcessor>(this);
+			// Register so it runs BEFORE widgets; we still return false so UI also gets events
+			FSlateApplication::Get().RegisterInputPreProcessor(PP); // priority defaults to high in practice
 		}
+		SetComponentTickEnabled(true);
 	}
 	else
 	{
-		RemoveOverlay();
-		bLeftHeld = bRightHeld = false;
-	}
-}
-
-void UFPCFullScreenJoystickComponent::RemoveOverlay()
-{
-	if (Overlay.IsValid())
-	{
-		if (UGameViewportClient* GVC = GetWorld() ? GetWorld()->GetGameViewport() : nullptr)
-			GVC->RemoveViewportWidgetContent(Overlay.ToSharedRef());
-		Overlay.Reset();
+		if (PP.IsValid())
+		{
+			FSlateApplication::Get().UnregisterInputPreProcessor(PP.ToSharedRef());
+			PP.Reset();
+		}
+		SetComponentTickEnabled(false);
+		if (bLeftHeld) _PP_TouchEnd(true);
+		if (bRightHeld) _PP_TouchEnd(false);
 	}
 }
 
 void UFPCFullScreenJoystickComponent::EndPlay(const EEndPlayReason::Type R)
 {
-	RemoveOverlay();
+	SetDragAnywhereEnabled(false);
 	Super::EndPlay(R);
 }
 
@@ -53,51 +44,52 @@ void UFPCFullScreenJoystickComponent::TickComponent(float Dt, ELevelTick, FActor
 {
 	if (bLeftHeld)
 	{
-		const FVector2D d = LeftCurrentPx - LeftOriginPx;
+		const FVector2D d = LeftCurrPx - LeftOriginPx;
 		const float r = d.Size();
 		const float mag = FMath::Clamp((r - MoveParams.DeadZonePx) / FMath::Max(1.f, MoveParams.MaxRadiusPx), 0.f, 1.f);
-		FVector2D axis = r > KINDA_SMALL_NUMBER ? d / r : FVector2D::ZeroVector; // direction
-		OnLeftAxisTick.Broadcast(axis * mag); // fires EVERY tick while held
+		const FVector2D dir = r > KINDA_SMALL_NUMBER ? d / r : FVector2D::ZeroVector;
+		OnLeftAxisTick.Broadcast(dir * mag); // fires EVERY TICK while held
 	}
 }
 
-// ---- Overlay callbacks ----
-void UFPCFullScreenJoystickComponent::_OverlaySetLeftState(bool bHeld, const FVector2D& OriginPx)
+void UFPCFullScreenJoystickComponent::_PP_TouchBegin(bool bLeft, const FVector2D& P)
 {
-	bLeftHeld = bHeld;
-	LeftOriginPx = OriginPx;
-	LeftCurrentPx = OriginPx;
+	if (bLeft)
+	{
+		bLeftHeld = true;
+		LeftOriginPx = P;
+		LeftCurrPx = P;
+	}
+	else
+	{
+		bRightHeld = true;
+		RightPrevPx = P;
+	}
 }
 
-void UFPCFullScreenJoystickComponent::_OverlayUpdateLeftPos(const FVector2D& CurPx)
+void UFPCFullScreenJoystickComponent::_PP_TouchMove(bool bLeft, const FVector2D& P)
 {
-	LeftCurrentPx = CurPx;
+	if (bLeft && bLeftHeld) { LeftCurrPx = P; }
+	else if (!bLeft && bRightHeld)
+	{
+		const FVector2D d = P - RightPrevPx;
+		RightPrevPx = P;
+		OnRightDelta.Broadcast(d);
+	}
 }
 
-void UFPCFullScreenJoystickComponent::_OverlayEndLeft()
+void UFPCFullScreenJoystickComponent::_PP_TouchEnd(bool bLeft)
 {
-	bLeftHeld = false;
-	OnLeftAxisTick.Broadcast(FVector2D::ZeroVector);
-	OnLeftEnded.Broadcast();
-}
-
-void UFPCFullScreenJoystickComponent::_OverlaySetRightState(bool bHeld, const FVector2D& StartPx)
-{
-	bRightHeld = bHeld;
-	RightPrevPx = StartPx;
-}
-
-void UFPCFullScreenJoystickComponent::_OverlayUpdateRightPos(const FVector2D& CurPx)
-{
-	if (!bRightHeld) return;
-	const FVector2D delta = CurPx - RightPrevPx;
-	RightPrevPx = CurPx;
-	OnRightDelta.Broadcast(delta); // emit immediate deltas for look
-}
-
-void UFPCFullScreenJoystickComponent::_OverlayEndRight()
-{
-	bRightHeld = false;
-	OnRightDelta.Broadcast(FVector2D::ZeroVector);
-	OnRightEnded.Broadcast();
+	if (bLeft)
+	{
+		bLeftHeld = false;
+		OnLeftAxisTick.Broadcast(FVector2D::ZeroVector);
+		OnLeftEnded.Broadcast();
+	}
+	else
+	{
+		bRightHeld = false;
+		OnRightDelta.Broadcast(FVector2D::ZeroVector);
+		OnRightEnded.Broadcast();
+	}
 }

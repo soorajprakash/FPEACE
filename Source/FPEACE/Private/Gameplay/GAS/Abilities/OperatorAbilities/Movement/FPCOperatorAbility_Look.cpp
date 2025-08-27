@@ -36,7 +36,7 @@ void UFPCOperatorAbility_Look::EndAbility(const FGameplayAbilitySpecHandle Handl
 
 void UFPCOperatorAbility_Look::OnDrag(FVector2D Delta)
 {
-	LookAround(FInputActionValue(Delta * 0.2f));
+	LookAround(FInputActionValue(Delta * 0.5f));
 }
 
 void UFPCOperatorAbility_Look::LookAround(const FInputActionValue& InputActionValue)

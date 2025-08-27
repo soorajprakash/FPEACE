@@ -31,43 +31,32 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void SetDragAnywhereEnabled(bool bEnable);
 
-	// Runtime tuning
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="FPEACE|Input")
 	FDragMoveParams MoveParams;
 
-	// Events you’ll bind in your Character
-	UPROPERTY(BlueprintAssignable, Category="FPEACE|Input")
-	FLeftAxisTick OnLeftAxisTick;
-	UPROPERTY(BlueprintAssignable, Category="FPEACE|Input")
+	UPROPERTY(BlueprintAssignable)
+	FLeftAxisTick OnLeftAxisTick; // [-1..1], |.| in [0..1]
+	UPROPERTY(BlueprintAssignable)
 	FSimpleEvent OnLeftEnded;
-	UPROPERTY(BlueprintAssignable, Category="FPEACE|Input")
+	UPROPERTY(BlueprintAssignable)
 	FRightDeltaEvent OnRightDelta;
-	UPROPERTY(BlueprintAssignable, Category="FPEACE|Input")
+	UPROPERTY(BlueprintAssignable)
 	FSimpleEvent OnRightEnded;
 
-	// Called by the Slate overlay:
-	void _OverlaySetLeftState(bool bHeld, const FVector2D& OriginScreenPx);
-	void _OverlayUpdateLeftPos(const FVector2D& CurrentScreenPx);
-	void _OverlayEndLeft();
-
-	void _OverlaySetRightState(bool bHeld, const FVector2D& StartScreenPx);
-	void _OverlayUpdateRightPos(const FVector2D& CurrentScreenPx);
-	void _OverlayEndRight();
+	// called from the pre-processor:
+	void _PP_TouchBegin(bool bLeft, const FVector2D& ScreenPos);
+	void _PP_TouchMove(bool bLeft, const FVector2D& ScreenPos);
+	void _PP_TouchEnd(bool bLeft);
 
 protected:
 	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
-	virtual void TickComponent(float Dt, ELevelTick TickType, FActorComponentTickFunction* ThisTick) override;
+	virtual void TickComponent(float Dt, ELevelTick, FActorComponentTickFunction*) override;
 
 private:
-	TSharedPtr<class SDragAnywhereOverlay> Overlay;
-	void RemoveOverlay();
+	TSharedPtr<class FDragAnywhereInputPreProcessor> PP;
 
-	// Left state
-	bool bLeftHeld = false;
+	bool bLeftHeld = false, bRightHeld = false;
 	FVector2D LeftOriginPx = FVector2D::ZeroVector;
-	FVector2D LeftCurrentPx = FVector2D::ZeroVector;
-
-	// Right state (we forward deltas immediately via event)
-	bool bRightHeld = false;
+	FVector2D LeftCurrPx = FVector2D::ZeroVector;
 	FVector2D RightPrevPx = FVector2D::ZeroVector;
 };
