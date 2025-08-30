@@ -94,7 +94,7 @@ private:
 	TWeakObjectPtr<UFPCFullScreenJoystickComponent> VirtualJoystickComp = nullptr;
 
 	void HandleInputMethodChanged(ECommonInputType NewType);
-	void ApplyHUDFor(ECommonInputType Type);
+	void HandleHUDAndInputForInputDevice(ECommonInputType Type);
 	
 	UFUNCTION()
 	void WorkAroundArmASRCrashOnGamePause();

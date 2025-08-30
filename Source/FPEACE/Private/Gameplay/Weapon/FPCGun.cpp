@@ -174,12 +174,12 @@ void AFPCGun::SetupWeapon(const ECameraMode TargetCameraMode, USceneComponent* A
 	Super::SetupWeapon(TargetCameraMode, AttachCharacterMesh);
 
 	// Pool the bullets
-	if (BulletClass && OwningOperator->WorldObjectPool)
+	if (BulletClass && OwningOperator->OperatorObjectPool)
 	{
 		FPooledActorSettings BulletPoolSettings;
 		BulletPoolSettings.bCanExpand = false;
 		BulletPoolSettings.InitialSpawnCount = GunAttributeSet->GetMagCapacity();
-		OwningOperator->WorldObjectPool->AddActorType(BulletClass, BulletPoolSettings);
+		OwningOperator->OperatorObjectPool->AddActorType(BulletClass, BulletPoolSettings);
 	}
 }
 
@@ -195,7 +195,7 @@ void AFPCGun::Fire()
 		BulletSpawnTransform = EmitterSocketTransform;
 
 		/*
-		 * Uncomment this if the bullet needs to be spawned from the aim socket's height' but at the emitter's distance'
+		 * Uncomment this if the bullet needs to be spawned from the aim socket's height' but at the muzzle end's distance'
 		 */
 		// const FTransform AimSocketTransform = OpticMeshComp->GetSocketTransform(TEXT("SOCKET_Aim"));
 		// const FVector RelativeEmitterLocation = AimSocketTransform.InverseTransformPosition(EmitterSocketTransform.GetLocation());
@@ -249,7 +249,7 @@ void AFPCGun::BurstModeFire()
 AFPCBullet* AFPCGun::AcquireBullet()
 {
 	AActor* BulletActorFromPool;
-	OwningOperator->WorldObjectPool->Pull(BulletClass, BulletActorFromPool);
+	OwningOperator->OperatorObjectPool->Pull(BulletClass, BulletActorFromPool);
 	if (AFPCBullet* NewBullet = Cast<AFPCBullet>(BulletActorFromPool))
 	{
 		NewBullet->Initialize(OwningOperator.Get(), this);

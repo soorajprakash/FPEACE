@@ -6,6 +6,7 @@
 #include "Gameplay/Actor/FPCCharacter.h"
 #include "FPCOperator.generated.h"
 
+class UObjectPool;
 class UFPCFullScreenJoystickComponent;
 struct FInputActionValue;
 class UInputAction;
@@ -25,6 +26,9 @@ class FPEACE_API AFPCOperator : public AFPCCharacter
 	friend class UFPCTouchInputWidget;
 
 public:
+	UPROPERTY()
+	TObjectPtr<UObjectPool> OperatorObjectPool;
+	
 	// Sets default values for this character's properties
 	AFPCOperator(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
 
@@ -223,7 +227,7 @@ protected:
 
 	virtual void PreInitializeComponents() override;
 
-	virtual void BeginPlay() override;
+	virtual void PostInitializeComponents() override;
 
 	virtual void PossessedBy(AController* NewController) override;
 

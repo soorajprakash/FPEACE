@@ -100,7 +100,7 @@ void AFPCBullet::Tick(float DeltaSeconds)
 		CurrentBulletAge += DeltaSeconds;
 
 		if (CurrentBulletAge >= BulletLifeSpan)
-			OwningOperator->WorldObjectPool->Push(this);
+			OwningOperator->OperatorObjectPool->Push(this);
 	}
 }
 
@@ -142,7 +142,7 @@ void AFPCBullet::BulletOverlapedSomething(UPrimitiveComponent* OverlappedCompone
                                           const FHitResult& SweepResult)
 {
 	DrawDebugSphere(GetWorld(), SweepResult.Location, 5, 12, FColor::Red, false, 2);
-	OwningOperator->WorldObjectPool->Push(this);
+	OwningOperator->OperatorObjectPool->Push(this);
 
 	if (AFPCCharacter* CharacterToDamage = Cast<AFPCCharacter>(OtherActor))
 	{

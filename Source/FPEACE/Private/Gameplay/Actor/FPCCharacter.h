@@ -15,7 +15,6 @@ class UFPCOperatorData;
 class UFPCAbilitySystemComponent;
 class AFPCGameplayPlayerController;
 class UFPCSkeletalMeshComponent;
-class UObjectPool;
 
 UCLASS()
 class FPEACE_API AFPCCharacter : public ACharacter, public IAbilitySystemInterface, public IFPCDamageReceiver
@@ -30,11 +29,6 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	virtual void PlayVocalSound(USoundBase* Sound, float CrossfadeDuration = 1);
-
-	//	--------------------- PUBLIC VARIABLES ---------------------
-	UPROPERTY()
-	TObjectPtr<UObjectPool> WorldObjectPool;
-
 
 	//	--------------------- GETTER FUNCTIONS ---------------------
 
@@ -85,6 +79,4 @@ protected:
 	virtual void BeginPlay() override;
 
 	virtual void PostInitializeComponents() override;
-
-	virtual void OnConstruction(const FTransform& Transform) override;
 };

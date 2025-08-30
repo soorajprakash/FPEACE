@@ -2,7 +2,9 @@
 
 
 #include "FPCEnemyCharacter.h"
+#include "AbilitySystemGlobals.h"
 #include "FCTween.h"
+#include "GameplayAbilitiesModule.h"
 #include "Components/BoxComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/WidgetComponent.h"
@@ -15,7 +17,6 @@
 #include "Gameplay/GAS/AttribueSets/FPCHealthAttributeSet.h"
 #include "Gameplay/GAS/Abilities/EnemyAbilities/FPCEnemyAbilityBase.h"
 #include "Gameplay/GAS/AttribueSets/FPCEnemyCombatAttributeSet.h"
-#include "Kismet/KismetSystemLibrary.h"
 
 TWeakObjectPtr<AFPCOperator> AFPCEnemyCharacter::PlayerOperator = nullptr;
 
@@ -33,10 +34,7 @@ AFPCEnemyCharacter::AFPCEnemyCharacter()
 	HealthBarWidgetComp->SetupAttachment(RootComponent);
 
 	RightHandHitBox = CreateDefaultSubobject<UBoxComponent>(TEXT("RightHandHitBox"));
-	RightHandHitBox->SetupAttachment(MainBodyMeshComp, FName(TEXT("Hand_R")));
-
 	LeftHandHitBox = CreateDefaultSubobject<UBoxComponent>(TEXT("LeftHandHitBox"));
-	LeftHandHitBox->SetupAttachment(MainBodyMeshComp, FName(TEXT("Hand_L")));
 
 	EnemyMovementComponent = Cast<UFPCCharacterMovementComponent>(ACharacter::GetMovementComponent());
 }
@@ -49,24 +47,62 @@ void AFPCEnemyCharacter::OnDeath_Implementation()
 	FPCAbilitySystemComponent->CancelAllAbilities();
 	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
 	MainBodyMeshComp->SetCollisionProfileName("Ragdoll");
-	MainBodyMeshComp->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
 	MainBodyMeshComp->SetSimulatePhysics(true);
 	HealthBarWidgetComp->SetHiddenInGame(true);
 
-	UMaterialInstanceDynamic* EnemyMainMat = MainBodyMeshComp->CreateAndSetMaterialInstanceDynamic(0);
-
-	FCTween::Play(-0.4f, 0.7f, [EnemyMainMat](float V)
+	FCTween::Play(-0.4f, 0.7f, [&](float V)
 	{
-		EnemyMainMat->SetScalarParameterValue(FName("DissolveAmount"), V);
+		MainMeshDynamicMaterial->SetScalarParameterValue(FName("DissolveAmount"), V);
 	}, 5)->SetOnComplete([&]
 	{
-		// Destroy this actor
+		// Notify this enemy's death
+		OnEnemyDeath.Broadcast(this);
 	});
+}
+
+void AFPCEnemyCharacter::OnPulledFromPool_Implementation()
+{
+	IObjectPooledActor::OnPulledFromPool_Implementation();
+
+	IGameplayAbilitiesModule::Get().GetAbilitySystemGlobals()->GetAttributeSetInitter()->InitAttributeSetDefaults(FPCAbilitySystemComponent, ContentID, 1, true);
+
+	MainMeshDynamicMaterial->SetScalarParameterValue(FName("DissolveAmount"), -0.4f);
+	GetCapsuleComponent()->SetCollisionProfileName("FPC_EnemyCapsule");
+	MainBodyMeshComp->SetCollisionProfileName("FPC_EnemyBody");
+	HealthBarWidgetComp->SetHiddenInGame(false);
+	EnemyMovementComponent->SetMovementMode(MOVE_Walking);
+	GetCapsuleComponent()->SetEnableGravity(true);
+	MainBodyMeshComp->SetEnableGravity(true);
+	SetActorEnableCollision(true);
+	SetActorHiddenInGame(false);
+}
+
+void AFPCEnemyCharacter::OnPushedToPool_Implementation()
+{
+	IObjectPooledActor::OnPushedToPool_Implementation();
+
+	SetActorTransform(FTransform::Identity);
+
+	FPCAbilitySystemComponent->CancelAllAbilities();
+	EnemyMovementComponent->DisableMovement();
+	MainBodyMeshComp->SetSimulatePhysics(false);
+
+	GetCapsuleComponent()->SetEnableGravity(false);
+	MainBodyMeshComp->SetEnableGravity(false);
+	MainBodyMeshComp->SetRelativeTransform(DefaultMainMeshRelativeTransform);
+	SetActorEnableCollision(false);
+	SetActorHiddenInGame(true);
 }
 
 void AFPCEnemyCharacter::PostInitializeComponents()
 {
 	Super::PostInitializeComponents();
+
+	if (MainBodyMeshComp->GetSkeletalMeshAsset())
+		RightHandHitBox->AttachToComponent(MainBodyMeshComp, FAttachmentTransformRules(EAttachmentRule::SnapToTarget, false), FName(TEXT("Hand_R")));
+
+	if (MainBodyMeshComp->GetSkinnedAsset())
+		LeftHandHitBox->AttachToComponent(MainBodyMeshComp, FAttachmentTransformRules(EAttachmentRule::SnapToTarget, false), FName(TEXT("Hand_L")));
 
 	BaseAnimInstance = Cast<UFPCEnemyAnimInstance>(MainBodyMeshComp->GetAnimInstance());
 	LeftHandHitBox->OnComponentBeginOverlap.AddDynamic(this, &AFPCEnemyCharacter::HandHit);
@@ -80,8 +116,13 @@ void AFPCEnemyCharacter::BeginPlay()
 	if (AttackAbility)
 		FPCAbilitySystemComponent->K2_GiveAbility(AttackAbility);
 
+	if (!MainMeshDynamicMaterial.IsValid())
+		MainMeshDynamicMaterial = MainBodyMeshComp->CreateAndSetMaterialInstanceDynamic(0);
+
 	if (!PlayerOperator.IsValid())
 		PlayerOperator = Cast<AFPCOperator>(GetWorld()->GetFirstPlayerController()->GetPawn());
+
+	DefaultMainMeshRelativeTransform = MainBodyMeshComp->GetRelativeTransform();
 }
 
 void AFPCEnemyCharacter::HandHit(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)

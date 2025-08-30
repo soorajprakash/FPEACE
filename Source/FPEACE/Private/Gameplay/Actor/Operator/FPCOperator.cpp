@@ -1,7 +1,11 @@
 ﻿// Copyright © Sooraj Prakash. All rights reserved.Unauthorized distribution or sharing of this code is prohibited.
 
 #include "FPCOperator.h"
+
+#include "AbilitySystemGlobals.h"
 #include "EnhancedInputComponent.h"
+#include "GameplayAbilitiesModule.h"
+#include "ObjectPoolSubsystem.h"
 #include "Components/FPCFullScreenJoystickComponent.h"
 #include "Components/FPCOperatorAnimationManagerComponent.h"
 #include "Components/FPCOperatorCameraManagerComponent.h"
@@ -210,15 +214,16 @@ TWeakObjectPtr<UFPCFullScreenJoystickComponent> AFPCOperator::GetFPCFullScreenJo
 void AFPCOperator::PreInitializeComponents()
 {
 	Super::PreInitializeComponents();
+
+	OperatorObjectPool = GetWorld()->GetSubsystem<UObjectPool>();
 	GetOperatorData();
 }
 
-void AFPCOperator::BeginPlay()
+void AFPCOperator::PostInitializeComponents()
 {
-	Super::BeginPlay();
+	Super::PostInitializeComponents();
 
-	if (FPCFullScreenJoystickComp)
-		FPCFullScreenJoystickComp->SetDragAnywhereEnabled(true);
+	IGameplayAbilitiesModule::Get().GetAbilitySystemGlobals()->GetAttributeSetInitter()->InitAttributeSetDefaults(FPCAbilitySystemComponent, ContentID, 1, true);
 }
 
 void AFPCOperator::PossessedBy(AController* NewController)

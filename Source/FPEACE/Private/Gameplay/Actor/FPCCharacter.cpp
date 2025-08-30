@@ -2,10 +2,7 @@
 // Unauthorized distribution of this file, or any part of it, is prohibited.
 
 #include "FPCCharacter.h"
-#include "AbilitySystemGlobals.h"
-#include "GameplayAbilitiesModule.h"
 #include "MetasoundSource.h"
-#include "ObjectPoolSubsystem.h"
 #include "Components/AudioComponent.h"
 #include "Gameplay/ExtendedClasses/Components/FPCAbilitySystemComponent.h"
 #include "Gameplay/ExtendedClasses/Components/FPCSkeletalMeshComponent.h"
@@ -15,7 +12,7 @@
 #include "Gameplay/GAS/AttribueSets/FPCHealthAttributeSet.h"
 
 // Sets default values
-AFPCCharacter::AFPCCharacter(const FObjectInitializer& ObjectInitializer): Super(
+AFPCCharacter::AFPCCharacter(const FObjectInitializer& ObjectInitializer) : Super(
 	ObjectInitializer.SetDefaultSubobjectClass<UFPCSkeletalMeshComponent>(MeshComponentName).SetDefaultSubobjectClass<UFPCCharacterMovementComponent>(CharacterMovementComponentName).
 	                  SetDefaultSubobjectClass<UFPCCapsuleComponent>(CapsuleComponentName))
 {
@@ -29,7 +26,6 @@ AFPCCharacter::AFPCCharacter(const FObjectInitializer& ObjectInitializer): Super
 
 	// Construct components
 	VocalAudioComponent = CreateDefaultSubobject<UAudioComponent>(TEXT("Vocal Audio Component"));
-	VocalAudioComponent->SetupAttachment(MainBodyMeshComp, FName("Head"));
 	VocalAudioComponent->SetAutoActivate(true);
 
 	if (!FPCAbilitySystemComponent)
@@ -40,7 +36,6 @@ AFPCCharacter::AFPCCharacter(const FObjectInitializer& ObjectInitializer): Super
 
 void AFPCCharacter::OnHitDamageTaken_Implementation(UAnimMontage* HitReactionMontage)
 {
-	
 }
 
 void AFPCCharacter::PlayVocalSound(USoundBase* Sound, float CrossfadeDuration)
@@ -90,17 +85,10 @@ void AFPCCharacter::PostInitializeComponents()
 {
 	Super::PostInitializeComponents();
 
+	if (MainBodyMeshComp->GetSkinnedAsset())
+		VocalAudioComponent->AttachToComponent(MainBodyMeshComp, FAttachmentTransformRules(EAttachmentRule::SnapToTarget, false), FName(TEXT("Head")));
+
 	FPCAbilitySystemComponent->InitAbilityActorInfo(this, this);
-
-	IGameplayAbilitiesModule::Get().GetAbilitySystemGlobals()->GetAttributeSetInitter()->InitAttributeSetDefaults(FPCAbilitySystemComponent, ContentID, 1, true);
-}
-
-void AFPCCharacter::OnConstruction(const FTransform& Transform)
-{
-	Super::OnConstruction(Transform);
-
-	if (const UWorld* World = GetWorld())
-		WorldObjectPool = World->GetSubsystem<UObjectPool>();
 }
 
 void AFPCCharacter::OnReceivedDamage(TWeakObjectPtr<AFPCCharacter> From, FName HitBone)

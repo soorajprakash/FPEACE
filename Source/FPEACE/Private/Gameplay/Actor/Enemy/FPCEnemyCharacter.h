@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "ObjectPooledActorInterface.h"
 #include "Gameplay/Actor/FPCCharacter.h"
 #include "FPCEnemyCharacter.generated.h"
 
@@ -14,14 +15,18 @@ class UWidgetComponent;
 class AFPCOperator;
 class UFPCEnemyAnimInstance;
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_OneParam(FOnEnemyEvent, AFPCEnemyCharacter*, Enemy);
+
 UCLASS(Abstract)
-class FPEACE_API AFPCEnemyCharacter : public AFPCCharacter
+class FPEACE_API AFPCEnemyCharacter : public AFPCCharacter, public IObjectPooledActor
 {
 	GENERATED_BODY()
 
 public:
 	// Sets default values for this character's properties
 	AFPCEnemyCharacter();
+
+	FOnEnemyEvent OnEnemyDeath;
 
 	virtual void OnDeath_Implementation() override;
 
@@ -77,15 +82,27 @@ protected:
 	UPROPERTY()
 	TWeakObjectPtr<UFPCEnemyAnimInstance> BaseAnimInstance;
 
+	// ----------------- INTERFACE IMPLEMENTATIONS -------------------
+	virtual void OnPulledFromPool_Implementation() override;
+	virtual void OnPushedToPool_Implementation() override;
+
 	// ----------------- OVERRIDES -------------------
 	virtual void PostInitializeComponents() override;
 
 	virtual void BeginPlay() override;
 
 private:
+
+	/*
+	 * The initial relative transform of the Main skeletal mesh component
+	 */
+	FTransform DefaultMainMeshRelativeTransform;
 	
 	static TWeakObjectPtr<AFPCOperator> PlayerOperator;
-	
+
+	UPROPERTY()
+	TWeakObjectPtr<UMaterialInstanceDynamic> MainMeshDynamicMaterial;
+
 	UPROPERTY()
 	TWeakObjectPtr<UFPCCharacterMovementComponent> EnemyMovementComponent;
 

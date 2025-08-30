@@ -38,16 +38,29 @@ void UObjectPool::OnWorldBeginPlay(UWorld& InWorld)
 {
 	Super::OnWorldBeginPlay(InWorld);
 
-	const UObjectPoolSettings* Settings = GetDefault<UObjectPoolSettings>();
+	if (!bCreateContainerActors) return;
+	if (PoolRootActor.IsValid()) return;
 
-	for (TTuple<TSubclassOf<AActor>, FPooledActorSettings> Element : Settings->InitialActorsToPool)
-	{
-		if (!AddActorType(Element.Key, Element.Value))
-		{
-			UE_LOG(LogObjectPool, Error, TEXT("Failed to spawn initial count of actor class \"%s\""),
-			       IsValid(Element.Key) ? *Element.Key->GetName() : *FString("Unknown class"))
-		}
-	}
+	FActorSpawnParameters Params;
+	Params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+	// Name = same as object pool name (unique across PIE sessions)
+	Params.Name = MakeUniqueObjectName(&InWorld, AActor::StaticClass(), *FString::Printf(TEXT("%s"), *GetName()));
+
+	AActor* Root = InWorld.SpawnActor<AActor>(AActor::StaticClass(), FTransform::Identity, Params);
+	if (!Root) return;
+
+	// Keep it lightweight
+	Root->SetCanBeDamaged(false);
+	Root->SetReplicates(false);
+	Root->SetActorHiddenInGame(true); // invisible container (no components anyway)
+
+#if WITH_EDITOR
+	// Editor niceties: label + folder (folders are editor/dev only)
+	Root->SetActorLabel(GetName()); // dev/editor only. :contentReference[oaicite:1]{index=1}
+	Root->SetFolderPath(*(RootFolderPath.ToString())); // dev/editor only. :contentReference[oaicite:2]{index=2}
+#endif
+
+	PoolRootActor = Root;
 }
 
 void UObjectPool::Deinitialize()
@@ -175,22 +188,30 @@ bool UObjectPool::Pull(const TSubclassOf<AActor> Class, AActor*& Actor_Out)
 	}
 }
 
-AActor* UObjectPool::SpawnNewActor(const TSubclassOf<AActor>& Class) const
+AActor* UObjectPool::SpawnNewActor(const TSubclassOf<AActor>& Class)
 {
-	if (UWorld* World = this->GetWorld(); World != nullptr)
-	{
-		FActorSpawnParameters Params;
-		Params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-		AActor* NewActor = World->SpawnActor<AActor>(Class.Get(), FVector(0, 0, 0), FRotator(0, 0, 0), Params);
-		if (!IsValid(NewActor))
-		{
-			UE_LOG(LogObjectPool, Error, TEXT("Failed to spawn actor of class \"%s\""), *Class->GetName())
-			return nullptr;
-		}
+	UWorld* World = GetWorld();
+	if (!World || !*Class) return nullptr;
 
-		return NewActor;
+	FActorSpawnParameters P;
+	P.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+	AActor* Instance = World->SpawnActor<AActor>(Class, FTransform::Identity, P);
+	if (!Instance) return nullptr;
+
+	// Attach to the class container so the Outliner stays organized
+	if (AActor* TypeRoot = TypeRootActors.FindRef(Class).Get())
+	{
+		Instance->AttachToActor(TypeRoot, FAttachmentTransformRules::KeepWorldTransform); // keep exact world location.
+
+#if WITH_EDITOR
+		// Optional: set a neat label or folder (both dev/editor only)
+		Instance->SetActorLabel(FString::Printf(TEXT("%s_%d"), *Class->GetName(), ++NumSpawnedForThisClass)); // editor only.
+		Instance->SetFolderPath(TypeRoot->GetFolderPath()); // editor only.
+#endif
 	}
-	return nullptr;
+
+	// Your existing "push into pool" path (hide, disable, OnPushedToPool, etc.)
+	return Instance;
 }
 
 bool UObjectPool::AddActorType(TSubclassOf<AActor> Class, FPooledActorSettings ActorSettings)
@@ -206,6 +227,40 @@ bool UObjectPool::AddActorType(TSubclassOf<AActor> Class, FPooledActorSettings A
 
 		if (!Pool.Contains(Class))
 		{
+			if (bCreateContainerActors && PoolRootActor.IsValid())
+			{
+				if (!TypeRootActors.FindRef(Class).IsValid())
+				{
+					UWorld* World = GetWorld();
+					if (World)
+					{
+						FActorSpawnParameters P;
+						P.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+						// Give the type container a nice unique name: PoolName_ClassName
+						const FString Label = FString::Printf(TEXT("%s_%s"), *GetName(), *GetNameSafe(Class));
+						P.Name = MakeUniqueObjectName(World, AActor::StaticClass(), *Label);
+
+						AActor* TypeRoot = World->SpawnActor<AActor>(AActor::StaticClass(), FTransform::Identity, P);
+						if (TypeRoot)
+						{
+							TypeRoot->SetReplicates(false);
+							TypeRoot->SetActorHiddenInGame(true);
+
+							// Attach under the pool root without changing world transform.
+							TypeRoot->AttachToActor(PoolRootActor.Get(), FAttachmentTransformRules::KeepWorldTransform);
+
+#if WITH_EDITOR
+							TypeRoot->SetActorLabel(Label); // editor/dev only. :contentReference[oaicite:5]{index=5}
+							// Optional subfolder: "Pools/PoolName"
+							const FString SubFolder = FString::Printf(TEXT("%s/%s"), *RootFolderPath.ToString(), *GetName());
+							TypeRoot->SetFolderPath(*SubFolder);
+#endif
+							TypeRootActors.Add(Class, TypeRoot);
+						}
+					}
+				}
+			}
+
 			TArray<AActor*> InactivePool;
 
 			ActivePoolSettings.Add(Class, ActorSettings);

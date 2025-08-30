@@ -72,10 +72,10 @@ void AFPCGameplayPlayerController::RemoveAllHUD()
 
 void AFPCGameplayPlayerController::HandleInputMethodChanged(ECommonInputType NewType)
 {
-	ApplyHUDFor(NewType);
+	HandleHUDAndInputForInputDevice(NewType);
 }
 
-void AFPCGameplayPlayerController::ApplyHUDFor(ECommonInputType Type)
+void AFPCGameplayPlayerController::HandleHUDAndInputForInputDevice(ECommonInputType Type)
 {
 	// Show the right HUD (Touch vs Desktop), and toggle the drag pre-processor
 	const bool bTouch = (Type == ECommonInputType::Touch);
@@ -174,7 +174,7 @@ void AFPCGameplayPlayerController::BeginPlay()
 		if (UCommonInputSubsystem* CIS = UCommonInputSubsystem::Get(LP))
 		{
 			// Assign the HUD initially
-			ApplyHUDFor(CIS->GetCurrentInputType());
+			HandleHUDAndInputForInputDevice(CIS->GetCurrentInputType());
 
 			// Bind callback to the input device change
 			CIS->OnInputMethodChangedNative.AddUObject(this, &AFPCGameplayPlayerController::HandleInputMethodChanged);
