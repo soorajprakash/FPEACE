@@ -50,7 +50,7 @@ void AFPCEnemyCharacter::OnDeath_Implementation()
 	MainBodyMeshComp->SetSimulatePhysics(true);
 	HealthBarWidgetComp->SetHiddenInGame(true);
 
-	FCTween::Play(-0.4f, 0.7f, [&](float V)
+	DeathMaterialTween = FCTween::Play(-0.4f, 0.7f, [&](float V)
 	{
 		MainMeshDynamicMaterial->SetScalarParameterValue(FName("DissolveAmount"), V);
 	}, 5)->SetOnComplete([&]
@@ -99,10 +99,10 @@ void AFPCEnemyCharacter::PostInitializeComponents()
 	Super::PostInitializeComponents();
 
 	if (MainBodyMeshComp->GetSkeletalMeshAsset())
+	{
 		RightHandHitBox->AttachToComponent(MainBodyMeshComp, FAttachmentTransformRules(EAttachmentRule::SnapToTarget, false), FName(TEXT("Hand_R")));
-
-	if (MainBodyMeshComp->GetSkinnedAsset())
 		LeftHandHitBox->AttachToComponent(MainBodyMeshComp, FAttachmentTransformRules(EAttachmentRule::SnapToTarget, false), FName(TEXT("Hand_L")));
+	}
 
 	BaseAnimInstance = Cast<UFPCEnemyAnimInstance>(MainBodyMeshComp->GetAnimInstance());
 	LeftHandHitBox->OnComponentBeginOverlap.AddDynamic(this, &AFPCEnemyCharacter::HandHit);
@@ -123,6 +123,14 @@ void AFPCEnemyCharacter::BeginPlay()
 		PlayerOperator = Cast<AFPCOperator>(GetWorld()->GetFirstPlayerController()->GetPawn());
 
 	DefaultMainMeshRelativeTransform = MainBodyMeshComp->GetRelativeTransform();
+}
+
+void AFPCEnemyCharacter::Destroyed()
+{
+	Super::Destroyed();
+
+	if (DeathMaterialTween)
+		DeathMaterialTween->Destroy();
 }
 
 void AFPCEnemyCharacter::HandHit(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)

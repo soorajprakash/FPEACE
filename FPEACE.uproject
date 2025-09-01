@@ -148,6 +148,10 @@
 		{
 			"Name": "GPULightmass",
 			"Enabled": true
+		},
+		{
+			"Name": "ChaosInsights",
+			"Enabled": false
 		}
 	],
 	"TargetPlatforms": [

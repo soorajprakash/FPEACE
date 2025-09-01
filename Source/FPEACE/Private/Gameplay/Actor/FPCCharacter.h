@@ -36,6 +36,7 @@ public:
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
 
 protected:
+	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="FPEACE")
 	TArray<TSubclassOf<class UFPCOperatorAbilityBase>> BasicAbilities;
 

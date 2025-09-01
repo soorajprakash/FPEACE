@@ -85,7 +85,7 @@ void AFPCCharacter::PostInitializeComponents()
 {
 	Super::PostInitializeComponents();
 
-	if (MainBodyMeshComp->GetSkinnedAsset())
+	if (MainBodyMeshComp->GetSkeletalMeshAsset())
 		VocalAudioComponent->AttachToComponent(MainBodyMeshComp, FAttachmentTransformRules(EAttachmentRule::SnapToTarget, false), FName(TEXT("Head")));
 
 	FPCAbilitySystemComponent->InitAbilityActorInfo(this, this);

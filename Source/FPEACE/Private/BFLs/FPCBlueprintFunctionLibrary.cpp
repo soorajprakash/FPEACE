@@ -15,7 +15,8 @@ FString UFPCBlueprintFunctionLibrary::GetAnimSequenceName(const UAnimSequence* T
 
 bool UFPCBlueprintFunctionLibrary::GetIfAnimSequenceHasRootMotionDelta(UAnimSequence* TargetSequence)
 {
-	const FVector RootMotionTranslation = TargetSequence->ExtractRootMotionFromRange(0.0f, TargetSequence->GetPlayLength()).GetTranslation();
+	FAnimExtractContext NewContext;
+	const FVector RootMotionTranslation = TargetSequence->ExtractRootMotionFromRange(0.0f, TargetSequence->GetPlayLength(), NewContext).GetTranslation();
 	const float RootMotionDistance = RootMotionTranslation.Size2D();
 	return !FMath::IsNearlyZero(RootMotionDistance);
 }

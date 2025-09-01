@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "FCTweenInstanceFloat.h"
 #include "ObjectPooledActorInterface.h"
 #include "Gameplay/Actor/FPCCharacter.h"
 #include "FPCEnemyCharacter.generated.h"
@@ -91,8 +92,15 @@ protected:
 
 	virtual void BeginPlay() override;
 
+	virtual void Destroyed() override;
+
 private:
 
+	/*
+	 * The tween used to animate material parameter for dissolve effect
+	 */
+	FCTweenInstance* DeathMaterialTween;
+	
 	/*
 	 * The initial relative transform of the Main skeletal mesh component
 	 */

@@ -3,11 +3,11 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "Runtime/AIModule/Classes/AIController.h"
+#include "DetourCrowdAIController.h"
 #include "FPCEnemyAIController.generated.h"
 
 UCLASS()
-class FPEACE_API AFPCEnemyAIController : public AAIController
+class FPEACE_API AFPCEnemyAIController : public ADetourCrowdAIController
 {
 	GENERATED_BODY()
 
