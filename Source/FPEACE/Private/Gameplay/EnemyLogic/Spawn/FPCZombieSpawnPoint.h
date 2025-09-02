@@ -16,15 +16,18 @@ class FPEACE_API AFPCZombieSpawnPoint : public ATargetPoint
 	GENERATED_BODY()
 
 public:
+
+	FOnSpawnPointStateChanged OnSpawnPointOccupancyChanged;
+
+	void SetSpawnBusy(bool bIsOccupied);
+protected:
+
 	/*
 	 * Whether this spawn point is currently being used
 	 */
 	UPROPERTY(VisibleAnywhere, Category="FPEACE")
 	bool bIsSpawnBusy = false;
-
-	FOnSpawnPointStateChanged OnSpawnPointOccupancyChanged;
-
-protected:
+	
 	UPROPERTY(EditDefaultsOnly, Category="FPEACE")
 	TObjectPtr<UBoxComponent> SpawnCollisionDetector;
 
@@ -35,8 +38,6 @@ protected:
 
 private:
 	int32 OverlapCounter = 0;
-
-	void SetSpawnBusy(bool bIsOccupied);
 
 	UFUNCTION()
 	void SomethingEnteredSpawnPointArea(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep,

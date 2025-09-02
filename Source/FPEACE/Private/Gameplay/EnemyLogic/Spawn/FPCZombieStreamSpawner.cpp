@@ -41,6 +41,7 @@ bool AFPCZombieStreamSpawner::TryActivateOne()
 	}
 
 	// Place EXACTLY at spawn point location/rotation (no nav, no sweep)
+	ChosenPoint->SetSpawnBusy(true);
 	SpawnedActor->SetActorLocationAndRotation(SpawnLoc, SpawnRot, /*bSweep*/false, nullptr, ETeleportType::TeleportPhysics);
 
 	// Track alive

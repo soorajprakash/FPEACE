@@ -62,6 +62,22 @@ void AFPCCharacter::PlayVocalSound(USoundBase* Sound, float CrossfadeDuration)
 	}
 }
 
+void AFPCCharacter::OnHealthChanged(const FOnAttributeChangeData& ChangeData)
+{
+	float NewHealthValue = ChangeData.NewValue;
+	float MaxHealthValue = HealthAttributeSet->GetMaxHealth();
+	float HealthFraction = NewHealthValue / MaxHealthValue;
+
+	if (HealthFraction > 0.5f)
+		HealthState = ELivingCharacterHealthState::Good;
+	else if (HealthFraction > 0.25f)
+		HealthState = ELivingCharacterHealthState::Low;
+	else
+		HealthState = ELivingCharacterHealthState::Critical;
+
+	OnHealthChangedEvent.Broadcast(ChangeData.NewValue, HealthState);
+}
+
 void AFPCCharacter::OnDeath_Implementation()
 {
 }
@@ -89,6 +105,7 @@ void AFPCCharacter::PostInitializeComponents()
 		VocalAudioComponent->AttachToComponent(MainBodyMeshComp, FAttachmentTransformRules(EAttachmentRule::SnapToTarget, false), FName(TEXT("Head")));
 
 	FPCAbilitySystemComponent->InitAbilityActorInfo(this, this);
+	FPCAbilitySystemComponent->GetGameplayAttributeValueChangeDelegate(UFPCHealthAttributeSet::GetHealthAttribute()).AddUObject(this, &AFPCCharacter::OnHealthChanged);
 }
 
 void AFPCCharacter::OnReceivedDamage(TWeakObjectPtr<AFPCCharacter> From, FName HitBone)

@@ -2,9 +2,8 @@
 
 
 #include "FPEACE_HUD_Widget.h"
-#include "AbilitySystemComponent.h"
 #include "Gameplay/Actor/Operator/FPCOperator.h"
-#include "Gameplay/GAS/AttribueSets/FPCHealthAttributeSet.h"
+
 
 void UFPEACE_HUD_Widget::NativeConstruct()
 {
@@ -13,15 +12,15 @@ void UFPEACE_HUD_Widget::NativeConstruct()
 	OwningOperator = Cast<AFPCOperator>(GetOwningPlayerPawn());
 
 	if (OwningOperator.IsValid())
-		OwningOperator.Get()->GetAbilitySystemComponent()->GetGameplayAttributeValueChangeDelegate(UFPCHealthAttributeSet::GetHealthAttribute()).AddUObject(
+		OwningOperator.Get()->OnHealthChangedEvent.AddDynamic(
 			this, &UFPEACE_HUD_Widget::OnPlayerHealthChangedCallback);
 }
 
-void UFPEACE_HUD_Widget::OnPlayerHealthChanged_Implementation(const float CurrentHealth)
+void UFPEACE_HUD_Widget::OnPlayerHealthChanged_Implementation(const float CurrentHealth, const ELivingCharacterHealthState CurrentHealthState)
 {
 }
 
-void UFPEACE_HUD_Widget::OnPlayerHealthChangedCallback(const FOnAttributeChangeData& OnAttributeChangeData)
+void UFPEACE_HUD_Widget::OnPlayerHealthChangedCallback(const float CurrentHealth, const ELivingCharacterHealthState HealthState)
 {
-	OnPlayerHealthChanged(OnAttributeChangeData.NewValue);
+	OnPlayerHealthChanged(CurrentHealth, HealthState);
 }

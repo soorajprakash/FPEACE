@@ -6,7 +6,7 @@
 #include "UI/Common/FPCUserWidget.h"
 #include "FPEACE_HUD_Widget.generated.h"
 
-struct FOnAttributeChangeData;
+enum class ELivingCharacterHealthState : uint8;
 class AFPCOperator;
 /**
  * 
@@ -21,11 +21,12 @@ protected:
 	virtual void NativeConstruct() override;
 
 	UFUNCTION(BlueprintNativeEvent)
-	void OnPlayerHealthChanged(const float CurrentHealth);
+	void OnPlayerHealthChanged(const float CurrentHealth, const ELivingCharacterHealthState CurrentHealthState);
 
 private:
 	UPROPERTY()
 	TWeakObjectPtr<AFPCOperator> OwningOperator;
 
-	void OnPlayerHealthChangedCallback(const FOnAttributeChangeData& OnAttributeChangeData);
+	UFUNCTION()
+	void OnPlayerHealthChangedCallback(const float CurrentHealth, const ELivingCharacterHealthState HealthState);
 };

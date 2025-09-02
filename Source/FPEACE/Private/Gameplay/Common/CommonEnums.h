@@ -55,3 +55,11 @@ enum class ELocomotionAnimType : uint8
 	Pivot,
 	Cycle
 };
+
+UENUM(BlueprintType)
+enum class ELivingCharacterHealthState : uint8
+{
+	Good,
+	Low,
+	Critical
+};

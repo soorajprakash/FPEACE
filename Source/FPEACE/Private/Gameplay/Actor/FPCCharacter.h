@@ -9,6 +9,8 @@
 #include "Gameplay/Interfaces/FPCDamageReceiver.h"
 #include "FPCCharacter.generated.h"
 
+struct FOnAttributeChangeData;
+enum class ELivingCharacterHealthState : uint8;
 class UMetaSoundSource;
 class UFPCHealthAttributeSet;
 class UFPCOperatorData;
@@ -16,7 +18,9 @@ class UFPCAbilitySystemComponent;
 class AFPCGameplayPlayerController;
 class UFPCSkeletalMeshComponent;
 
-UCLASS()
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FOnHealthAttributeChanged, const float, CurrentHealth, const ELivingCharacterHealthState, HealthState);
+
+UCLASS(Abstract)
 class FPEACE_API AFPCCharacter : public ACharacter, public IAbilitySystemInterface, public IFPCDamageReceiver
 {
 	GENERATED_BODY()
@@ -24,6 +28,9 @@ class FPEACE_API AFPCCharacter : public ACharacter, public IAbilitySystemInterfa
 public:
 	// Sets default values for this character's properties
 	AFPCCharacter(const FObjectInitializer& ObjectInitializer = FObjectInitializer::Get());
+
+	UPROPERTY(BlueprintAssignable)
+	FOnHealthAttributeChanged OnHealthChangedEvent;
 
 	virtual void OnReceivedDamage(TWeakObjectPtr<AFPCCharacter> From, FName HitBone) override;
 
@@ -36,9 +43,11 @@ public:
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
 
 protected:
-	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="FPEACE")
 	TArray<TSubclassOf<class UFPCOperatorAbilityBase>> BasicAbilities;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = "FPEACE")
+	ELivingCharacterHealthState HealthState;
 
 	/*
 	 * Name of the content ID used to fetch default attribute values
@@ -72,6 +81,8 @@ protected:
 
 	UFUNCTION(BlueprintNativeEvent)
 	void OnDeath();
+	
+	void OnHealthChanged(const FOnAttributeChangeData& ChangeData);
 
 	virtual void OnDeath_Implementation();
 
