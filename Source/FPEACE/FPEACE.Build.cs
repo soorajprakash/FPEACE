@@ -14,9 +14,18 @@ public class FPEACE : ModuleRules
 		{
 			"Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput", "AnimGraphRuntime",
 			"AnimationLocomotionLibraryRuntime", "Niagara", "UMG", "SlateCore", "Slate", "CommonUI", "CommonInput",
-			"CinematicCamera", "NavigationSystem",
+			"CinematicCamera", "NavigationSystem", "RHI", "RenderCore", "Projects",
 			"ModelViewViewModel", "SignificanceManager", "GameplayTags", "GameplayAbilities", "GameplayTasks",
 			"GameplayStateTreeModule", "AIModule", "MetasoundEngine"
 		});
+
+		if (Target.Platform == UnrealTargetPlatform.Win64)
+		{
+			PublicDependencyModuleNames.AddRange(new string[]
+			{
+				"DLSS",
+				"DLSSBlueprint",
+			});
+		}
 	}
 }

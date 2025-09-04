@@ -108,7 +108,7 @@ void AFPCZombieStreamSpawner::BeginPlay()
 		ZombiePool = World->GetSubsystem<UObjectPool>();
 
 		for (TSubclassOf ZombieClass : ZombieClasses)
-			ZombiePool->AddActorType(ZombieClass, FPooledActorSettings(0, true));
+			ZombiePool->AddActorType(ZombieClass, FPooledActorSettings());
 	}
 
 	for (AFPCZombieSpawnPoint* SpawnPoint : SpawnPoints)

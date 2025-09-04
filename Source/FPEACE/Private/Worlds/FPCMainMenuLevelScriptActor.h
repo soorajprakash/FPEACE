@@ -36,6 +36,8 @@ protected:
 
 	virtual void BeginPlay() override;
 
+	void SetupTemporalUpscalers();
+
 private:
 	UPROPERTY()
 	TObjectPtr<UMaterialInstanceDynamic> Menu3DCameraOperatorPostProcessMaterial;
