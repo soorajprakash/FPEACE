@@ -37,7 +37,7 @@ public:
 	TWeakObjectPtr<class UFPCCharacterMovementComponent> GetEnemyMovementComponent() const { return EnemyMovementComponent; }
 
 	// ----------------- SETTERS -------------------
-	void SetCanDamagePlayer(bool Value) { bCanDamagePlayer = Value; };
+	void SetCanDamagePlayer(bool Value);
 
 protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="FPEACE")
@@ -45,6 +45,9 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="FPEACE")
 	bool bCanDamagePlayer;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="FPEACE")
+	bool bHandIntersectingPlayer;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category="FPEACE")
 	TSubclassOf<UFPCEnemyAbilityBase> AttackAbility;
@@ -86,7 +89,7 @@ protected:
 	// ----------------- INTERFACE IMPLEMENTATIONS -------------------
 	virtual void OnPulledFromPool_Implementation() override;
 	virtual void OnPushedToPool_Implementation() override;
-
+	
 	// ----------------- OVERRIDES -------------------
 	virtual void PostInitializeComponents() override;
 
@@ -96,6 +99,8 @@ protected:
 
 private:
 
+	void NotifyPlayerHit();
+	
 	/*
 	 * The tween used to animate material parameter for dissolve effect
 	 */
@@ -115,5 +120,8 @@ private:
 	TWeakObjectPtr<UFPCCharacterMovementComponent> EnemyMovementComponent;
 
 	UFUNCTION()
-	void HandHit(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+	void HandEnteredPlayer(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+
+	UFUNCTION()
+	void HandExitedPlayer(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 };

@@ -105,8 +105,10 @@ void AFPCEnemyCharacter::PostInitializeComponents()
 	}
 
 	BaseAnimInstance = Cast<UFPCEnemyAnimInstance>(MainBodyMeshComp->GetAnimInstance());
-	LeftHandHitBox->OnComponentBeginOverlap.AddDynamic(this, &AFPCEnemyCharacter::HandHit);
-	RightHandHitBox->OnComponentBeginOverlap.AddDynamic(this, &AFPCEnemyCharacter::HandHit);
+	LeftHandHitBox->OnComponentBeginOverlap.AddDynamic(this, &AFPCEnemyCharacter::HandEnteredPlayer);
+	LeftHandHitBox->OnComponentEndOverlap.AddDynamic(this, &AFPCEnemyCharacter::HandExitedPlayer);
+	RightHandHitBox->OnComponentBeginOverlap.AddDynamic(this, &AFPCEnemyCharacter::HandEnteredPlayer);
+	RightHandHitBox->OnComponentEndOverlap.AddDynamic(this, &AFPCEnemyCharacter::HandExitedPlayer);
 }
 
 void AFPCEnemyCharacter::BeginPlay()
@@ -133,24 +135,33 @@ void AFPCEnemyCharacter::Destroyed()
 		DeathMaterialTween->Destroy();
 }
 
-void AFPCEnemyCharacter::HandHit(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+void AFPCEnemyCharacter::NotifyPlayerHit()
 {
+	SetCanDamagePlayer(false);
+	FGameplayEffectContextHandle EffectContext = FPCAbilitySystemComponent->MakeEffectContext();
+	EffectContext.AddInstigator(this, this);
+
+	FGameplayEffectSpecHandle SpecHandle = FPCAbilitySystemComponent->MakeOutgoingSpec(MeleeDamageEffect, 1, EffectContext);
+
+	// Apply Damage Effect to player's ASC
+	FPCAbilitySystemComponent->ApplyGameplayEffectSpecToTarget(*SpecHandle.Data, PlayerOperator->GetAbilitySystemComponent());
+
+	PlayerOperator->OnReceivedDamage(this, FName("None"));
+}
+
+void AFPCEnemyCharacter::HandEnteredPlayer(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep,
+                                           const FHitResult& SweepResult)
+{
+	bHandIntersectingPlayer = true;
+
 	if (bCanDamagePlayer)
-	{
-		if (AFPCOperator* PlayerCharacter = Cast<AFPCOperator>(OtherActor))
-		{
-			SetCanDamagePlayer(false);
-			FGameplayEffectContextHandle EffectContext = FPCAbilitySystemComponent->MakeEffectContext();
-			EffectContext.AddInstigator(this, this);
+		if (OtherActor == PlayerOperator)
+			NotifyPlayerHit();
+}
 
-			FGameplayEffectSpecHandle SpecHandle = FPCAbilitySystemComponent->MakeOutgoingSpec(MeleeDamageEffect, 1, EffectContext);
-
-			// Apply Damage Effect to player's ASC
-			FPCAbilitySystemComponent->ApplyGameplayEffectSpecToTarget(*SpecHandle.Data, PlayerCharacter->GetAbilitySystemComponent());
-
-			PlayerCharacter->OnReceivedDamage(this, FName("None"));
-		}
-	}
+void AFPCEnemyCharacter::HandExitedPlayer(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+{
+	bHandIntersectingPlayer = false;
 }
 
 void AFPCEnemyCharacter::OnReceivedDamage(TWeakObjectPtr<AFPCCharacter> From, FName HitBone)
@@ -193,4 +204,12 @@ void AFPCEnemyCharacter::OnReceivedDamage(TWeakObjectPtr<AFPCCharacter> From, FN
 			PlayerOperator->PlayEnemyHitRegisterSound(true);
 		OnDeath();
 	}
+}
+
+void AFPCEnemyCharacter::SetCanDamagePlayer(bool Value)
+{
+	bCanDamagePlayer = Value;
+
+	if (bCanDamagePlayer && bHandIntersectingPlayer)
+		NotifyPlayerHit();
 }
